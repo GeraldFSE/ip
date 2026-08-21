@@ -3,10 +3,12 @@ import java.util.Scanner;
 /**
  * Entry point for the Thomas chatbot.
  * <p>
- * In this increment Thomas reads commands from standard input, storing each
- * one as a task and printing the stored tasks on the {@code list} command.
- * Stored tasks can be marked done with {@code mark} and not done again with
- * {@code unmark}. It stops when the user types {@code bye} or the input ends.
+ * In this increment Thomas reads commands from standard input and stores three
+ * kinds of task: {@code todo}, {@code deadline ... /by ...} and
+ * {@code event ... /from ... /to ...}. The stored tasks are printed on
+ * {@code list}, and can be marked done with {@code mark} and not done again
+ * with {@code unmark}. It stops when the user types {@code bye} or the input
+ * ends.
  */
 public class Thomas {
     /** Indentation applied to every line of chatbot text. */
@@ -33,6 +35,22 @@ public class Thomas {
             System.out.print(INDENT + line + "\n");
         }
         System.out.print(DIVIDER + "\n");
+    }
+
+    /**
+     * Confirms that a task was added and reports the new size of the list.
+     * <p>
+     * The three add commands share this acknowledgement, so it lives in one
+     * place; {@code task} is a {@link Task}, and polymorphism picks the right
+     * {@code toString()} for whichever subclass was actually added.
+     *
+     * @param task      the task just stored
+     * @param taskCount how many tasks are now stored
+     */
+    private static void printAddedBlock(Task task, int taskCount) {
+        printBlock("Got it. I've added this task:",
+                "   " + task,
+                "Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
@@ -83,10 +101,22 @@ public class Thomas {
                     printBlock("OK, I've marked this task as not done yet:", "   " + task);
                 } else if (taskCount >= MAX_TASKS) {
                     printBlock("Sorry, I can only remember " + MAX_TASKS + " tasks!");
-                } else {
-                    tasks[taskCount] = new Task(command);
+                } else if (keyword.equals("todo")) {
+                    tasks[taskCount] = new TodoTask(parts[1]);
                     taskCount++;
-                    printBlock("added: " + command);
+                    printAddedBlock(tasks[taskCount - 1], taskCount);
+                } else if (keyword.equals("deadline")) {
+                    // "return book /by Sunday" -> ["return book", "Sunday"]
+                    String[] details = parts[1].split(" /by ", 2);
+                    tasks[taskCount] = new DeadlineTask(details[0], details[1]);
+                    taskCount++;
+                    printAddedBlock(tasks[taskCount - 1], taskCount);
+                } else if (keyword.equals("event")) {
+                    // "meeting /from Mon 2pm /to 4pm" -> ["meeting", "Mon 2pm", "4pm"]
+                    String[] details = parts[1].split(" /from | /to ", 3);
+                    tasks[taskCount] = new EventTask(details[0], details[1], details[2]);
+                    taskCount++;
+                    printAddedBlock(tasks[taskCount - 1], taskCount);
                 }
             }
         }
