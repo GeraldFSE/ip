@@ -1031,6 +1031,315 @@ bye
 {{FAREWELL}}
 ```
 
+ ### TC31: Delete a task from the middle of the list
+
+**Aim:** `delete <n>` removes task n, echoes back the task it removed, and
+reports the new size. The tasks after it close up, so a later `list` numbers
+them contiguously with no gap where the removed task was.
+
+**Input:**
+
+```text
+todo read book
+deadline return book /by Sunday
+event project meeting /from Mon 2pm /to 4pm
+todo join sports club
+delete 3
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Sunday)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] join sports club
+     Now you have 4 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+     2. [D][ ] return book (by: Sunday)
+     3. [T][ ] join sports club
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC32: Deleting renumbers the tasks that follow
+
+**Aim:** After a delete, the numbers shift down, so `mark 2` names what used to
+be task 3. This is what would break if a delete left a hole rather than closing
+the list up.
+
+**Input:**
+
+```text
+todo read book
+todo return book
+todo join sports club
+delete 1
+mark 2
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] join sports club
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] read book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] join sports club
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] return book
+     2. [T][X] join sports club
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC33: Delete the only task, leaving the list empty
+
+**Aim:** Deleting down to nothing leaves a list that still works rather than a
+list in a broken state. Guards the boundary where the count reaches zero.
+
+**Input:**
+
+```text
+todo read book
+delete 1
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] read book
+     Now you have 0 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC34: `delete` with a bad task number is rejected
+
+**Aim:** `delete` validates its argument the same way `mark` and `unmark` do --
+missing, non-numeric, and out of range are each reported, and none of them
+removes anything. The closing `list` shows the task still there.
+
+**Input:**
+
+```text
+todo read book
+delete
+delete abc
+delete 9
+delete 0
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     HEYY!! You need a valid number to delete
+    ____________________________________________________________
+    ____________________________________________________________
+     WHAT? Why are you passing a non integer?! Give me an INTEGER!!
+    ____________________________________________________________
+    ____________________________________________________________
+     There is no task 9! You only have 1 task(s).
+    ____________________________________________________________
+    ____________________________________________________________
+     There is no task 0! You only have 1 task(s).
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC35: Deleting from an empty list is rejected
+
+**Aim:** `delete 1` with nothing stored is reported rather than removing from an
+empty list. Guards the range check when the count is zero, where every task
+number is out of range.
+
+**Input:**
+
+```text
+delete 1
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     There is no task 1! You only have 0 task(s).
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC36: Adding after a delete continues from the new count
+
+**Aim:** A task added after a delete is numbered from the shortened list, not
+from a count that only ever grows. Interleaves adds and deletes so a count kept
+separately from the list would drift out of step.
+
+**Input:**
+
+```text
+todo read book
+todo return book
+delete 1
+todo join sports club
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] join sports club
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] return book
+     2. [T][ ] join sports club
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC37: A deleted task's done state does not follow its number
+
+**Aim:** Deleting a task shifts the ones after it without disturbing their
+completion state. Task 2 is marked done, task 1 is removed, and the task that
+becomes 1 is still the one that was marked.
+
+**Input:**
+
+```text
+todo read book
+todo return book
+mark 2
+delete 1
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] return book
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][X] return book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
@@ -1046,5 +1355,6 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **A blank input line.** Pressing enter on its own is reported as an unknown
   command. A blank line inside a fenced input block is too easy to mistake for
   formatting, so this one is left to inspection rather than a case.
-* **The 100-task limit.** Reaching `MAX_TASKS` prints a refusal message. Testing
-  it needs 100 lines of input, which is better generated than written by hand.
+* **A ceiling on the number of tasks.** There is no longer one to test: the
+  tasks are held in an `ArrayList`, which grows as tasks are added, so the
+  refusal message that `MAX_TASKS` used to produce is gone.
