@@ -5,7 +5,8 @@ import java.util.Scanner;
  * <p>
  * In this increment Thomas reads commands from standard input, storing each
  * one as a task and printing the stored tasks on the {@code list} command.
- * It stops when the user types {@code bye} or the input ends.
+ * Stored tasks can be marked done with {@code mark} and not done again with
+ * {@code unmark}. It stops when the user types {@code bye} or the input ends.
  */
 public class Thomas {
     /** Indentation applied to every line of chatbot text. */
@@ -34,6 +35,11 @@ public class Thomas {
         System.out.print(DIVIDER + "\n");
     }
 
+    /**
+     * Runs the chatbot until the user says {@code bye} or the input ends.
+     *
+     * @param args command line arguments; unused
+     */
     public static void main(String[] args) {
         // The first five lines are ASCII art spelling "Thomas". Every backslash
         // is written as \\ because a lone \ starts an escape sequence in Java.
@@ -42,34 +48,49 @@ public class Thomas {
                 "  / / / __ \\/ __ \\/ __ `__ \\/ __ `/ ___/",
                 " / / / / / / /_/ / / / / / / /_/ (__  ) ",
                 "/_/ /_/ /_/\\____/_/ /_/ /_/\\__,_/____/  ",
-                "Chu Chu! I'm Thomas!",
+                "Choo Choo! I'm Thomas!",
                 "How can I serve you today?");
 
-        Scanner userInput = new Scanner(System.in);
-
-        String[] taskList = new String[MAX_TASKS];
+        Task[] tasks = new Task[MAX_TASKS];
         int taskCount = 0;
 
-        while (userInput.hasNextLine()) {
-            String command = userInput.nextLine();
-            if (command.equals("bye")) {
-                break;
-            } else if (command.equals("list")) {
-                // Number the tasks for display; taskList itself stays unnumbered.
-                String[] entries = new String[taskCount];
-                for (int i = 0; i < taskCount; i++) {
-                    entries[i] = (i + 1) + ". " + taskList[i];
+        // try-with-resources closes the Scanner once the loop ends.
+        try (Scanner userInput = new Scanner(System.in)) {
+            while (userInput.hasNextLine()) {
+                String command = userInput.nextLine();
+
+                // Split on the first space only, so parts[0] is the command
+                // keyword and parts[1], when present, is its argument.
+                String[] parts = command.split(" ", 2);
+                String keyword = parts[0];
+
+                if (command.equals("bye")) {
+                    break;
+                } else if (command.equals("list")) {
+                    // Number the tasks for display; tasks itself stays unnumbered.
+                    String[] entries = new String[taskCount];
+                    for (int i = 0; i < taskCount; i++) {
+                        entries[i] = (i + 1) + ". " + tasks[i];
+                    }
+                    printBlock(entries);
+                } else if (keyword.equals("mark")) {
+                    Task task = tasks[Integer.parseInt(parts[1]) - 1];
+                    task.markAsDone();
+                    printBlock("Nice! I've marked this task as done:", "   " + task);
+                } else if (keyword.equals("unmark")) {
+                    Task task = tasks[Integer.parseInt(parts[1]) - 1];
+                    task.unmarkAsDone();
+                    printBlock("OK, I've marked this task as not done yet:", "   " + task);
+                } else if (taskCount >= MAX_TASKS) {
+                    printBlock("Sorry, I can only remember " + MAX_TASKS + " tasks!");
+                } else {
+                    tasks[taskCount] = new Task(command);
+                    taskCount++;
+                    printBlock("added: " + command);
                 }
-                printBlock(entries);
-            } else if (taskCount == MAX_TASKS) {
-                printBlock("Sorry, I can only remember " + MAX_TASKS + " tasks!");
-            } else {
-                taskList[taskCount] = command;
-                taskCount++;
-                printBlock("added: " + command);
             }
         }
 
-        printBlock("Until next time! Chu Chu!");
+        printBlock("Until next time! Choo Choo!");
     }
 }
