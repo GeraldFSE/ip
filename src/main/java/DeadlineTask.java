@@ -28,4 +28,15 @@ public class DeadlineTask extends Task {
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by + ")";
     }
+
+    /**
+     * Returns the deadline encoded for the save file, tagged {@code D} with the
+     * due date as a fourth field.
+     *
+     * @return for example {@code "D | 0 | return book | Sunday"}
+     */
+    @Override
+    public String toSaveFormat() {
+        return "D | " + super.toSaveFormat() + " | " + by;
+    }
 }

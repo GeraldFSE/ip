@@ -33,4 +33,15 @@ public class EventTask extends Task {
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
     }
+
+    /**
+     * Returns the event encoded for the save file, tagged {@code E} with the
+     * start and end as the fourth and fifth fields.
+     *
+     * @return for example {@code "E | 0 | project meeting | Mon 2pm | 4pm"}
+     */
+    @Override
+    public String toSaveFormat() {
+        return "E | " + super.toSaveFormat() + " | " + from + " | " + to;
+    }
 }

@@ -6,10 +6,18 @@ input and compares the console output against the expected output.
 
 ## How a case is run
 
-* Every case runs the program **from scratch** in its own process. A case never
-  sees tasks added by an earlier case, so cases can be reordered or run one at a
-  time without their results changing. A case that needs existing tasks adds
-  them itself, as part of its own input.
+* Every case runs the program **from scratch** in its own process, in its own
+  throwaway working directory. A case never sees tasks added by an earlier case,
+  whether through memory or through the save file the chatbot writes to
+  `./data`, so cases can be reordered or run one at a time without their results
+  changing. A case that needs existing tasks adds them itself, as part of its
+  own input.
+* A case may give **more than one `**Input:**` block**. Each block is a separate
+  run of the chatbot, and the runs share that one working directory, so a later
+  run starts from the save file the earlier one left behind. The expected output
+  is the runs' output end to end, greeting and farewell included for each. This
+  is the only way to test saving and loading: a reload only happens when the
+  program is started again.
 * The comparison is line by line over the program's whole console output,
   including the greeting and the farewell. Indentation is compared; trailing
   spaces at the end of a line and blank lines at the end of the output are not.
@@ -24,6 +32,10 @@ three parts: `**Aim:**`, an `**Input:**` code block, and an
 `**Expected output:**` code block. In the expected output, a line reading
 `{{GREETING}}` or `{{FAREWELL}}` expands to the corresponding block below, so
 the banner does not have to be repeated in every case.
+
+A case that needs the chatbot restarted gives a second `**Input:**` block after
+the first; its expected output then covers both runs in order, each with its own
+greeting and farewell.
 
 ## Shared output blocks
 
@@ -1031,7 +1043,7 @@ bye
 {{FAREWELL}}
 ```
 
- ### TC31: Delete a task from the middle of the list
+### TC31: Delete a task from the middle of the list
 
 **Aim:** `delete <n>` removes task n, echoes back the task it removed, and
 reports the new size. The tasks after it close up, so a later `list` numbers
@@ -1340,6 +1352,275 @@ bye
 {{FAREWELL}}
 ```
 
+### TC38: Tasks are still there after the chatbot is restarted
+
+**Aim:** Tasks added in one run are saved and loaded back by the next, so the
+list survives the program exiting. This is the whole point of the save file, and
+it needs two runs to show at all.
+
+**Input:**
+
+```text
+todo read book
+deadline return book /by Sunday
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Sunday)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+     2. [D][ ] return book (by: Sunday)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC39: A task's done state survives a restart
+
+**Aim:** `mark` is saved as well as the task itself, so a task marked done in
+one run comes back done. Guards the done flag being written to the save file and
+read back, rather than every loaded task starting out not done.
+
+**Input:**
+
+```text
+todo read book
+todo return book
+mark 2
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] return book
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+     2. [T][X] return book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC40: A deleted task does not come back after a restart
+
+**Aim:** `delete` saves the shortened list, so the removed task stays removed.
+Guards the save being a fresh write of the whole list rather than an append,
+which would leave the deleted task in the file.
+
+**Input:**
+
+```text
+todo read book
+todo return book
+delete 1
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] return book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC41: An event's start and end both survive a restart
+
+**Aim:** A task type with more than one extra field round-trips completely.
+Guards the save format's fourth and fifth fields being written and read back in
+the right order -- swapping them would still load, and only the displayed times
+would give it away.
+
+**Input:**
+
+```text
+event project meeting /from Mon 2pm /to 4pm
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC42: A task is saved even when the session ends without a `bye`
+
+**Aim:** Saving happens when the task is added, not when the program exits, so a
+session that ends by input running out has still saved its work. Guards against
+the save being attached to the `bye` path alone.
+
+**Input:**
+
+```text
+todo read book
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC43: A save file line that cannot be read is skipped, not fatal
+
+**Aim:** One unreadable line costs only that task: it is reported and skipped,
+and the remaining lines still load. A description containing the field separator
+`" | "` is the way to produce such a line without editing the file by hand -- it
+saves as an extra field, which is the known limitation noted below.
+
+**Input:**
+
+```text
+todo a | b
+todo read book
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] a | b
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Skipping a line I could not read: expected 3 fields but found 4: T | 0 | a | b
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
@@ -1358,3 +1639,18 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.
+* **A description containing the save file's field separator.** `todo a | b` is
+  accepted and shown correctly, but saves as a line with an extra field, so the
+  task is skipped on the next start-up rather than coming back. TC43 pins that
+  behaviour down as a reported skip rather than silent truncation, but the task
+  is still lost. Fixing it properly means escaping the separator when writing, or
+  putting the description last so the rest of the line can be split off before
+  it; both are more machinery than this increment needs.
+* **Losing the save file mid-session.** The save is written after every change,
+  so a chatbot killed outright should lose nothing. Confirming that needs the
+  process to be killed rather than fed end-of-input, which the test script has no
+  way to do -- TC42 covers the nearest testable case, input simply running out.
+* **An unreadable or unwritable save file.** The messages for a save file that
+  exists but cannot be read, or a `./data` folder that cannot be created, are
+  reachable only by changing file permissions, which the test script does not
+  set up.

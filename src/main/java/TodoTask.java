@@ -23,4 +23,14 @@ public class TodoTask extends Task {
     public String toString() {
         return "[T]" + super.toString();
     }
+
+    /**
+     * Returns the to-do encoded for the save file, tagged {@code T}.
+     *
+     * @return for example {@code "T | 0 | borrow book"}
+     */
+    @Override
+    public String toSaveFormat() {
+        return "T | " + super.toSaveFormat();
+    }
 }

@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
+
 /**
  * Entry point for the Thomas chatbot.
  * <p>
@@ -10,10 +14,24 @@ import java.util.Scanner;
  * {@code list}, can be marked done with {@code mark} and not done again with
  * {@code unmark}, and removed with {@code delete}. It stops when the user types
  * {@code bye} or the input ends.
+ * <p>
+ * The list survives between runs: it is loaded from {@value #DATA_PATH} at
+ * start-up and written back after every command that changes it, so no task is
+ * lost even if the program is closed without typing {@code bye}.
  */
 public class Thomas {
     /** Indentation applied to every line of chatbot text. */
     private static final String INDENT = "     ";
+
+    /**
+     * Where the task list is saved, as a path from the project root.
+     * <p>
+     * Relative paths resolve against the directory the program was started
+     * from, so this assumes Thomas is run from the project root, as the test
+     * script does. Held in one place so the load and save calls cannot drift
+     * apart.
+     */
+    private static final String DATA_PATH = "./data/tasklist.txt";
 
     /**
      * Horizontal rule printed above and below each block of chatbot output.
@@ -115,6 +133,154 @@ public class Thomas {
     }
 
     /**
+     * Checks that a save file line holds exactly the fields its type needs.
+     *
+     * @param fields   the line already split on the field separator
+     * @param expected how many fields this task type is written with
+     * @param line     the original line, quoted back in the error message
+     * @throws ThomasException if the count does not match
+     */
+    private static void requireFieldCount(String[] fields, int expected, String line)
+            throws ThomasException {
+        if (fields.length != expected) {
+            throw new ThomasException("expected " + expected + " fields but found "
+                    + fields.length + ": " + line);
+        }
+    }
+
+    /**
+     * Turns one line of the save file back into a task.
+     * <p>
+     * The line is split on the field separator rather than parsed out of the
+     * display text, so the shape is fixed and known: type letter, done flag,
+     * description, then whatever extra fields that type carries.
+     *
+     * @param line one line of the save file, without its line separator
+     * @return the task the line describes
+     * @throws ThomasException if the type is unknown or fields are missing
+     */
+    private static Task parseSavedTask(String line) throws ThomasException {
+        // -1 keeps trailing empty fields, so a line ending in a separator is
+        // reported as corrupt below rather than silently shortening the array.
+        String[] fields = line.split(" \\| ", -1);
+        if (fields.length < 3) {
+            throw new ThomasException("too few fields: " + line);
+        }
+
+        // Each type has an exact field count. Checking for exactly the right
+        // number, rather than at least it, is what catches a description that
+        // itself contains " | ": that splits into an extra field and would
+        // otherwise be loaded back silently truncated.
+        String description = fields[2];
+        Task task = switch (fields[0]) {
+        case "T" -> {
+            requireFieldCount(fields, 3, line);
+            yield new TodoTask(description);
+        }
+        case "D" -> {
+            requireFieldCount(fields, 4, line);
+            yield new DeadlineTask(description, fields[3]);
+        }
+        case "E" -> {
+            requireFieldCount(fields, 5, line);
+            yield new EventTask(description, fields[3], fields[4]);
+        }
+        default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
+        };
+
+        // "1" means done; anything else is treated as not done, so a damaged
+        // flag costs the tick rather than the whole task.
+        if (fields[1].equals("1")) {
+            task.markAsDone();
+        }
+        return task;
+    }
+
+    /**
+     * Reads saved tasks into {@code tasks}.
+     * <p>
+     * A missing file is the normal first run, not an error, so it simply leaves
+     * the list empty. Individual unreadable lines are reported and skipped
+     * rather than abandoning the whole file: one damaged line should not cost
+     * the user every other task.
+     *
+     * @param tasks the list to append the saved tasks to
+     * @throws IOException if the file exists but cannot be read
+     */
+    private static void loadTasks(ArrayList<Task> tasks) throws IOException {
+        File file = new File(DATA_PATH);
+        if (!file.exists()) {
+            return;
+        }
+
+        // try-with-resources: the Scanner holds a real file handle, so it is
+        // closed however this block ends, including on an exception.
+        try (Scanner scan = new Scanner(file)) {
+            while (scan.hasNextLine()) {
+                // nextLine(), not next(): descriptions contain spaces, and
+                // next() would hand back one word at a time.
+                String current = scan.nextLine();
+                if (current.isBlank()) {
+                    continue;
+                }
+                try {
+                    tasks.add(parseSavedTask(current));
+                } catch (ThomasException e) {
+                    printBlock("Skipping a line I could not read: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes every task to the save file, replacing what was there before.
+     * <p>
+     * The list is only read, never emptied: this runs after every change to the
+     * task list, so mutating it here would delete the tasks it is meant to be
+     * saving.
+     *
+     * @param tasks the tasks to write, left unchanged
+     * @throws IOException if the folder or file cannot be written
+     */
+    private static void saveTasks(ArrayList<Task> tasks) throws IOException {
+        File file = new File(DATA_PATH);
+
+        // FileWriter cannot create missing folders, so ./data must be made
+        // first. mkdirs() creates every missing level and is a no-op when they
+        // already exist. getParentFile() is null for a bare filename.
+        File folder = file.getParentFile();
+        if (folder != null) {
+            folder.mkdirs();
+        }
+
+        // try-with-resources: closing is what flushes buffered text to disk, so
+        // skipping it on an exception would lose the tasks.
+        try (FileWriter fw = new FileWriter(file)) {
+            for (Task task : tasks) {
+                fw.write(task.toSaveFormat() + System.lineSeparator());
+            }
+        }
+    }
+
+    /**
+     * Saves the task list, reporting a failure instead of crashing.
+     * <p>
+     * Called after every command that changes the list, which is what makes the
+     * save automatic. Wrapping the {@link IOException} here keeps the read loop
+     * free of try/catch at all six call sites, and means a save failure costs
+     * the user a warning rather than the session.
+     *
+     * @param tasks the tasks to write
+     */
+    private static void save(ArrayList<Task> tasks) {
+        try {
+            saveTasks(tasks);
+        } catch (IOException e) {
+            printBlock("Uh oh! I could not save your tasks: " + e.getMessage());
+        }
+    }
+
+    /**
      * Runs the chatbot until the user says {@code bye} or the input ends.
      *
      * @param args command line arguments; unused
@@ -134,8 +300,15 @@ public class Thomas {
         // there is no fixed ceiling to enforce, and remove() closes the gap
         // left by a deleted task instead of leaving a hole to shuffle by hand.
         ArrayList<Task> tasks = new ArrayList<>();
+        try {
+            loadTasks(tasks);
+        } catch (IOException e) {
+            // An unreadable save file should not stop the chatbot: say so and
+            // carry on with an empty list rather than dying with a stack trace.
+            printBlock("Uh oh! I could not read your saved tasks: " + e.getMessage(),
+                    "Starting with an empty list.");
+        }
 
-        // try-with-resources closes the Scanner once the loop ends.
         Scanner userInput = new Scanner(System.in);
 
         // Labelled so the BYE case can end the loop. A plain break inside a
@@ -173,11 +346,13 @@ public class Thomas {
                 case MARK -> {
                     Task taskToMark = tasks.get(parseTaskIndex(parts, tasks.size(), "mark"));
                     taskToMark.markAsDone();
+                    save(tasks);
                     printBlock("Nice! I've marked this task as done:", "   " + taskToMark);
                 }
                 case UNMARK -> {
                     Task taskToUnmark = tasks.get(parseTaskIndex(parts, tasks.size(), "unmark"));
                     taskToUnmark.unmarkAsDone();
+                    save(tasks);
                     printBlock("OK, I've marked this task as not done yet:", "   " + taskToUnmark);
                 }
                 case DELETE -> {
@@ -185,6 +360,7 @@ public class Thomas {
                     // back to the user, and closes the gap: everything after it
                     // shifts down one and the numbering stays contiguous.
                     Task removedTask = tasks.remove(parseTaskIndex(parts, tasks.size(), "delete"));
+                    save(tasks);
                     printBlock("Noted. I've removed this task:",
                             "   " + removedTask,
                             "Now you have " + tasks.size() + " task(s) in the list.");
@@ -250,6 +426,7 @@ public class Thomas {
                     // Shared by all three: the task is only appended, counted
                     // and announced once the branch above returned without throwing.
                     tasks.add(newTask);
+                    save(tasks);
                     printAddedBlock(newTask, tasks.size());
                 }
                 // A switch statement over an enum is not checked for
@@ -264,7 +441,8 @@ public class Thomas {
             }
         }
 
-
+        // No save here: every command that changes the list has already saved,
+        // so the file is current even if the program never reaches this point.
         printBlock("Until next time! Choo Choo!");
     }
 }
