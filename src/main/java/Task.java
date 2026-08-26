@@ -55,4 +55,23 @@ public class Task {
     public String toString() {
         return getStatusIcon() + " " + this.description;
     }
+
+    /**
+     * Returns this task encoded for the save file.
+     * <p>
+     * This is deliberately separate from {@link #toString()}: that one is for
+     * the person reading the screen and is free to change, while this one is
+     * the format {@code Thomas} parses back on start-up. Keeping them apart
+     * means restyling the display cannot break loading.
+     * <p>
+     * Fields are separated by {@code " | "}, and the completion state is a
+     * digit rather than {@code "[X]"} so the parser never has to strip
+     * brackets. Subclasses prefix their type letter and append their own
+     * fields, exactly as they do for {@code toString()}.
+     *
+     * @return for example {@code "1 | read book"}
+     */
+    public String toSaveFormat() {
+        return (isDone ? "1" : "0") + " | " + this.description;
+    }
 }

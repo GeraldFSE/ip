@@ -5,10 +5,15 @@ Each test case is a fresh run of the chatbot: the case's input lines are fed to
 the program on standard input, and the program's console output is compared
 against the case's expected output.
 
-Running each case in its own process keeps cases independent -- a case never
-inherits tasks added by an earlier one, so cases can be reordered or run singly
-(--filter) without changing their results. A case that needs existing tasks
-adds them itself as part of its own input.
+Running each case in its own process and its own throwaway working directory
+keeps cases independent -- a case never inherits tasks added by an earlier one,
+whether through memory or through the save file the chatbot writes to ./data, so
+cases can be reordered or run singly (--filter) without changing their results.
+A case that needs existing tasks adds them itself as part of its own input.
+
+A case may give more than one **Input:** block. Each is a separate run of the
+chatbot sharing that one directory, which is how a case shows that tasks saved
+by one run are still there for the next.
 
 Exit status is 0 when every case passes, 1 on the first failure (the run stops
 there, so the reported failure is always the first thing that went wrong), and
@@ -21,6 +26,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # Root of the repository: this file lives at
@@ -74,6 +80,27 @@ def first_fence_after(body, label):
     return match.group(1) if match else None
 
 
+def all_fences_after(body, label):
+    """Returns the fenced block following every occurrence of `label`.
+
+    A case with more than one **Input:** block is run once per block, in order,
+    against the same data directory. That is what makes saving and loading
+    testable: the chatbot has to be stopped and started again for a reload to
+    happen at all, and a single run can never show it.
+    """
+    fences = []
+    position = 0
+    while True:
+        found = body.find(label, position)
+        if found == -1:
+            return fences
+        match = FENCE_RE.search(body, found)
+        if match is None:
+            return fences
+        fences.append(match.group(1))
+        position = match.end()
+
+
 def display_path(path):
     """Shows a path relative to the repository when it is inside it.
 
@@ -110,7 +137,7 @@ def parse_plan(plan_path):
     """Parses the test plan into (macros, cases).
 
     macros maps a name such as GREETING to the lines it expands to. cases is a
-    list of dicts with keys: name, aim, input, expected.
+    list of dicts with keys: name, aim, inputs (one entry per run), expected.
     """
     markdown = plan_path.read_text(encoding="utf-8")
 
@@ -130,9 +157,9 @@ def parse_plan(plan_path):
             for name, case_body in split_sections(body, level=3):
                 aim = parse_aim(case_body)
 
-                case_input = first_fence_after(case_body, "**Input:**")
+                case_inputs = all_fences_after(case_body, "**Input:**")
                 expected = first_fence_after(case_body, "**Expected output:**")
-                if case_input is None:
+                if not case_inputs:
                     raise PlanError(f"Test case '{name}' has no **Input:** block.")
                 if expected is None:
                     raise PlanError(
@@ -142,7 +169,7 @@ def parse_plan(plan_path):
                     {
                         "name": name,
                         "aim": aim,
-                        "input": case_input,
+                        "inputs": case_inputs,
                         "expected": expected,
                     }
                 )
@@ -218,27 +245,45 @@ def compile_sources():
     return True
 
 
-def run_case(case_input):
-    """Runs the chatbot once with the given stdin text.
+def run_case(case_inputs):
+    """Runs the chatbot once per input block, and returns (output, exit_code).
 
-    Returns (combined_output, exit_code). stderr is folded into the output so a
-    stack trace shows up in the transcript where it happened.
+    Every run happens in a throwaway working directory, so the save file the
+    chatbot writes to ./data belongs to this case alone: cases stay independent
+    now that tasks outlive a run, and the repository is not left holding a data
+    file produced by a test.
+
+    The runs of one case share that directory, which is what lets a later run
+    see what an earlier one saved. Their outputs are concatenated, and the first
+    non-zero exit status is the one reported.
+
+    stderr is folded into the output so a stack trace shows up in the transcript
+    where it happened.
     """
-    stdin_text = case_input if case_input.endswith("\n") else case_input + "\n"
-    try:
-        result = subprocess.run(
-            ["java", "-cp", str(BIN_DIR), MAIN_CLASS],
-            input=stdin_text,
-            capture_output=True,
-            text=True,
-            timeout=TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
-        return (
-            f"<<< the program did not exit within {TIMEOUT_SECONDS}s >>>",
-            None,
-        )
-    return result.stdout + result.stderr, result.returncode
+    outputs = []
+    with tempfile.TemporaryDirectory(prefix="thomas-ui-test-") as workdir:
+        for case_input in case_inputs:
+            stdin_text = (
+                case_input if case_input.endswith("\n") else case_input + "\n"
+            )
+            try:
+                result = subprocess.run(
+                    ["java", "-cp", str(BIN_DIR), MAIN_CLASS],
+                    input=stdin_text,
+                    capture_output=True,
+                    text=True,
+                    timeout=TIMEOUT_SECONDS,
+                    cwd=workdir,
+                )
+            except subprocess.TimeoutExpired:
+                outputs.append(
+                    f"<<< the program did not exit within {TIMEOUT_SECONDS}s >>>"
+                )
+                return "".join(outputs), None
+            outputs.append(result.stdout + result.stderr)
+            if result.returncode != 0:
+                return "".join(outputs), result.returncode
+    return "".join(outputs), 0
 
 
 def print_transcript(case, actual):
@@ -247,10 +292,16 @@ def print_transcript(case, actual):
     if case["aim"]:
         print(f"Aim: {case['aim']}")
     print()
-    print("Console input:")
-    for line in case["input"].splitlines():
-        print(f"  > {line}")
-    print()
+    for number, case_input in enumerate(case["inputs"], start=1):
+        # Numbered only when there is more than one, so the ordinary
+        # single-run case reads exactly as it did before.
+        if len(case["inputs"]) > 1:
+            print(f"Console input (run {number} of {len(case['inputs'])}):")
+        else:
+            print("Console input:")
+        for line in case_input.splitlines():
+            print(f"  > {line}")
+        print()
     print("Console output:")
     for line in actual.splitlines():
         print(f"  | {line}")
@@ -332,7 +383,7 @@ def main():
             print(f"SETUP ERROR: {error}", file=sys.stderr)
             return 2
 
-        actual, exit_code = run_case(case["input"])
+        actual, exit_code = run_case(case["inputs"])
         print_transcript(case, actual)
 
         expected_lines = normalise(expected)
