@@ -285,15 +285,17 @@ todo read book
 ### TC8: Add one task of each type and list them
 
 **Aim:** `todo`, `deadline` and `event` each store a task of the matching type,
-acknowledge it with the running task count, and show their own tag and
-date/time details in a later `list`.
+acknowledge it with the running task count, and show their own tag and date
+details in a later `list`. The dates are typed as `yyyy-mm-dd HHmm` on a 24-hour
+clock and shown back as `MMM dd yyyy, h:mm a` on a 12-hour one, so this also
+guards the input and display formats being deliberately different ones.
 
 **Input:**
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02 1800
+event project meeting /from 2019-12-02 1400 /to 2019-12-04 1600
 list
 bye
 ```
@@ -309,28 +311,33 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] return book (by: Sunday)
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      Now you have 2 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
      Now you have 3 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] borrow book
-     2. [D][ ] return book (by: Sunday)
-     3. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     3. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
 
-### TC9: Dates are kept as free text
+### TC9: A `/by` that is not a date is rejected
 
-**Aim:** A deadline's `/by` text is stored verbatim, with no date parsing, so
-text that is not a date at all is still accepted. Guards the split on `/by`
-against text containing spaces and punctuation.
+**Aim:** A deadline is now a real date and time, not free text, so text that is
+neither is reported rather than stored. Guards the `DateTimeParseException` from
+`LocalDateTime.parse` being rethrown as a `ThomasException` instead of reaching
+the user as a stack trace, and the message quoting back what was rejected.
+
+The date is the last thing checked, so the whole `/by` text is passed to the
+parser: this is also what shows that splitting on `/by` kept the spaces and
+punctuation rather than trimming the argument down to its first word.
 
 **Input:**
 
@@ -344,9 +351,159 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
+     I can't read 'no idea :-p' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC9a: A date given without a time is rejected
+
+**Aim:** The time is required, not optional. A bare `yyyy-mm-dd` is refused
+rather than being quietly taken to mean midnight, so a task never claims a time
+the user did not choose. This is the case that separates "the date must parse"
+from "the date and the time must both be there" -- a parser accepting the date
+half alone would let this through and store `12:00 AM`.
+
+**Input:**
+
+```text
+deadline return book /by 2019-12-02
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     I can't read '2019-12-02' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC9b: A near-miss date is rejected as firmly as nonsense
+
+**Aim:** Only the one accepted form gets through -- a date written the other way
+round, or naming a month that does not exist, is refused rather than guessed at.
+`2/12/2019 1800` is the shape the user is most likely to reach for, and
+`2019-13-01 1800` matches the pattern exactly while naming a thirteenth month,
+which a check on shape alone would let through.
+
+**Input:**
+
+```text
+deadline return book /by 2/12/2019 1800
+deadline return book /by 2019-13-01 1800
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     I can't read '2/12/2019 1800' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+    ____________________________________________________________
+     I can't read '2019-13-01 1800' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC9c: A time outside the 24-hour clock is rejected
+
+**Aim:** The time is read on a 24-hour clock, so `2500` is not a time and
+`1860` is not a minute count. Guards the `HH` and `mm` halves of the pattern
+against a value of the right width but the wrong range, which is what a check
+counting only digits would miss.
+
+**Input:**
+
+```text
+deadline return book /by 2019-12-02 2500
+deadline return book /by 2019-12-02 1860
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     I can't read '2019-12-02 2500' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+    ____________________________________________________________
+     I can't read '2019-12-02 1860' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC9d: An event's start and end are reported separately when unreadable
+
+**Aim:** The two dates of an event are named individually in the error, so the
+user is told which one to fix. Guards the `field` argument passed to the date
+parser at each of its call sites; one shared wording would make these two
+messages identical.
+
+**Input:**
+
+```text
+event project meeting /from Mon 2pm /to 2019-12-04 1600
+event project meeting /from 2019-12-02 1400 /to 4pm
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     I can't read 'Mon 2pm' as a start date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+    ____________________________________________________________
+     I can't read '4pm' as an end date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC9e: Midnight and noon are shown the right way round
+
+**Aim:** `0000` and `1200` are the two values a 24-hour to 12-hour conversion
+gets wrong most easily -- midnight is `12:00 AM`, not `0:00 AM`, and noon is
+`12:00 PM`, not `12:00 AM`. Guards the `h` and `a` halves of the display format
+at the only two points where they disagree with the input.
+
+**Input:**
+
+```text
+deadline sleep /by 2019-12-02 0000
+deadline lunch /by 2019-12-02 1200
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] do homework (by: no idea :-p)
+        [D][ ] sleep (by: Dec 02 2019, 12:00 AM)
      Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] lunch (by: Dec 02 2019, 12:00 PM)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [D][ ] sleep (by: Dec 02 2019, 12:00 AM)
+     2. [D][ ] lunch (by: Dec 02 2019, 12:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -499,8 +656,13 @@ bye
 
 ### TC16: An event with `/from` but no `/to` is rejected
 
-**Aim:** A missing end time is reported specifically, rather than being lumped
-in with a missing start time. Guards the second of the two splits.
+**Aim:** A missing end date is reported specifically, rather than being lumped
+in with a missing start date. Guards the second of the two splits.
+
+The start given here, `Mon 2pm`, is not a valid date either, so this also pins
+down the order of the checks: the missing `/to` is reported first because the
+dates are only parsed once both markers have been found. Reordering those would
+show the "I can't read 'Mon 2pm'" message instead and hide the real mistake.
 
 **Input:**
 
@@ -866,7 +1028,7 @@ bye
 
 ```text
 todo read book /by tomorrow
-deadline standby report /by Friday
+deadline standby report /by 2019-12-06 0900
 list
 bye
 ```
@@ -882,13 +1044,13 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] standby report (by: Friday)
+        [D][ ] standby report (by: Dec 06 2019, 9:00 AM)
      Now you have 2 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] read book /by tomorrow
-     2. [D][ ] standby report (by: Friday)
+     2. [D][ ] standby report (by: Dec 06 2019, 9:00 AM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -941,7 +1103,7 @@ cases miss.
 ```text
 todo read book
 event project meeting /from Mon 2pm
-deadline return book /by Sunday
+deadline return book /by 2019-12-02 1800
 blah
 mark 2
 todo
@@ -965,7 +1127,7 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] return book (by: Sunday)
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      Now you have 2 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
@@ -973,14 +1135,14 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Nice! I've marked this task as done:
-        [D][X] return book (by: Sunday)
+        [D][X] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
      HEYY!! The description of a todo cannot be empty!
     ____________________________________________________________
     ____________________________________________________________
      OK, I've marked this task as not done yet:
-        [D][ ] return book (by: Sunday)
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
      There is no task 9! You only have 2 task(s).
@@ -988,7 +1150,7 @@ bye
     ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] read book
-     2. [D][ ] return book (by: Sunday)
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1053,8 +1215,8 @@ them contiguously with no gap where the removed task was.
 
 ```text
 todo read book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02 1800
+event project meeting /from 2019-12-02 1400 /to 2019-12-04 1600
 todo join sports club
 delete 3
 list
@@ -1072,12 +1234,12 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] return book (by: Sunday)
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      Now you have 2 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
      Now you have 3 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
@@ -1087,13 +1249,13 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Noted. I've removed this task:
-        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
      Now you have 3 task(s) in the list.
     ____________________________________________________________
     ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] read book
-     2. [D][ ] return book (by: Sunday)
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      3. [T][ ] join sports club
     ____________________________________________________________
 {{FAREWELL}}
@@ -1362,7 +1524,7 @@ it needs two runs to show at all.
 
 ```text
 todo read book
-deadline return book /by Sunday
+deadline return book /by 2019-12-02 1800
 bye
 ```
 
@@ -1384,7 +1546,7 @@ bye
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
-        [D][ ] return book (by: Sunday)
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      Now you have 2 task(s) in the list.
     ____________________________________________________________
 {{FAREWELL}}
@@ -1392,7 +1554,7 @@ bye
     ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] read book
-     2. [D][ ] return book (by: Sunday)
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1507,7 +1669,7 @@ would give it away.
 **Input:**
 
 ```text
-event project meeting /from Mon 2pm /to 4pm
+event project meeting /from 2019-12-02 1400 /to 2019-12-04 1600
 bye
 ```
 
@@ -1524,14 +1686,14 @@ bye
 {{GREETING}}
     ____________________________________________________________
      Got it. I've added this task:
-        [E][ ] project meeting (from: Mon 2pm to: 4pm)
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
      Now you have 1 task(s) in the list.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
      Here are the tasks in your list:
-     1. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1650,6 +1812,21 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   so a chatbot killed outright should lose nothing. Confirming that needs the
   process to be killed rather than fed end-of-input, which the test script has no
   way to do -- TC42 covers the nearest testable case, input simply running out.
+* **A saved date that cannot be read.** A date in the save file is parsed
+  through the same helper as one the user types, so it is reported and the line
+  skipped rather than killing start-up, exactly as TC43 shows for a bad field
+  count. There is no case for it because there is no way to produce one through
+  the UI: every date the chatbot writes it wrote from a `LocalDate`, so it can
+  always read it back. Reaching this needs the file edited by hand, which the
+  test script does not do.
+* **An event that ends before it starts.** `event x /from 2019-12-05 1800 /to
+  2019-12-01 1800` is accepted and stored. Now that both are real points in
+  time, comparing them is a one-line check, but rejecting it is a decision about
+  what the chatbot should allow rather than a bug in what it does, so it is left
+  alone for now.
+* **A start and end that disagree about having a time.** Not reachable: a time
+  is required on every date, so an event cannot have one end with a time and the
+  other without. It would need testing if the time were ever made optional.
 * **An unreadable or unwritable save file.** The messages for a save file that
   exists but cannot be read, or a `./data` folder that cannot be created, are
   reachable only by changing file permissions, which the test script does not
