@@ -10,6 +10,7 @@
 public enum Command {
     BYE("bye"),
     LIST("list"),
+    ON("on"),
     MARK("mark"),
     UNMARK("unmark"),
     DELETE("delete"),

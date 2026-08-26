@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileWriter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
 /**
  * Entry point for the Thomas chatbot.
  * <p>
@@ -133,6 +137,58 @@ public class Thomas {
     }
 
     /**
+     * Turns a date the user typed into a {@link LocalDateTime}.
+     * <p>
+     * A date and a time are both required, in {@link Task#DATE_INPUT_FORMAT}:
+     * a date on its own is refused rather than being assumed to mean midnight,
+     * so a task never claims a time the user did not choose.
+     * <p>
+     * The parser's exception is rethrown as a {@link ThomasException} for the
+     * same reason the one from {@link Integer#parseInt} is in
+     * {@link #parseTaskIndex}: the read loop then has one kind of user error to
+     * report, and no Java class name reaches the user. The save file is read
+     * through here too, so a damaged date there costs one skipped line rather
+     * than the whole start-up.
+     *
+     * @param text  the date as written, expected as {@code yyyy-mm-dd HHmm}
+     * @param field which date this is, named as it should read in the message
+     *              and so carrying its own article, for example
+     *              {@code "a deadline date"} against {@code "an end date"}
+     * @return the date and time the text names
+     * @throws ThomasException if the text is not a date and time in that form
+     */
+    private static LocalDateTime parseDate(String text, String field) throws ThomasException {
+        try {
+            return LocalDateTime.parse(text, Task.DATE_INPUT_FORMAT);
+        } catch (DateTimeParseException e) {
+            throw new ThomasException("I can't read '" + text + "' as " + field
+                    + "! Write it as a date and a 24-hour time, like 2019-12-02 1800.");
+        }
+    }
+
+    /**
+     * Turns a whole day the user typed into a {@link LocalDate}.
+     * <p>
+     * Separate from {@link #parseDate} because the two read different things.
+     * A task happens at a moment, so it needs a date and a time; {@code on}
+     * asks about a whole day, so a time would be meaningless there and is
+     * refused rather than ignored. Returning a {@link LocalDate} rather than a
+     * {@link LocalDateTime} is what says so in the type.
+     *
+     * @param text the day as written, expected as {@code yyyy-mm-dd}
+     * @return the day the text names
+     * @throws ThomasException if the text is not a date in that form
+     */
+    private static LocalDate parseDay(String text) throws ThomasException {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException e) {
+            throw new ThomasException("I can't read '" + text + "' as a day! "
+                    + "Write it as 2019-12-02.");
+        }
+    }
+
+    /**
      * Checks that a save file line holds exactly the fields its type needs.
      *
      * @param fields   the line already split on the field separator
@@ -179,11 +235,14 @@ public class Thomas {
         }
         case "D" -> {
             requireFieldCount(fields, 4, line);
-            yield new DeadlineTask(description, fields[3]);
+            LocalDateTime byDate = parseDate(fields[3], "a deadline date");
+            yield new DeadlineTask(description, byDate);
         }
         case "E" -> {
             requireFieldCount(fields, 5, line);
-            yield new EventTask(description, fields[3], fields[4]);
+            LocalDateTime fromDate = parseDate(fields[3], "a start date");
+            LocalDateTime toDate = parseDate(fields[4], "an end date");
+            yield new EventTask(description, fromDate, toDate);
         }
         default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
         };
@@ -343,6 +402,26 @@ public class Thomas {
                     }
                     printBlock(entries);
                 }
+                case ON -> {
+                    LocalDate day = parseDay(requireArgument(parts,
+                            "HEYY!! Which day do you want to see?"));
+
+                    // An ArrayList rather than a sized array as LIST uses: how
+                    // many tasks match is not known until they have been tested.
+                    ArrayList<String> entries = new ArrayList<>();
+                    entries.add("Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":");
+
+                    // Numbered by position in the whole list, not by position
+                    // among the matches, so a number shown here is the number
+                    // mark and delete take. Numbering the matches 1, 2, 3 would
+                    // read more tidily and send the user to the wrong task.
+                    for (int i = 0; i < tasks.size(); i++) {
+                        if (tasks.get(i).occursOn(day)) {
+                            entries.add((i + 1) + ". " + tasks.get(i));
+                        }
+                    }
+                    printBlock(entries.toArray(new String[0]));
+                }
                 case MARK -> {
                     Task taskToMark = tasks.get(parseTaskIndex(parts, tasks.size(), "mark"));
                     taskToMark.markAsDone();
@@ -377,9 +456,22 @@ public class Thomas {
                     } else if (command == Command.DEADLINE) {
                         String arguments = requireArgument(parts,
                                 "HEYY!! The description of a deadline cannot be empty!");
-                        // "return book /by Sunday" -> ["return book", "Sunday"]
+                        // "return book /by 2019-12-02 1800"
+                        //     -> ["return book", "2019-12-02 1800"]
                         String[] details = arguments.split(" /by ", 2);
                         if (details.length < 2) {
+                            // Two different mistakes arrive here, because the
+                            // separator carries a leading space so that a word
+                            // such as "standby" is not mistaken for a marker.
+                            // requireArgument has already trimmed the argument,
+                            // so a line that is nothing but "/by ..." has no
+                            // space in front of the marker for the separator to
+                            // match: the marker is there, and it is the
+                            // description in front of it that is missing.
+                            if (arguments.startsWith("/by")) {
+                                throw new ThomasException(
+                                        "HEYY!! The description of a deadline cannot be empty!");
+                            }
                             throw new ThomasException("Are you forgetting something!! When is the deadline!");
                         }
                         String deadlineName = details[0].trim();
@@ -391,7 +483,8 @@ public class Thomas {
                         if (by.isEmpty()) {
                             throw new ThomasException("Are you forgetting something!! When is the deadline!");
                         }
-                        newTask = new DeadlineTask(deadlineName, by);
+                        LocalDateTime byDate = parseDate(by, "a deadline date");
+                        newTask = new DeadlineTask(deadlineName, byDate);
                     } else {
                         String arguments = requireArgument(parts,
                                 "HEYY!! The description of an event cannot be empty!");
@@ -401,6 +494,13 @@ public class Thomas {
                         // "meeting /from Mon 2pm /to 4pm" -> ["meeting", "Mon 2pm /to 4pm"]
                         String[] afterFrom = arguments.split(" /from ", 2);
                         if (afterFrom.length < 2) {
+                            // As in the deadline branch above: a line that
+                            // begins with the marker has a /from, and it is the
+                            // description in front of it that is missing.
+                            if (arguments.startsWith("/from")) {
+                                throw new ThomasException(
+                                        "HEYY!! The description of an event cannot be empty!");
+                            }
                             throw new ThomasException("Erm when does it start? You need a /from!");
                         }
                         // "Mon 2pm /to 4pm" -> ["Mon 2pm", "4pm"]
@@ -420,7 +520,9 @@ public class Thomas {
                         if (to.isEmpty()) {
                             throw new ThomasException("Erm when does it end? You need a /to after your /from!");
                         }
-                        newTask = new EventTask(eventName, from, to);
+                        LocalDateTime fromDate = parseDate(from, "a start date");
+                        LocalDateTime toDate = parseDate(to, "an end date");
+                        newTask = new EventTask(eventName, fromDate, toDate);
                     }
 
                     // Shared by all three: the task is only appended, counted
