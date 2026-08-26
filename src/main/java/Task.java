@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -43,6 +44,18 @@ public class Task {
      */
     public static final DateTimeFormatter DATE_DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy, h:mm a", Locale.ENGLISH);
+
+    /**
+     * How a whole day is shown, with no time, for example {@code "Dec 02 2019"}.
+     * <p>
+     * Separate from {@link #DATE_DISPLAY_FORMAT} rather than reusing it,
+     * because a {@link java.time.LocalDate} carries no hour or minute:
+     * formatting one with a pattern that asks for them throws
+     * {@code UnsupportedTemporalTypeException} at run time, and nothing about
+     * it fails to compile.
+     */
+    public static final DateTimeFormatter DATE_DISPLAY_DAY =
+            DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
 
     /** The task text exactly as the user typed it. */
     protected String description;
@@ -92,6 +105,22 @@ public class Task {
     @Override
     public String toString() {
         return getStatusIcon() + " " + this.description;
+    }
+
+    /**
+     * Returns whether this task falls on a given day.
+     * <p>
+     * A plain task carries no date, so it is never on any particular day and
+     * this base version always says no. The dated subclasses override it, which
+     * is what lets the {@code on} command filter the list without asking any
+     * task what type it is: adding another dated task type means overriding
+     * this method, not extending a chain of {@code instanceof} checks.
+     *
+     * @param day the day being asked about
+     * @return true if this task falls on that day
+     */
+    public boolean occursOn(LocalDate day) {
+        return false;
     }
 
     /**

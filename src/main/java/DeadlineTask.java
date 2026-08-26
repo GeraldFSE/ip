@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -31,6 +32,20 @@ public class DeadlineTask extends Task {
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by.format(DATE_DISPLAY_FORMAT) + ")";
+    }
+
+    /**
+     * Returns whether this deadline falls due on a given day.
+     * <p>
+     * The time of day is dropped for the comparison, so a deadline at any hour
+     * counts as being on that day.
+     *
+     * @param day the day being asked about
+     * @return true if the task is due on that day
+     */
+    @Override
+    public boolean occursOn(LocalDate day) {
+        return by.toLocalDate().equals(day);
     }
 
     /**

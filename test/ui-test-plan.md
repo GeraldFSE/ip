@@ -1783,14 +1783,390 @@ bye
 {{FAREWELL}}
 ```
 
+### TC44: `on` shows the deadlines and events falling on a day
+
+**Aim:** `on <date>` lists the dated tasks that fall on that day and leaves out
+the ones that do not. The numbers shown are the tasks' positions in the whole
+list, not their positions among the matches, so the todos in between leave gaps:
+task 2 and task 4 are numbered 2 and 4, not 1 and 2.
+
+**Input:**
+
+```text
+todo borrow book
+deadline return book /by 2019-12-02 1800
+todo read book
+event project meeting /from 2019-12-02 1400 /to 2019-12-04 1600
+on 2019-12-02
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] borrow book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+     Now you have 4 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     4. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC45: An event counts as happening on every day it spans
+
+**Aim:** An event covers its whole range, both ends included. The five `on`
+commands walk the day before, the first day, a day in the middle, the last day,
+and the day after, so the event is found on exactly three of them.
+
+This is the case that catches the range test being written as
+`day.isAfter(start) && day.isBefore(end)`: that reading drops the first and last
+day, which a case asking only about the middle day would still pass.
+
+**Input:**
+
+```text
+event project meeting /from 2019-12-02 1400 /to 2019-12-04 1600
+on 2019-12-01
+on 2019-12-02
+on 2019-12-03
+on 2019-12-04
+on 2019-12-05
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 01 2019:
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+     1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 03 2019:
+     1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 04 2019:
+     1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 05 2019:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC46: A todo never falls on a day, whatever its description says
+
+**Aim:** A todo carries no date, so it is never matched even when its
+description is the date being asked about. Guards the base `occursOn` returning
+false rather than the filter comparing text, and shows a day with no matches
+printing its header and nothing else, as an empty `list` does.
+
+The deadline is set one day later to pin the comparison down to the exact day:
+a check for "on or after" would wrongly match it.
+
+**Input:**
+
+```text
+todo 2019-12-02
+deadline return book /by 2019-12-03 1800
+on 2019-12-02
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] 2019-12-02
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Dec 03 2019, 6:00 PM)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC47: The number `on` shows is the number `mark` takes
+
+**Aim:** The whole reason `on` numbers by list position rather than by match
+position. A task shown as 2 by `on` is task 2 to `mark`, so the user can act on
+what they see without counting the list again. Numbering the matches from 1
+would show this same task as 1 and send `mark 1` to the wrong task.
+
+**Input:**
+
+```text
+todo borrow book
+deadline return book /by 2019-12-02 1800
+on 2019-12-02
+mark 2
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] borrow book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [D][X] return book (by: Dec 02 2019, 6:00 PM)
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] borrow book
+     2. [D][X] return book (by: Dec 02 2019, 6:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC48: `on` with a missing or unreadable day is rejected
+
+**Aim:** `on` validates its argument the way the add commands validate theirs.
+A day is a whole day, so a date with a time on it is refused rather than having
+the time ignored -- the opposite of `deadline`, where the time is required.
+That difference is the point of `parseDay` being separate from `parseDate`.
+
+**Input:**
+
+```text
+on
+on tomorrow
+on 2019-12-02 1800
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     HEYY!! Which day do you want to see?
+    ____________________________________________________________
+    ____________________________________________________________
+     I can't read 'tomorrow' as a day! Write it as 2019-12-02.
+    ____________________________________________________________
+    ____________________________________________________________
+     I can't read '2019-12-02 1800' as a day! Write it as 2019-12-02.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC49: `on` with nothing stored prints only its header
+
+**Aim:** `on` before anything has been added prints the header and nothing else,
+rather than failing. Guards the match loop against an empty task list, the same
+boundary TC3 guards for `list`.
+
+**Input:**
+
+```text
+on 2019-12-02
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC50: A marker given with no description in front of it names the right mistake
+
+**Aim:** `deadline /by ...` and `event /from ... /to ...` are missing their
+description, not their marker, and are told so. The marker is present, so
+complaining about the marker sends the user looking in the wrong place.
+
+This is the case the separator's leading space creates. `" /by "` is what stops
+"standby" being read as a marker, but the argument has already been trimmed, so
+a line that is nothing but `/by ...` has no space in front of the marker for the
+separator to match -- the split finds no marker and, without the check, blames
+the one thing that is actually there.
+
+**Input:**
+
+```text
+deadline /by 2019-12-02 1800
+event /from 2019-12-02 1400 /to 2019-12-04 1600
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     HEYY!! The description of a deadline cannot be empty!
+    ____________________________________________________________
+    ____________________________________________________________
+     HEYY!! The description of an event cannot be empty!
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC51: A genuinely missing marker still reports the marker
+
+**Aim:** The other half of TC50. Text with no marker at all is still told the
+marker is missing, so the new check narrows the message rather than replacing
+it. Guards `startsWith` being tested against the marker rather than something
+looser that would catch these too.
+
+**Input:**
+
+```text
+deadline return book
+event project meeting
+event project meeting /from 2019-12-02 1400
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Are you forgetting something!! When is the deadline!
+    ____________________________________________________________
+    ____________________________________________________________
+     Erm when does it start? You need a /from!
+    ____________________________________________________________
+    ____________________________________________________________
+     Erm when does it end? You need a /to after your /from!
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC52: An event that ends before it starts is rejected
+
+**Aim:** An event cannot run backwards. The times are checked against each
+other, not just parsed, and the rejected event is not stored -- the closing
+`list` shows nothing was added.
+
+The two dates differ only in their time of day, so this also shows the
+comparison is made on the whole point in time rather than on the date alone,
+which would see the two as equal and let it through.
+
+**Input:**
+
+```text
+event project meeting /from 2019-12-01 1600 /to 2019-12-01 1400
+event conference /from 2019-12-05 0900 /to 2019-12-01 0900
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     HUH?! Your event ends before it starts! Check your /from and /to.
+    ____________________________________________________________
+    ____________________________________________________________
+     HUH?! Your event ends before it starts! Check your /from and /to.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC53: An event that starts and ends at the same moment is accepted
+
+**Aim:** The boundary of TC52. Equal times are allowed -- an event lasting no
+time says nothing false, while one ending before it begins cannot be true.
+Guards the check being `isAfter` rather than a comparison that also rejects
+equality.
+
+**Input:**
+
+```text
+event standup /from 2019-12-02 0900 /to 2019-12-02 0900
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] standup (from: Dec 02 2019, 9:00 AM to: Dec 02 2019, 9:00 AM)
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [E][ ] standup (from: Dec 02 2019, 9:00 AM to: Dec 02 2019, 9:00 AM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
 mistaken for an oversight. Add cases here as the chatbot grows:
 
-* **Invalid `mark`/`unmark` arguments.** `mark 9` with fewer than 9 tasks, or
-  `mark abc`, currently throws an uncaught exception and kills the chatbot.
-  There is no error handling to test yet, so there is no case for it.
+* **A keyword typed in the wrong case.** `Bye`, `TODO x` and `List` are all
+  reported as unknown commands, because the match is made with `equals`. That is
+  deliberate rather than accidental, and noted in `Command.fromKeyword`, but no
+  case pins it down, so nothing would notice if the matching were loosened.
 * **Arguments given to `bye` and `list`.** Matching on the keyword means
   `bye now` and `list all` are accepted, with the extra text ignored. That is
   consistent with the other commands, which also ignore what they do not read,
@@ -1816,14 +2192,19 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   through the same helper as one the user types, so it is reported and the line
   skipped rather than killing start-up, exactly as TC43 shows for a bad field
   count. There is no case for it because there is no way to produce one through
-  the UI: every date the chatbot writes it wrote from a `LocalDate`, so it can
-  always read it back. Reaching this needs the file edited by hand, which the
-  test script does not do.
-* **An event that ends before it starts.** `event x /from 2019-12-05 1800 /to
-  2019-12-01 1800` is accepted and stored. Now that both are real points in
-  time, comparing them is a one-line check, but rejecting it is a decision about
-  what the chatbot should allow rather than a bug in what it does, so it is left
-  alone for now.
+  the UI: every date the chatbot writes it wrote from a `LocalDateTime`, in the
+  same format it reads, so it can always read it back. Reaching this needs the
+  file edited by hand, which the test script does not do.
+* **The order `on` lists its matches in.** They come out in list order, not in
+  order of the time they happen at, so a 6 PM deadline can be shown above a
+  2 PM event. Sorting them would read better but would break the numbering
+  `on` exists to provide, since the numbers are list positions.
+* **An event in the save file that runs backwards.** The check lives in
+  `EventTask`'s constructor, which the save file is loaded through too, so such
+  a line is reported and skipped exactly as TC43 shows for a bad field count.
+  There is no case for it because there is no way to produce one through the UI
+  -- TC52 refuses to create it in the first place, so reaching this needs the
+  file edited by hand, which the test script does not do.
 * **A start and end that disagree about having a time.** Not reachable: a time
   is required on every date, so an event cannot have one end with a time and the
   other without. It would need testing if the time were ever made optional.
