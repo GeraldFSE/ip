@@ -1,3 +1,5 @@
+package thomas;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,6 +8,11 @@ import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import thomas.task.DeadlineTask;
+import thomas.task.EventTask;
+import thomas.task.Task;
+import thomas.task.TodoTask;
 
 /**
  * Loads tasks from the save file and writes them back to it.

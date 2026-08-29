@@ -1,4 +1,10 @@
+package thomas.command;
+
 import java.time.LocalDate;
+
+import thomas.Storage;
+import thomas.TaskList;
+import thomas.Ui;
 
 /**
  * Shows the tasks falling on one day: the {@code on <day>} command.

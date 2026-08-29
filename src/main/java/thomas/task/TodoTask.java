@@ -1,3 +1,5 @@
+package thomas.task;
+
 /**
  * A task with no date or time attached, such as {@code borrow book}.
  * <p>

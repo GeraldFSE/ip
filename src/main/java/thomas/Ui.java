@@ -1,7 +1,11 @@
+package thomas;
+
 import java.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import thomas.task.Task;
 
 /**
  * Deals with everything the user sees and types.

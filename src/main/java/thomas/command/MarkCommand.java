@@ -1,13 +1,15 @@
+package thomas.command;
+
+import thomas.Storage;
+import thomas.TaskList;
+import thomas.ThomasException;
+import thomas.Ui;
+import thomas.task.Task;
+
 /**
- * Marks a task not done again: the {@code unmark <number>} command.
- * <p>
- * Deliberately its own class rather than a {@link MarkCommand} carrying a
- * true/false flag. The two differ only in one call and one message, but a
- * boolean argument at the call site says nothing about which way round it is:
- * {@code new MarkCommand(3, false)} has to be looked up, where
- * {@code new UnmarkCommand(3)} reads as what it does.
+ * Marks a task done: the {@code mark <number>} command.
  */
-public class UnmarkCommand extends Command {
+public class MarkCommand extends Command {
     /**
      * The task number the user typed, counting from 1.
      * <p>
@@ -23,12 +25,12 @@ public class UnmarkCommand extends Command {
      * @param taskNumber the number as the user typed it, counting from 1 and not
      *                   yet checked against the list
      */
-    public UnmarkCommand(int taskNumber) {
+    public MarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
 
     /**
-     * Marks the named task not done, saves, and says so.
+     * Marks the named task done, saves, and says so.
      *
      * @param tasks   the list holding the task
      * @param ui      used to confirm the change
@@ -38,8 +40,8 @@ public class UnmarkCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
         Task task = tasks.getByNumber(taskNumber);
-        task.unmarkAsDone();
+        task.markAsDone();
         save(tasks, ui, storage);
-        ui.showUnmarked(task);
+        ui.showMarked(task);
     }
 }

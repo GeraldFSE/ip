@@ -1,3 +1,7 @@
+package thomas.command;
+
+import thomas.ThomasException;
+
 /**
  * The kind of command a typed keyword names.
  * <p>

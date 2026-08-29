@@ -1,4 +1,8 @@
+package thomas;
+
 import java.io.IOException;
+
+import thomas.command.Command;
 
 /**
  * Entry point for the Thomas chatbot.

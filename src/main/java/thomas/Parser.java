@@ -1,6 +1,22 @@
+package thomas;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+
+import thomas.command.AddCommand;
+import thomas.command.Command;
+import thomas.command.CommandType;
+import thomas.command.DeleteCommand;
+import thomas.command.ExitCommand;
+import thomas.command.ListCommand;
+import thomas.command.MarkCommand;
+import thomas.command.OnCommand;
+import thomas.command.UnmarkCommand;
+import thomas.task.DeadlineTask;
+import thomas.task.EventTask;
+import thomas.task.Task;
+import thomas.task.TodoTask;
 
 /**
  * Makes sense of one line the user typed.
