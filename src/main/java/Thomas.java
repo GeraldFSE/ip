@@ -1,13 +1,10 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-
-import java.io.File;
 import java.io.IOException;
-import java.io.FileWriter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+
+import java.util.ArrayList;
 
 /**
  * Entry point for the Thomas chatbot.
@@ -23,9 +20,10 @@ import java.time.format.DateTimeParseException;
  * start-up and written back after every command that changes it, so no task is
  * lost even if the program is closed without typing {@code bye}.
  * <p>
- * Reading and writing the console is not done here: that belongs to {@link Ui},
- * so this class is left with understanding commands and keeping the task list,
- * and none of the indentation or wording of the output.
+ * Neither end of that is done here. Talking to the user belongs to {@link Ui}
+ * and the save file belongs to {@link Storage}, so this class is left with
+ * understanding commands and keeping the task list: it holds none of the
+ * wording of the output and none of the save file format.
  */
 public class Thomas {
     /**
@@ -33,8 +31,9 @@ public class Thomas {
      * <p>
      * Relative paths resolve against the directory the program was started
      * from, so this assumes Thomas is run from the project root, as the test
-     * script does. Held in one place so the load and save calls cannot drift
-     * apart.
+     * script does. It is chosen here, rather than inside {@link Storage},
+     * because deciding where the tasks live is this program's business while
+     * reading and writing them is Storage's.
      */
     private static final String DATA_PATH = "./data/tasklist.txt";
 
@@ -102,39 +101,9 @@ public class Thomas {
     }
 
     /**
-     * Turns a date the user typed into a {@link LocalDateTime}.
-     * <p>
-     * A date and a time are both required, in {@link Task#DATE_INPUT_FORMAT}:
-     * a date on its own is refused rather than being assumed to mean midnight,
-     * so a task never claims a time the user did not choose.
-     * <p>
-     * The parser's exception is rethrown as a {@link ThomasException} for the
-     * same reason the one from {@link Integer#parseInt} is in
-     * {@link #parseTaskIndex}: the read loop then has one kind of user error to
-     * report, and no Java class name reaches the user. The save file is read
-     * through here too, so a damaged date there costs one skipped line rather
-     * than the whole start-up.
-     *
-     * @param text  the date as written, expected as {@code yyyy-mm-dd HHmm}
-     * @param field which date this is, named as it should read in the message
-     *              and so carrying its own article, for example
-     *              {@code "a deadline date"} against {@code "an end date"}
-     * @return the date and time the text names
-     * @throws ThomasException if the text is not a date and time in that form
-     */
-    private static LocalDateTime parseDate(String text, String field) throws ThomasException {
-        try {
-            return LocalDateTime.parse(text, Task.DATE_INPUT_FORMAT);
-        } catch (DateTimeParseException e) {
-            throw new ThomasException("I can't read '" + text + "' as " + field
-                    + "! Write it as a date and a 24-hour time, like 2019-12-02 1800.");
-        }
-    }
-
-    /**
      * Turns a whole day the user typed into a {@link LocalDate}.
      * <p>
-     * Separate from {@link #parseDate} because the two read different things.
+     * Separate from {@link Task#parseDate} because the two read different things.
      * A task happens at a moment, so it needs a date and a time; {@code on}
      * asks about a whole day, so a time would be meaningless there and is
      * refused rather than ignored. Returning a {@link LocalDate} rather than a
@@ -154,153 +123,22 @@ public class Thomas {
     }
 
     /**
-     * Checks that a save file line holds exactly the fields its type needs.
-     *
-     * @param fields   the line already split on the field separator
-     * @param expected how many fields this task type is written with
-     * @param line     the original line, quoted back in the error message
-     * @throws ThomasException if the count does not match
-     */
-    private static void requireFieldCount(String[] fields, int expected, String line)
-            throws ThomasException {
-        if (fields.length != expected) {
-            throw new ThomasException("expected " + expected + " fields but found "
-                    + fields.length + ": " + line);
-        }
-    }
-
-    /**
-     * Turns one line of the save file back into a task.
-     * <p>
-     * The line is split on the field separator rather than parsed out of the
-     * display text, so the shape is fixed and known: type letter, done flag,
-     * description, then whatever extra fields that type carries.
-     *
-     * @param line one line of the save file, without its line separator
-     * @return the task the line describes
-     * @throws ThomasException if the type is unknown or fields are missing
-     */
-    private static Task parseSavedTask(String line) throws ThomasException {
-        // -1 keeps trailing empty fields, so a line ending in a separator is
-        // reported as corrupt below rather than silently shortening the array.
-        String[] fields = line.split(" \\| ", -1);
-        if (fields.length < 3) {
-            throw new ThomasException("too few fields: " + line);
-        }
-
-        // Each type has an exact field count. Checking for exactly the right
-        // number, rather than at least it, is what catches a description that
-        // itself contains " | ": that splits into an extra field and would
-        // otherwise be loaded back silently truncated.
-        String description = fields[2];
-        Task task = switch (fields[0]) {
-        case "T" -> {
-            requireFieldCount(fields, 3, line);
-            yield new TodoTask(description);
-        }
-        case "D" -> {
-            requireFieldCount(fields, 4, line);
-            LocalDateTime byDate = parseDate(fields[3], "a deadline date");
-            yield new DeadlineTask(description, byDate);
-        }
-        case "E" -> {
-            requireFieldCount(fields, 5, line);
-            LocalDateTime fromDate = parseDate(fields[3], "a start date");
-            LocalDateTime toDate = parseDate(fields[4], "an end date");
-            yield new EventTask(description, fromDate, toDate);
-        }
-        default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
-        };
-
-        // "1" means done; anything else is treated as not done, so a damaged
-        // flag costs the tick rather than the whole task.
-        if (fields[1].equals("1")) {
-            task.markAsDone();
-        }
-        return task;
-    }
-
-    /**
-     * Reads saved tasks into {@code tasks}.
-     * <p>
-     * A missing file is the normal first run, not an error, so it simply leaves
-     * the list empty. Individual unreadable lines are reported and skipped
-     * rather than abandoning the whole file: one damaged line should not cost
-     * the user every other task.
-     *
-     * @param tasks the list to append the saved tasks to
-     * @param ui    used to report the lines that had to be skipped
-     * @throws IOException if the file exists but cannot be read
-     */
-    private static void loadTasks(ArrayList<Task> tasks, Ui ui) throws IOException {
-        File file = new File(DATA_PATH);
-        if (!file.exists()) {
-            return;
-        }
-
-        // try-with-resources: the Scanner holds a real file handle, so it is
-        // closed however this block ends, including on an exception.
-        try (Scanner scan = new Scanner(file)) {
-            while (scan.hasNextLine()) {
-                // nextLine(), not next(): descriptions contain spaces, and
-                // next() would hand back one word at a time.
-                String current = scan.nextLine();
-                if (current.isBlank()) {
-                    continue;
-                }
-                try {
-                    tasks.add(parseSavedTask(current));
-                } catch (ThomasException e) {
-                    ui.showSkippedLine(e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Writes every task to the save file, replacing what was there before.
-     * <p>
-     * The list is only read, never emptied: this runs after every change to the
-     * task list, so mutating it here would delete the tasks it is meant to be
-     * saving.
-     *
-     * @param tasks the tasks to write, left unchanged
-     * @throws IOException if the folder or file cannot be written
-     */
-    private static void saveTasks(ArrayList<Task> tasks) throws IOException {
-        File file = new File(DATA_PATH);
-
-        // FileWriter cannot create missing folders, so ./data must be made
-        // first. mkdirs() creates every missing level and is a no-op when they
-        // already exist. getParentFile() is null for a bare filename.
-        File folder = file.getParentFile();
-        if (folder != null) {
-            folder.mkdirs();
-        }
-
-        // try-with-resources: closing is what flushes buffered text to disk, so
-        // skipping it on an exception would lose the tasks.
-        try (FileWriter fw = new FileWriter(file)) {
-            for (Task task : tasks) {
-                fw.write(task.toSaveFormat() + System.lineSeparator());
-            }
-        }
-    }
-
-    /**
      * Saves the task list, reporting a failure instead of crashing.
      * <p>
      * Called after every command that changes the list, which is what makes the
-     * save automatic. Wrapping the {@link IOException} here keeps the read loop
-     * free of try/catch at all six call sites, and means a save failure costs
-     * the user a warning rather than the session.
+     * save automatic. {@link Storage#save} throws rather than printing, because
+     * it has no business talking to the user; catching the {@link IOException}
+     * here in one place keeps the read loop free of try/catch at all six call
+     * sites, and means a save failure costs the user a warning rather than the
+     * session.
      *
-     * @param tasks the tasks to write
-     * @param ui    used to report a failed save
+     * @param tasks   the tasks to write
+     * @param storage where to write them
+     * @param ui      used to report a failed save
      */
-    private static void save(ArrayList<Task> tasks, Ui ui) {
+    private static void save(ArrayList<Task> tasks, Storage storage, Ui ui) {
         try {
-            saveTasks(tasks);
+            storage.save(tasks);
         } catch (IOException e) {
             ui.showSavingError(e.getMessage());
         }
@@ -317,16 +155,24 @@ public class Thomas {
         Ui ui = new Ui();
         ui.showWelcome();
 
+        Storage storage = new Storage(DATA_PATH);
+
         // An ArrayList rather than a Task[]: it grows as tasks are added, so
         // there is no fixed ceiling to enforce, and remove() closes the gap
         // left by a deleted task instead of leaving a hole to shuffle by hand.
-        ArrayList<Task> tasks = new ArrayList<>();
+        ArrayList<Task> tasks;
         try {
-            loadTasks(tasks, ui);
+            tasks = storage.load();
+            // Storage records the lines it could not read instead of printing
+            // them, so they are shown here, where the Ui is.
+            for (String skipped : storage.getSkippedLines()) {
+                ui.showSkippedLine(skipped);
+            }
         } catch (IOException e) {
             // An unreadable save file should not stop the chatbot: say so and
             // carry on with an empty list rather than dying with a stack trace.
             ui.showLoadingError(e.getMessage());
+            tasks = new ArrayList<>();
         }
 
         // Labelled so the BYE case can end the loop. A plain break inside a
@@ -358,13 +204,13 @@ public class Thomas {
                 case MARK -> {
                     Task taskToMark = tasks.get(parseTaskIndex(parts, tasks.size(), "mark"));
                     taskToMark.markAsDone();
-                    save(tasks, ui);
+                    save(tasks, storage, ui);
                     ui.showMarked(taskToMark);
                 }
                 case UNMARK -> {
                     Task taskToUnmark = tasks.get(parseTaskIndex(parts, tasks.size(), "unmark"));
                     taskToUnmark.unmarkAsDone();
-                    save(tasks, ui);
+                    save(tasks, storage, ui);
                     ui.showUnmarked(taskToUnmark);
                 }
                 case DELETE -> {
@@ -372,7 +218,7 @@ public class Thomas {
                     // back to the user, and closes the gap: everything after it
                     // shifts down one and the numbering stays contiguous.
                     Task removedTask = tasks.remove(parseTaskIndex(parts, tasks.size(), "delete"));
-                    save(tasks, ui);
+                    save(tasks, storage, ui);
                     ui.showRemoved(removedTask, tasks.size());
                 }
                 // One case for the three add commands, so appending and
@@ -414,7 +260,7 @@ public class Thomas {
                         if (by.isEmpty()) {
                             throw new ThomasException("Are you forgetting something!! When is the deadline!");
                         }
-                        LocalDateTime byDate = parseDate(by, "a deadline date");
+                        LocalDateTime byDate = Task.parseDate(by, "a deadline date");
                         newTask = new DeadlineTask(deadlineName, byDate);
                     } else {
                         String arguments = requireArgument(parts,
@@ -451,15 +297,15 @@ public class Thomas {
                         if (to.isEmpty()) {
                             throw new ThomasException("Erm when does it end? You need a /to after your /from!");
                         }
-                        LocalDateTime fromDate = parseDate(from, "a start date");
-                        LocalDateTime toDate = parseDate(to, "an end date");
+                        LocalDateTime fromDate = Task.parseDate(from, "a start date");
+                        LocalDateTime toDate = Task.parseDate(to, "an end date");
                         newTask = new EventTask(eventName, fromDate, toDate);
                     }
 
                     // Shared by all three: the task is only appended, counted
                     // and announced once the branch above returned without throwing.
                     tasks.add(newTask);
-                    save(tasks, ui);
+                    save(tasks, storage, ui);
                     ui.showAdded(newTask, tasks.size());
                 }
                 // A switch statement over an enum is not checked for
