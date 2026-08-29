@@ -1,3 +1,5 @@
+package thomas;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import thomas.ThomasException;
 import thomas.task.DeadlineTask;
 import thomas.task.EventTask;
 import thomas.task.Task;

@@ -1,8 +1,9 @@
+package thomas;
+
 import java.time.LocalDate;
 
 import java.util.ArrayList;
 
-import thomas.ThomasException;
 import thomas.task.Task;
 
 /**

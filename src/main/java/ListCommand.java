@@ -1,3 +1,7 @@
+import thomas.Storage;
+import thomas.TaskList;
+import thomas.Ui;
+
 /**
  * Shows every stored task, numbered: the {@code list} command.
  */

@@ -2,6 +2,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import thomas.TaskList;
 import thomas.ThomasException;
 import thomas.task.DeadlineTask;
 import thomas.task.EventTask;

@@ -1,3 +1,6 @@
+import thomas.Storage;
+import thomas.TaskList;
+import thomas.Ui;
 import thomas.task.Task;
 
 /**

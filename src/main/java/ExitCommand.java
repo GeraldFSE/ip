@@ -1,3 +1,7 @@
+import thomas.Storage;
+import thomas.TaskList;
+import thomas.Ui;
+
 /**
  * Ends the session: the {@code bye} command.
  * <p>

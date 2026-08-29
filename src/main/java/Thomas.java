@@ -1,6 +1,9 @@
 import java.io.IOException;
 
+import thomas.Storage;
+import thomas.TaskList;
 import thomas.ThomasException;
+import thomas.Ui;
 
 /**
  * Entry point for the Thomas chatbot.
