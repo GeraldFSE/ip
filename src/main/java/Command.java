@@ -1,53 +1,68 @@
+import java.io.IOException;
+
 /**
- * A command Thomas understands.
+ * One command, understood and ready to be carried out.
  * <p>
- * The set of commands is closed, so a word the user typed either maps to one of
- * these constants or is not a command at all. Naming them here means the
- * compiler checks every use: a misspelt {@code case DEADLINE} does not compile,
- * where a misspelt {@code keyword.equals("dedline")} used to compile into a
- * branch that could never run.
+ * A {@code Command} is built by {@link Parser} from a line the user typed, with
+ * whatever arguments that command takes already read and checked. Carrying it
+ * out is then {@link #execute} -- so the work of understanding a line and the
+ * work of doing what it asks are separated, and neither has to be read to
+ * follow the other.
+ * <p>
+ * Each command is its own subclass rather than a branch of a switch. What that
+ * buys is that everything about a command sits in one file: {@link Thomas} asks
+ * for a command and runs it without knowing which one it got, and adding a new
+ * one means writing a class rather than editing the loop that runs them all.
+ * <p>
+ * The three collaborators are handed to {@link #execute} rather than held as
+ * fields, because a command is built fresh for every line and would otherwise
+ * carry three references it uses once. It also keeps plain what each command is
+ * allowed to touch: the tasks, the screen, and the save file.
  */
-public enum Command {
-    BYE("bye"),
-    LIST("list"),
-    ON("on"),
-    MARK("mark"),
-    UNMARK("unmark"),
-    DELETE("delete"),
-    TODO("todo"),
-    DEADLINE("deadline"),
-    EVENT("event");
+public abstract class Command {
+    /**
+     * Carries out this command.
+     *
+     * @param tasks   the task list to read or change
+     * @param ui      how to tell the user what happened
+     * @param storage where to write the tasks when they change
+     * @throws ThomasException if the command cannot be carried out, for example
+     *                         because it names a task that does not exist --
+     *                         which cannot be known until the list is in hand
+     */
+    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
 
     /**
-     * The word the user types for this command.
+     * Returns whether the chatbot should stop after this command.
      * <p>
-     * Held as its own field rather than derived from {@link #name()}, so that
-     * what the user types stays independent of what the constant is called.
+     * False for almost every command, so that is the answer here and only
+     * {@link ExitCommand} overrides it. Asking the command means the read loop
+     * never tests which command it is holding.
+     *
+     * @return true if this command ends the session
      */
-    private final String keyword;
-
-    Command(String keyword) {
-        this.keyword = keyword;
+    public boolean isExit() {
+        return false;
     }
 
     /**
-     * Returns the command a typed keyword names.
+     * Saves the task list, reporting a failure instead of crashing.
      * <p>
-     * This is the one place that decides whether a word is a command, so by the
-     * time a caller has a {@code Command} in hand it is known to be valid and
-     * only real commands need handling. Matching is case sensitive, as it was
-     * when each keyword was compared with {@code equals}.
+     * Inherited by the commands that change the list, which is what makes the
+     * save automatic and keeps it worded once. {@link Storage#save} throws
+     * rather than printing, because it has no business talking to the user;
+     * catching the {@link IOException} here means a save failure costs the user
+     * a warning rather than the session.
      *
-     * @param keyword the first word of the line the user typed
-     * @return the matching command
-     * @throws ThomasException if no command has that keyword
+     * @param tasks   the tasks to write
+     * @param ui      used to report a failed save
+     * @param storage where to write them
      */
-    public static Command fromKeyword(String keyword) throws ThomasException {
-        for (Command command : values()) {
-            if (command.keyword.equals(keyword)) {
-                return command;
-            }
+    protected void save(TaskList tasks, Ui ui, Storage storage) {
+        try {
+            storage.save(tasks);
+        } catch (IOException e) {
+            ui.showSavingError(e.getMessage());
         }
-        throw new ThomasException("Erm sorry, what does that mean again?");
     }
 }

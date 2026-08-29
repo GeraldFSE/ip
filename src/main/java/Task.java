@@ -1,5 +1,7 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 /**
@@ -56,6 +58,38 @@ public class Task {
      */
     public static final DateTimeFormatter DATE_DISPLAY_DAY =
             DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
+
+    /**
+     * Turns a date written in {@link #DATE_INPUT_FORMAT} into a
+     * {@link LocalDateTime}.
+     * <p>
+     * Kept beside the format it reads, so the two cannot drift apart, and so
+     * both callers -- the command handling and the save file loader -- share one
+     * reader rather than each growing their own.
+     * <p>
+     * A date and a time are both required: a date on its own is refused rather
+     * than being assumed to mean midnight, so a task never claims a time the
+     * user did not choose.
+     * <p>
+     * The parser's own exception is rethrown as a {@link ThomasException} so
+     * that callers have one kind of user error to report and no Java class name
+     * reaches the user.
+     *
+     * @param text  the date as written, expected as {@code yyyy-mm-dd HHmm}
+     * @param field which date this is, named as it should read in the message
+     *              and so carrying its own article, for example
+     *              {@code "a deadline date"} against {@code "an end date"}
+     * @return the date and time the text names
+     * @throws ThomasException if the text is not a date and time in that form
+     */
+    public static LocalDateTime parseDate(String text, String field) throws ThomasException {
+        try {
+            return LocalDateTime.parse(text, DATE_INPUT_FORMAT);
+        } catch (DateTimeParseException e) {
+            throw new ThomasException("I can't read '" + text + "' as " + field
+                    + "! Write it as a date and a 24-hour time, like 2019-12-02 1800.");
+        }
+    }
 
     /** The task text exactly as the user typed it. */
     protected String description;
