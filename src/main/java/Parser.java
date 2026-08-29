@@ -5,15 +5,16 @@ import java.time.format.DateTimeParseException;
 /**
  * Makes sense of one line the user typed.
  * <p>
- * A {@code Parser} is built from a single command line and splits it once, so
- * everything that knows the shape of the input -- where the keyword ends, that
- * a deadline is written {@code /by} and an event {@code /from ... /to ...},
- * which mistake each complaint names -- is settled here. Callers ask for the
- * command and then for the arguments it takes, and never see the raw text.
+ * {@link #parse} is the whole of this class from the outside: hand it a line and
+ * it hands back a {@link Command} ready to be carried out. Everything that knows
+ * the shape of the input -- where the keyword ends, that a deadline is written
+ * {@code /by} and an event {@code /from ... /to ...}, which mistake each
+ * complaint names -- is settled in here, so no other class ever sees the raw
+ * text.
  * <p>
- * Nothing is parsed unless it is asked for: a {@code list} carries no argument,
- * and reading one out of it would be inventing work. That is why the arguments
- * are separate methods rather than fields filled in by the constructor.
+ * A {@code Parser} object is the working state of one such call: the line split
+ * once, so the methods reading the arguments do not each split it again. That is
+ * why the constructor is private, and why nothing outside holds one.
  * <p>
  * Every failure leaves as a {@link ThomasException} carrying a message meant for
  * the user, so the caller has one kind of error to report and no Java class name
@@ -35,26 +36,49 @@ public class Parser {
     /**
      * Reads a line far enough to know which command it is.
      * <p>
-     * An unrecognised keyword is rejected here, so a caller holding a
-     * {@code Parser} is already holding a real command. The arguments are left
-     * alone until asked for, since which of them the line should carry depends
-     * on that command.
+     * An unrecognised keyword is rejected here, so the arguments are only ever
+     * read for a command that really exists.
      *
      * @param line the line exactly as the user typed it
      * @throws ThomasException if the first word is not a command
      */
-    public Parser(String line) throws ThomasException {
+    private Parser(String line) throws ThomasException {
         this.parts = line.split(" ", 2);
         this.commandType = CommandType.fromKeyword(parts[0]);
     }
 
     /**
-     * Returns the kind of command this line names.
+     * Turns a typed line into the command it asks for, arguments and all.
+     * <p>
+     * Each command is built with what it needs already read and checked, so
+     * carrying it out afterwards does no parsing. A line that cannot be
+     * understood throws here rather than producing a command that would fail
+     * halfway through doing something.
+     * <p>
+     * The {@code switch} is an expression over an enum, so the compiler checks
+     * that every {@link CommandType} is covered: adding a keyword without giving
+     * it a command stops the build rather than silently doing nothing at run
+     * time. That is what makes a {@code default} branch unnecessary here, where
+     * the read loop this replaced needed one.
      *
-     * @return the kind of command, known to be one Thomas handles
+     * @param fullCommand the line exactly as the user typed it
+     * @return the command that line asks for
+     * @throws ThomasException if the line is not a command Thomas understands, or
+     *                         its arguments are missing or unreadable
      */
-    public CommandType getCommandType() {
-        return commandType;
+    public static Command parse(String fullCommand) throws ThomasException {
+        Parser parser = new Parser(fullCommand);
+        return switch (parser.commandType) {
+        case BYE -> new ExitCommand();
+        case LIST -> new ListCommand();
+        case ON -> new OnCommand(parser.parseDay());
+        case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
+        case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
+        case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
+        // The three add commands differ only in the task they build, which
+        // parseNewTask settles, so one AddCommand serves all three.
+        case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
+        };
     }
 
     /**
@@ -94,7 +118,7 @@ public class Parser {
      *         against the list
      * @throws ThomasException if the number is missing or is not a whole number
      */
-    public int parseTaskNumber(String action) throws ThomasException {
+    private int parseTaskNumber(String action) throws ThomasException {
         String argument = requireArgument("HEYY!! You need a valid number to " + action);
 
         try {
@@ -117,7 +141,7 @@ public class Parser {
      * @throws ThomasException if the day is missing or is not written as
      *                         {@code yyyy-mm-dd}
      */
-    public LocalDate parseDay() throws ThomasException {
+    private LocalDate parseDay() throws ThomasException {
         String text = requireArgument("HEYY!! Which day do you want to see?");
         try {
             return LocalDate.parse(text);
@@ -142,7 +166,7 @@ public class Parser {
      * @return the task the line describes
      * @throws ThomasException if a description, marker or date is missing or unreadable
      */
-    public Task parseNewTask() throws ThomasException {
+    private Task parseNewTask() throws ThomasException {
         return switch (commandType) {
         case TODO -> parseTodo();
         case DEADLINE -> parseDeadline();

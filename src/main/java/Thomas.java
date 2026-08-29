@@ -14,12 +14,11 @@ import java.io.IOException;
  * start-up and written back after every command that changes it, so no task is
  * lost even if the program is closed without typing {@code bye}.
  * <p>
- * Almost none of that is done here. Talking to the user belongs to {@link Ui},
- * the save file to {@link Storage}, holding the tasks to {@link TaskList}, and
- * understanding a typed line to {@link Parser}. This class is what holds those
- * four together: it decides which of them a command calls for, and in what
- * order. That leaves it able to say what the chatbot does without saying how any
- * of it is done.
+ * None of that is done here. Talking to the user belongs to {@link Ui}, the save
+ * file to {@link Storage}, holding the tasks to {@link TaskList}, understanding
+ * a typed line to {@link Parser}, and carrying out what it asked for to a
+ * {@link Command}. This class only assembles those parts and turns the handle:
+ * read a line, parse it, run it, repeat.
  */
 public class Thomas {
     /**
@@ -80,87 +79,31 @@ public class Thomas {
     }
 
     /**
-     * Saves the task list, reporting a failure instead of crashing.
-     * <p>
-     * Called after every command that changes the list, which is what makes the
-     * save automatic. {@link Storage#save} throws rather than printing, because
-     * it has no business talking to the user; catching the {@link IOException}
-     * here in one place keeps {@link #run()} free of try/catch at all four call
-     * sites, and means a save failure costs the user a warning rather than the
-     * session.
-     */
-    private void save() {
-        try {
-            storage.save(tasks);
-        } catch (IOException e) {
-            ui.showSavingError(e.getMessage());
-        }
-    }
-
-    /**
      * Reads and carries out commands until the user says {@code bye} or the
      * input ends.
      * <p>
-     * Each case reads as the steps the command takes -- work out the argument,
-     * change the list, save, say what happened -- because the parsing, the
-     * checking and the wording have all moved to the classes that own them.
+     * The loop no longer knows what any command does. It reads a line, asks
+     * {@link Parser} for the command it names, runs it, and asks whether that
+     * was the last one -- so a new command is a new class, and this method never
+     * changes again.
+     * <p>
+     * Both ways of ending are handled: {@code bye} answers true to
+     * {@link Command#isExit()}, and input that simply runs out fails
+     * {@link Ui#hasNextCommand()}. The farewell sits after the loop because it
+     * is owed in both cases.
      */
     public void run() {
-        // Labelled so the BYE case can end the loop. A plain break inside a
-        // switch leaves the switch, not the loop, which would silently read on
-        // past a bye instead of stopping.
-        readLoop:
-        while (ui.hasNextCommand()) {
+        boolean isExit = false;
+        while (!isExit && ui.hasNextCommand()) {
             try {
-                // Rejects an unknown keyword as it is built, so every case
-                // below is a command that really exists.
-                Parser parser = new Parser(ui.readCommand());
-
-                switch (parser.getCommandType()) {
-                case BYE -> {
-                    break readLoop;
-                }
-                case LIST -> ui.showTaskList(tasks);
-                case ON -> ui.showTasksOnDay(tasks, parser.parseDay());
-                case MARK -> {
-                    Task taskToMark = tasks.getByNumber(parser.parseTaskNumber("mark"));
-                    taskToMark.markAsDone();
-                    save();
-                    ui.showMarked(taskToMark);
-                }
-                case UNMARK -> {
-                    Task taskToUnmark = tasks.getByNumber(parser.parseTaskNumber("unmark"));
-                    taskToUnmark.unmarkAsDone();
-                    save();
-                    ui.showUnmarked(taskToUnmark);
-                }
-                case DELETE -> {
-                    Task removedTask = tasks.deleteByNumber(parser.parseTaskNumber("delete"));
-                    save();
-                    ui.showRemoved(removedTask, tasks.size());
-                }
-                // One case for the three add commands: whichever was typed, the
-                // task is appended, saved and announced the same way, so that
-                // stays written once.
-                case TODO, DEADLINE, EVENT -> {
-                    // Built first, so a task is only added to the list once its
-                    // arguments have parsed without throwing.
-                    Task newTask = parser.parseNewTask();
-                    tasks.add(newTask);
-                    save();
-                    ui.showAdded(newTask, tasks.size());
-                }
-                // A switch statement over an enum is not checked for
-                // exhaustiveness, so a constant added to CommandType but not
-                // handled here would silently do nothing. Fail loudly instead.
-                // This cannot be reached from user input: the parser has
-                // already rejected any word that is not one of the constants.
-                default -> throw new AssertionError("Command not handled: " + parser.getCommandType());
-                }
+                Command command = Parser.parse(ui.readCommand());
+                command.execute(tasks, ui, storage);
+                isExit = command.isExit();
             } catch (ThomasException e) {
-                // Every user mistake, wherever it was noticed, arrives here as
-                // one kind of exception and is reported the same way. That is
-                // what keeps the cases above free of error handling.
+                // Every user mistake, whether noticed while reading the line or
+                // while carrying it out, arrives here as one kind of exception
+                // and is reported the same way. That is what keeps both the
+                // parser and the commands free of error handling.
                 ui.showError(e.getMessage());
             }
         }
