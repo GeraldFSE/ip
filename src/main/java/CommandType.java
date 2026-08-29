@@ -1,13 +1,16 @@
 /**
- * A command Thomas understands.
+ * The kind of command a typed keyword names.
  * <p>
  * The set of commands is closed, so a word the user typed either maps to one of
  * these constants or is not a command at all. Naming them here means the
  * compiler checks every use: a misspelt {@code case DEADLINE} does not compile,
  * where a misspelt {@code keyword.equals("dedline")} used to compile into a
  * branch that could never run.
+ * <p>
+ * This is the vocabulary of the language the user types, not a command that can
+ * be carried out. It answers "which command is this?" and nothing else.
  */
-public enum Command {
+public enum CommandType {
     BYE("bye"),
     LIST("list"),
     ON("on"),
@@ -26,26 +29,26 @@ public enum Command {
      */
     private final String keyword;
 
-    Command(String keyword) {
+    CommandType(String keyword) {
         this.keyword = keyword;
     }
 
     /**
-     * Returns the command a typed keyword names.
+     * Returns the kind of command a typed keyword names.
      * <p>
      * This is the one place that decides whether a word is a command, so by the
-     * time a caller has a {@code Command} in hand it is known to be valid and
-     * only real commands need handling. Matching is case sensitive, as it was
-     * when each keyword was compared with {@code equals}.
+     * time a caller has a {@code CommandType} in hand it is known to be valid
+     * and only real commands need handling. Matching is case sensitive, as it
+     * was when each keyword was compared with {@code equals}.
      *
      * @param keyword the first word of the line the user typed
-     * @return the matching command
+     * @return the matching kind of command
      * @throws ThomasException if no command has that keyword
      */
-    public static Command fromKeyword(String keyword) throws ThomasException {
-        for (Command command : values()) {
-            if (command.keyword.equals(keyword)) {
-                return command;
+    public static CommandType fromKeyword(String keyword) throws ThomasException {
+        for (CommandType type : values()) {
+            if (type.keyword.equals(keyword)) {
+                return type;
             }
         }
         throw new ThomasException("Erm sorry, what does that mean again?");

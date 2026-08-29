@@ -20,8 +20,8 @@ import java.time.format.DateTimeParseException;
  * ever reaches the screen.
  */
 public class Parser {
-    /** The command the line names. */
-    private final Command command;
+    /** The kind of command the line names. */
+    private final CommandType commandType;
 
     /**
      * The line split into keyword and argument.
@@ -45,16 +45,16 @@ public class Parser {
      */
     public Parser(String line) throws ThomasException {
         this.parts = line.split(" ", 2);
-        this.command = Command.fromKeyword(parts[0]);
+        this.commandType = CommandType.fromKeyword(parts[0]);
     }
 
     /**
-     * Returns the command this line names.
+     * Returns the kind of command this line names.
      *
-     * @return the command, known to be one Thomas handles
+     * @return the kind of command, known to be one Thomas handles
      */
-    public Command getCommand() {
-        return command;
+    public CommandType getCommandType() {
+        return commandType;
     }
 
     /**
@@ -143,13 +143,13 @@ public class Parser {
      * @throws ThomasException if a description, marker or date is missing or unreadable
      */
     public Task parseNewTask() throws ThomasException {
-        return switch (command) {
+        return switch (commandType) {
         case TODO -> parseTodo();
         case DEADLINE -> parseDeadline();
         case EVENT -> parseEvent();
         // Reached only by calling this for a command that adds no task, which
         // is a mistake in the caller rather than anything the user did.
-        default -> throw new AssertionError("Not an add command: " + command);
+        default -> throw new AssertionError("Not an add command: " + commandType);
         };
     }
 

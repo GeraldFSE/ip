@@ -116,7 +116,7 @@ public class Thomas {
                 // below is a command that really exists.
                 Parser parser = new Parser(ui.readCommand());
 
-                switch (parser.getCommand()) {
+                switch (parser.getCommandType()) {
                 case BYE -> {
                     break readLoop;
                 }
@@ -151,11 +151,11 @@ public class Thomas {
                     ui.showAdded(newTask, tasks.size());
                 }
                 // A switch statement over an enum is not checked for
-                // exhaustiveness, so a command added to Command but not handled
-                // here would silently do nothing. Fail loudly instead. This
-                // cannot be reached from user input: the parser has already
-                // rejected any word that is not one of the constants.
-                default -> throw new AssertionError("Command not handled: " + parser.getCommand());
+                // exhaustiveness, so a constant added to CommandType but not
+                // handled here would silently do nothing. Fail loudly instead.
+                // This cannot be reached from user input: the parser has
+                // already rejected any word that is not one of the constants.
+                default -> throw new AssertionError("Command not handled: " + parser.getCommandType());
                 }
             } catch (ThomasException e) {
                 // Every user mistake, wherever it was noticed, arrives here as
