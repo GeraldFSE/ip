@@ -22,11 +22,12 @@ import java.time.format.DateTimeParseException;
  * The list survives between runs: it is loaded from {@value #DATA_PATH} at
  * start-up and written back after every command that changes it, so no task is
  * lost even if the program is closed without typing {@code bye}.
+ * <p>
+ * Reading and writing the console is not done here: that belongs to {@link Ui},
+ * so this class is left with understanding commands and keeping the task list,
+ * and none of the indentation or wording of the output.
  */
 public class Thomas {
-    /** Indentation applied to every line of chatbot text. */
-    private static final String INDENT = "     ";
-
     /**
      * Where the task list is saved, as a path from the project root.
      * <p>
@@ -36,42 +37,6 @@ public class Thomas {
      * apart.
      */
     private static final String DATA_PATH = "./data/tasklist.txt";
-
-    /**
-     * Horizontal rule printed above and below each block of chatbot output.
-     * Indented one space less than the text it wraps, as the sample output shows.
-     */
-    private static final String DIVIDER =
-            "    ____________________________________________________________";
-
-    /**
-     * Prints lines as one chatbot block: indented, wrapped in dividers.
-     *
-     * @param lines the text lines to display, without indentation or newlines
-     */
-    private static void printBlock(String... lines) {
-        System.out.print(DIVIDER + "\n");
-        for (String line : lines) {
-            System.out.print(INDENT + line + "\n");
-        }
-        System.out.print(DIVIDER + "\n");
-    }
-
-    /**
-     * Confirms that a task was added and reports the new size of the list.
-     * <p>
-     * The three add commands share this acknowledgement, so it lives in one
-     * place; {@code task} is a {@link Task}, and polymorphism picks the right
-     * {@code toString()} for whichever subclass was actually added.
-     *
-     * @param task      the task just stored
-     * @param taskCount how many tasks are now stored
-     */
-    private static void printAddedBlock(Task task, int taskCount) {
-        printBlock("Got it. I've added this task:",
-                "   " + task,
-                "Now you have " + taskCount + " task(s) in the list.");
-    }
 
     /**
      * Returns a command's argument, rejecting a command given without one.
@@ -264,9 +229,10 @@ public class Thomas {
      * the user every other task.
      *
      * @param tasks the list to append the saved tasks to
+     * @param ui    used to report the lines that had to be skipped
      * @throws IOException if the file exists but cannot be read
      */
-    private static void loadTasks(ArrayList<Task> tasks) throws IOException {
+    private static void loadTasks(ArrayList<Task> tasks, Ui ui) throws IOException {
         File file = new File(DATA_PATH);
         if (!file.exists()) {
             return;
@@ -285,7 +251,7 @@ public class Thomas {
                 try {
                     tasks.add(parseSavedTask(current));
                 } catch (ThomasException e) {
-                    printBlock("Skipping a line I could not read: " + e.getMessage());
+                    ui.showSkippedLine(e.getMessage());
                 }
             }
         }
@@ -330,12 +296,13 @@ public class Thomas {
      * the user a warning rather than the session.
      *
      * @param tasks the tasks to write
+     * @param ui    used to report a failed save
      */
-    private static void save(ArrayList<Task> tasks) {
+    private static void save(ArrayList<Task> tasks, Ui ui) {
         try {
             saveTasks(tasks);
         } catch (IOException e) {
-            printBlock("Uh oh! I could not save your tasks: " + e.getMessage());
+            ui.showSavingError(e.getMessage());
         }
     }
 
@@ -345,38 +312,30 @@ public class Thomas {
      * @param args command line arguments; unused
      */
     public static void main(String[] args) {
-        // The first five lines are ASCII art spelling "Thomas". Every backslash
-        // is written as \\ because a lone \ starts an escape sequence in Java.
-        printBlock("  ________                              ",
-                " /_  __/ /_  ____  ____ ___  ____ ______",
-                "  / / / __ \\/ __ \\/ __ `__ \\/ __ `/ ___/",
-                " / / / / / / /_/ / / / / / / /_/ (__  ) ",
-                "/_/ /_/ /_/\\____/_/ /_/ /_/\\__,_/____/  ",
-                "Choo Choo! I'm Thomas!",
-                "How can I serve you today?");
+        // One Ui for the whole session: it owns the Scanner over standard
+        // input, and a second one would buffer ahead and swallow commands.
+        Ui ui = new Ui();
+        ui.showWelcome();
 
         // An ArrayList rather than a Task[]: it grows as tasks are added, so
         // there is no fixed ceiling to enforce, and remove() closes the gap
         // left by a deleted task instead of leaving a hole to shuffle by hand.
         ArrayList<Task> tasks = new ArrayList<>();
         try {
-            loadTasks(tasks);
+            loadTasks(tasks, ui);
         } catch (IOException e) {
             // An unreadable save file should not stop the chatbot: say so and
             // carry on with an empty list rather than dying with a stack trace.
-            printBlock("Uh oh! I could not read your saved tasks: " + e.getMessage(),
-                    "Starting with an empty list.");
+            ui.showLoadingError(e.getMessage());
         }
-
-        Scanner userInput = new Scanner(System.in);
 
         // Labelled so the BYE case can end the loop. A plain break inside a
         // switch leaves the switch, not the loop, which would silently read on
         // past a bye instead of stopping.
         readLoop:
-        while (userInput.hasNextLine()) {
+        while (ui.hasNextCommand()) {
             try {
-                String line = userInput.nextLine();
+                String line = ui.readCommand();
 
                 // Split on the first space only, so parts[0] is the command
                 // keyword and parts[1], when present, is its argument.
@@ -390,59 +349,31 @@ public class Thomas {
                 case BYE -> {
                     break readLoop;
                 }
-                case LIST -> {
-                    // Number the tasks for display; tasks itself stays unnumbered.
-                    // One slot longer than the list to hold the header line,
-                    // which then shifts every task one place along: entry i
-                    // shows task i - 1, numbered i.
-                    String[] entries = new String[tasks.size() + 1];
-                    entries[0] = "Here are the tasks in your list:";
-                    for (int i = 1; i <= tasks.size(); i++) {
-                        entries[i] = i + ". " + tasks.get(i - 1);
-                    }
-                    printBlock(entries);
-                }
+                case LIST -> ui.showTaskList(tasks);
                 case ON -> {
                     LocalDate day = parseDay(requireArgument(parts,
                             "HEYY!! Which day do you want to see?"));
-
-                    // An ArrayList rather than a sized array as LIST uses: how
-                    // many tasks match is not known until they have been tested.
-                    ArrayList<String> entries = new ArrayList<>();
-                    entries.add("Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":");
-
-                    // Numbered by position in the whole list, not by position
-                    // among the matches, so a number shown here is the number
-                    // mark and delete take. Numbering the matches 1, 2, 3 would
-                    // read more tidily and send the user to the wrong task.
-                    for (int i = 0; i < tasks.size(); i++) {
-                        if (tasks.get(i).occursOn(day)) {
-                            entries.add((i + 1) + ". " + tasks.get(i));
-                        }
-                    }
-                    printBlock(entries.toArray(new String[0]));
+                    ui.showTasksOnDay(tasks, day);
                 }
                 case MARK -> {
                     Task taskToMark = tasks.get(parseTaskIndex(parts, tasks.size(), "mark"));
                     taskToMark.markAsDone();
-                    save(tasks);
-                    printBlock("Nice! I've marked this task as done:", "   " + taskToMark);
+                    save(tasks, ui);
+                    ui.showMarked(taskToMark);
                 }
                 case UNMARK -> {
                     Task taskToUnmark = tasks.get(parseTaskIndex(parts, tasks.size(), "unmark"));
                     taskToUnmark.unmarkAsDone();
-                    save(tasks);
-                    printBlock("OK, I've marked this task as not done yet:", "   " + taskToUnmark);
+                    save(tasks, ui);
+                    ui.showUnmarked(taskToUnmark);
                 }
                 case DELETE -> {
                     // remove() returns the task it took out, so it can be shown
                     // back to the user, and closes the gap: everything after it
                     // shifts down one and the numbering stays contiguous.
                     Task removedTask = tasks.remove(parseTaskIndex(parts, tasks.size(), "delete"));
-                    save(tasks);
-                    printBlock("Noted. I've removed this task:",
-                            "   " + removedTask,
-                            "Now you have " + tasks.size() + " task(s) in the list.");
+                    save(tasks, ui);
+                    ui.showRemoved(removedTask, tasks.size());
                 }
                 // One case for the three add commands, so appending and
                 // announcing the new task stays written once.
@@ -528,8 +459,8 @@ public class Thomas {
                     // Shared by all three: the task is only appended, counted
                     // and announced once the branch above returned without throwing.
                     tasks.add(newTask);
-                    save(tasks);
-                    printAddedBlock(newTask, tasks.size());
+                    save(tasks, ui);
+                    ui.showAdded(newTask, tasks.size());
                 }
                 // A switch statement over an enum is not checked for
                 // exhaustiveness, so a command added to Command but not handled
@@ -539,12 +470,12 @@ public class Thomas {
                 default -> throw new AssertionError("Command not handled: " + command);
                 }
             } catch (ThomasException e) {
-                printBlock(e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
 
         // No save here: every command that changes the list has already saved,
         // so the file is current even if the program never reaches this point.
-        printBlock("Until next time! Choo Choo!");
+        ui.showGoodbye();
     }
 }
