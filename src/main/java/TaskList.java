@@ -2,6 +2,9 @@ import java.time.LocalDate;
 
 import java.util.ArrayList;
 
+import thomas.ThomasException;
+import thomas.task.Task;
+
 /**
  * The tasks the chatbot is keeping, and the operations over them.
  * <p>

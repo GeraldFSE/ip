@@ -2,6 +2,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import thomas.ThomasException;
+import thomas.task.DeadlineTask;
+import thomas.task.EventTask;
+import thomas.task.Task;
+import thomas.task.TodoTask;
+
 /**
  * Makes sense of one line the user typed.
  * <p>

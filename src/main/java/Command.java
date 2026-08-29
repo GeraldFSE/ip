@@ -1,5 +1,7 @@
 import java.io.IOException;
 
+import thomas.ThomasException;
+
 /**
  * One command, understood and ready to be carried out.
  * <p>

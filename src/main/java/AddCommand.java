@@ -1,3 +1,5 @@
+import thomas.task.Task;
+
 /**
  * Stores a new task: the {@code todo}, {@code deadline} and {@code event}
  * commands.

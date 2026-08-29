@@ -1,3 +1,6 @@
+import thomas.ThomasException;
+import thomas.task.Task;
+
 /**
  * Marks a task done: the {@code mark <number>} command.
  */

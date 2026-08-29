@@ -1,5 +1,9 @@
+package thomas.task;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import thomas.ThomasException;
 
 /**
  * A task that runs from one date and time to another.

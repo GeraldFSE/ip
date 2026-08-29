@@ -1,3 +1,5 @@
+package thomas;
+
 /**
  * Signals that the chatbot cannot carry out a command the user typed.
  * <p>

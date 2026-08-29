@@ -1,5 +1,7 @@
 import java.io.IOException;
 
+import thomas.ThomasException;
+
 /**
  * Entry point for the Thomas chatbot.
  * <p>

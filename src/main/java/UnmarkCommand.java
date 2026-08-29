@@ -1,3 +1,6 @@
+import thomas.ThomasException;
+import thomas.task.Task;
+
 /**
  * Marks a task not done again: the {@code unmark <number>} command.
  * <p>

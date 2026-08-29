@@ -1,3 +1,6 @@
+import thomas.ThomasException;
+import thomas.task.Task;
+
 /**
  * Removes a task from the list: the {@code delete <number>} command.
  */
