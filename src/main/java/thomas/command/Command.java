@@ -1,3 +1,5 @@
+package thomas.command;
+
 import java.io.IOException;
 
 import thomas.Storage;

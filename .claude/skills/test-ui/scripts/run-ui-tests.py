@@ -36,7 +36,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_PLAN = REPO_ROOT / "test" / "ui-test-plan.md"
 SRC_DIR = REPO_ROOT / "src" / "main" / "java"
 BIN_DIR = REPO_ROOT / "bin"
-MAIN_CLASS = "Thomas"
+MAIN_CLASS = "thomas.Thomas"
 
 # How long a single run of the chatbot may take before it is considered hung.
 TIMEOUT_SECONDS = 20

@@ -1,3 +1,5 @@
+package thomas.command;
+
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.ThomasException;
