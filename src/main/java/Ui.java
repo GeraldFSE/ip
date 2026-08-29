@@ -174,7 +174,7 @@ public class Ui {
      *
      * @param tasks the tasks to show, in list order
      */
-    public void showTaskList(ArrayList<Task> tasks) {
+    public void showTaskList(TaskList tasks) {
         // Number the tasks for display; tasks itself stays unnumbered.
         // One slot longer than the list to hold the header line, which then
         // shifts every task one place along: entry i shows task i - 1,
@@ -190,24 +190,21 @@ public class Ui {
     /**
      * Prints the tasks that fall on one day.
      * <p>
-     * The filtering sits next to the printing because the numbering depends on
-     * it: each match is numbered by its position in the whole list, not by its
-     * position among the matches, so a number shown here is the number
-     * {@code mark} and {@code delete} take. Numbering the matches 1, 2, 3 would
-     * read more tidily and send the user to the wrong task.
+     * Which tasks match is {@link TaskList}'s question, and it answers with
+     * their positions rather than the tasks alone. That is what lets each match
+     * keep the number it has in the whole list, so a number shown here is the
+     * number {@code mark} and {@code delete} take.
      *
-     * @param tasks the whole task list, in list order
+     * @param tasks the whole task list
      * @param day   the day to report on
      */
-    public void showTasksOnDay(ArrayList<Task> tasks, LocalDate day) {
+    public void showTasksOnDay(TaskList tasks, LocalDate day) {
         // An ArrayList rather than a sized array as showTaskList uses: how many
         // tasks match is not known until they have been tested.
         ArrayList<String> entries = new ArrayList<>();
         entries.add("Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":");
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).occursOn(day)) {
-                entries.add((i + 1) + ". " + tasks.get(i));
-            }
+        for (int position : tasks.positionsOn(day)) {
+            entries.add((position + 1) + ". " + tasks.get(position));
         }
         showBlock(entries.toArray(new String[0]));
     }

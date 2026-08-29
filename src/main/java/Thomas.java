@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
-import java.util.ArrayList;
-
 /**
  * Entry point for the Thomas chatbot.
  * <p>
@@ -20,10 +18,10 @@ import java.util.ArrayList;
  * start-up and written back after every command that changes it, so no task is
  * lost even if the program is closed without typing {@code bye}.
  * <p>
- * Neither end of that is done here. Talking to the user belongs to {@link Ui}
- * and the save file belongs to {@link Storage}, so this class is left with
- * understanding commands and keeping the task list: it holds none of the
- * wording of the output and none of the save file format.
+ * Little of that is done here. Talking to the user belongs to {@link Ui}, the
+ * save file to {@link Storage}, and holding the tasks to {@link TaskList}, so
+ * this class is left with one job: working out which operation a typed line
+ * asks for, and calling it on those three.
  */
 public class Thomas {
     /**
@@ -62,42 +60,30 @@ public class Thomas {
     }
 
     /**
-     * Turns the argument of {@code mark}, {@code unmark} or {@code delete} into
-     * an index into the task list.
+     * Reads the task number the user gave to {@code mark}, {@code unmark} or
+     * {@code delete}.
      * <p>
-     * The user counts tasks from 1 and the list counts from 0, so the number is
-     * checked against the tasks that exist and then shifted down by one here --
-     * the single place that conversion happens.
-     * <p>
-     * The range is checked against {@code taskCount} rather than any capacity:
-     * a number past the end must be reported, not passed to
-     * {@link java.util.ArrayList#get(int)}.
+     * Only that the argument is a whole number is settled here. Whether a task
+     * actually carries that number is {@link TaskList}'s to answer, since only
+     * the list knows how many tasks there are; this method never sees the list.
      *
-     * @param parts     the command line split into keyword and argument
-     * @param taskCount how many tasks are currently stored
-     * @param action    the command being run, used to word the missing-argument
-     *                  message, for example {@code "mark"}
-     * @return the index of the task the user named
-     * @throws ThomasException if the number is missing, not a number, or out of range
+     * @param parts  the command line split into keyword and argument
+     * @param action the command being run, used to word the missing-argument
+     *               message, for example {@code "mark"}
+     * @return the number the user typed, counting from 1 and not yet checked
+     *         against the list
+     * @throws ThomasException if the number is missing or is not a whole number
      */
-    private static int parseTaskIndex(String[] parts, int taskCount, String action)
-            throws ThomasException {
+    private static int parseTaskNumber(String[] parts, String action) throws ThomasException {
         String argument = requireArgument(parts, "HEYY!! You need a valid number to " + action);
 
-        int taskNumber;
         try {
-            taskNumber = Integer.parseInt(argument);
+            return Integer.parseInt(argument);
         } catch (NumberFormatException e) {
             // Rethrown as a ThomasException so the read loop has one kind of
             // user error to report, and no Java class name reaches the user.
             throw new ThomasException("WHAT? Why are you passing a non integer?! Give me an INTEGER!!");
         }
-
-        if (taskNumber < 1 || taskNumber > taskCount) {
-            throw new ThomasException("There is no task " + taskNumber + "! You only have "
-                    + taskCount + " task(s).");
-        }
-        return taskNumber - 1;
     }
 
     /**
@@ -136,7 +122,7 @@ public class Thomas {
      * @param storage where to write them
      * @param ui      used to report a failed save
      */
-    private static void save(ArrayList<Task> tasks, Storage storage, Ui ui) {
+    private static void save(TaskList tasks, Storage storage, Ui ui) {
         try {
             storage.save(tasks);
         } catch (IOException e) {
@@ -157,12 +143,11 @@ public class Thomas {
 
         Storage storage = new Storage(DATA_PATH);
 
-        // An ArrayList rather than a Task[]: it grows as tasks are added, so
-        // there is no fixed ceiling to enforce, and remove() closes the gap
-        // left by a deleted task instead of leaving a hole to shuffle by hand.
-        ArrayList<Task> tasks;
+        // Storage hands back plain tasks; wrapping them in a TaskList is what
+        // adds the checked operations the commands below rely on.
+        TaskList tasks;
         try {
-            tasks = storage.load();
+            tasks = new TaskList(storage.load());
             // Storage records the lines it could not read instead of printing
             // them, so they are shown here, where the Ui is.
             for (String skipped : storage.getSkippedLines()) {
@@ -172,7 +157,7 @@ public class Thomas {
             // An unreadable save file should not stop the chatbot: say so and
             // carry on with an empty list rather than dying with a stack trace.
             ui.showLoadingError(e.getMessage());
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
 
         // Labelled so the BYE case can end the loop. A plain break inside a
@@ -202,22 +187,19 @@ public class Thomas {
                     ui.showTasksOnDay(tasks, day);
                 }
                 case MARK -> {
-                    Task taskToMark = tasks.get(parseTaskIndex(parts, tasks.size(), "mark"));
+                    Task taskToMark = tasks.getByNumber(parseTaskNumber(parts, "mark"));
                     taskToMark.markAsDone();
                     save(tasks, storage, ui);
                     ui.showMarked(taskToMark);
                 }
                 case UNMARK -> {
-                    Task taskToUnmark = tasks.get(parseTaskIndex(parts, tasks.size(), "unmark"));
+                    Task taskToUnmark = tasks.getByNumber(parseTaskNumber(parts, "unmark"));
                     taskToUnmark.unmarkAsDone();
                     save(tasks, storage, ui);
                     ui.showUnmarked(taskToUnmark);
                 }
                 case DELETE -> {
-                    // remove() returns the task it took out, so it can be shown
-                    // back to the user, and closes the gap: everything after it
-                    // shifts down one and the numbering stays contiguous.
-                    Task removedTask = tasks.remove(parseTaskIndex(parts, tasks.size(), "delete"));
+                    Task removedTask = tasks.deleteByNumber(parseTaskNumber(parts, "delete"));
                     save(tasks, storage, ui);
                     ui.showRemoved(removedTask, tasks.size());
                 }

@@ -180,7 +180,7 @@ public class Storage {
      * @param tasks the tasks to write, left unchanged
      * @throws IOException if the folder or file cannot be written
      */
-    public void save(ArrayList<Task> tasks) throws IOException {
+    public void save(TaskList tasks) throws IOException {
         File file = new File(filePath);
 
         // FileWriter cannot create missing folders, so ./data must be made
@@ -194,8 +194,8 @@ public class Storage {
         // try-with-resources: closing is what flushes buffered text to disk, so
         // skipping it on an exception would lose the tasks.
         try (FileWriter fw = new FileWriter(file)) {
-            for (Task task : tasks) {
-                fw.write(task.toSaveFormat() + System.lineSeparator());
+            for (int i = 0; i < tasks.size(); i++) {
+                fw.write(tasks.get(i).toSaveFormat() + System.lineSeparator());
             }
         }
     }
