@@ -75,7 +75,7 @@ public class Parser {
 
     /**
      * Returns this command's argument, rejecting a command given without one.
-     * A bare keyword such as "todo" leaves no argument, and a keyword followed
+     * A bare keyword such as "to-do" leaves no argument, and a keyword followed
      * by spaces alone leaves a blank one. Both are refused.
      *
      * @param message What to tell the user when the argument is missing.
@@ -153,7 +153,7 @@ public class Parser {
     }
 
     /**
-     * Returns the task that a todo, deadline or event line describes.
+     * Returns the task that a to-do, deadline or event line describes.
      * The three add commands are read through one method because the caller
      * treats them alike. A task is returned only if every part of it parsed, so
      * a half-built task never reaches the list.
@@ -174,9 +174,9 @@ public class Parser {
     }
 
     /**
-     * Returns the task a todo line describes.
+     * Returns the task a to-do line describes.
      *
-     * @return New todo.
+     * @return New to-do.
      * @throws ThomasException If the description is missing, or contains the
      *                         save file's field separator.
      */

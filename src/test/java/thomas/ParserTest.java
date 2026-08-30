@@ -72,7 +72,7 @@ public class ParserTest {
         assertEquals("Erm sorry, what does that mean again?", e.getMessage());
     }
 
-    // ---- todo ----
+    // ---- to-do ----
 
     @Test
     public void parse_todoWithDescription_returnsAddCommand() throws ThomasException {

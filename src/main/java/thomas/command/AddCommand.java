@@ -6,7 +6,7 @@ import thomas.Ui;
 import thomas.task.Task;
 
 /**
- * Stores a new task, serving the todo, deadline and event commands.
+ * Stores a new task, serving the to-do, deadline and event commands.
  * One class serves all three, because once the line has been read they differ
  * only in which kind of task was built, and appending, saving and announcing it
  * are the same either way.

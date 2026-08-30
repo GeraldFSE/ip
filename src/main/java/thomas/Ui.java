@@ -53,7 +53,7 @@ public class Ui {
     /**
      * Returns one command line.
      * A whole line is read rather than one word, since a command such as
-     * "todo read book" carries spaces.
+     * "to-do read book" carries spaces.
      *
      * @return Line the user typed, exactly as typed.
      */

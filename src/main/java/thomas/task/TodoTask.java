@@ -9,7 +9,7 @@ public class TodoTask extends Task {
     /**
      * Creates a to-do that is not yet done.
      *
-     * @param description Task text, without the todo keyword.
+     * @param description Task text, without the to-do keyword.
      */
     public TodoTask(String description) {
         super(description);
