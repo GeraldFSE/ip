@@ -65,10 +65,11 @@ Follow it exactly:
 * Use `{@inheritDoc}` when an overridden method needs the parent's comment plus a note about how it differs.
 * A field's Javadoc goes on one line, with no closing period: `/** Number of connections to this database */`.
 
-### Two project conventions, stricter than the above
+### Three project conventions, stricter than the above
 
 * **No inline tags.** Do not write `{@link …}`, `{@code …}`, `<p>`, or any other HTML or inline Javadoc markup. Refer to types and methods in plain prose. This keeps the comments readable as source and avoids links that silently fail to resolve across packages, which had happened more than once before the rule.
 * **Explain the decision, not the mechanism.** Where a design choice would otherwise look arbitrary — why a check lives in one class rather than another, why two classes are separate — state the reason in one sentence. Do not restate what the signature already says.
+* **Write "to-do", never "todo", in prose.** IDEs list any comment matching a case-insensitive `\btodo\b` in their TODO window, and this project's own vocabulary collides with that marker. Eight comments were being reported as outstanding work before the rule, which is enough false entries to hide a real marker left before submission. The hyphen does not match the pattern. This applies to comment prose only: the keyword literal `"todo"` in `CommandType`, the `TodoTask` class name, the `TODO` enum constant and test strings such as `Parser.parse("todo read book")` are code and stay exactly as they are. Where the prose quotes what the user types, the hyphenated form is knowingly not a command the parser accepts — the example reads as illustrative rather than literal, which was the accepted trade.
 
 When removing an inline tag from a comment, check whether it was the only use of an import; `checkstyleMain` and `checkstyleTest` fail on the unused import that is left behind.
 
