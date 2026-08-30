@@ -74,13 +74,29 @@ public class Task {
      */
     public static final String FIELD_SEPARATOR = " | ";
 
+    /** The task text exactly as the user typed it. */
+    protected String description;
+
+    /** Whether this task has been completed. */
+    protected boolean isDone;
+
+    /**
+     * Creates a task that is not yet done.
+     *
+     * @param description the task text as entered by the user
+     */
+    public Task(String description) {
+        this.description = description;
+        this.isDone = false;
+    }
+
     /**
      * Turns a date written in {@link #DATE_INPUT_FORMAT} into a
      * {@link LocalDateTime}.
      * <p>
-     * Kept beside the format it reads, so the two cannot drift apart, and so
-     * both callers -- the command handling and the save file loader -- share one
-     * reader rather than each growing their own.
+     * Kept in the same class as the format it reads, so the two cannot drift
+     * apart, and so both callers -- the command handling and the save file
+     * loader -- share one reader rather than each growing their own.
      * <p>
      * A date and a time are both required: a date on its own is refused rather
      * than being assumed to mean midnight, so a task never claims a time the
@@ -106,21 +122,6 @@ public class Task {
         }
     }
 
-    /** The task text exactly as the user typed it. */
-    protected String description;
-
-    /** Whether this task has been completed. */
-    protected boolean isDone;
-
-    /**
-     * Creates a task that is not yet done.
-     *
-     * @param description the task text as entered by the user
-     */
-    public Task(String description) {
-        this.description = description;
-        this.isDone = false;
-    }
 
     /**
      * Returns the icon showing whether this task is done.
