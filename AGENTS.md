@@ -62,9 +62,9 @@ Follow Gradle and JUnit conventions: `seedu.duke.Todo` is tested by `seedu.duke.
 
 Before reporting the change as done:
 
-1. **Update the JUnit tests.** Add cases for behaviour the change introduces, and update cases whose behaviour it deliberately alters. If the change touches a method that is above the line described above and has no tests, add them now rather than later — the target is maintained per change, not restored in a sweep afterwards. Say explicitly when an existing assertion was changed, and why.
-2. **Update `test/ui-test-plan.md` if needed.** Add a case for behaviour the change introduces, and update the expected output of existing cases whose behaviour the change deliberately alters. Behaviour that is deliberately out of scope belongs under "Not yet covered" rather than being left unmentioned.
-3. **Run `./gradlew test checkstyleTest`**, then **run the `test-ui` skill** and report it as that skill describes: show the console transcript rather than summarising it as "tests passed", stop at the first failure without fixing anything first, and say explicitly whenever an expected output in the plan was edited.
+1. **Update the JUnit tests.** Add cases for behavior the change introduces, and update cases whose behavior it deliberately alters. If the change touches a method that is above the line described above and has no tests, add them now rather than later — the target is maintained per change, not restored in a sweep afterwards. Say explicitly when an existing assertion was changed, and why.
+2. **Update `test/ui-test-plan.md` if needed.** Add a case for behavior the change introduces, and update the expected output of existing cases whose behavior the change deliberately alters. Behavior that is deliberately out of scope belongs under "Not yet covered" rather than being left unmentioned.
+3. **Run `./gradlew test checkstyleTest`**, then **run the `test-ui` skill** and report it as that skill describes: show the console transcript rather than summarizing it as "tests passed", stop at the first failure without fixing anything first, and say explicitly whenever an expected output in the plan was edited.
 
 A change is not finished until both suites have been run and reported. If a change genuinely has no observable effect on the text UI (a comment, a Javadoc, a pure rename), say so instead of running that suite.
 
@@ -73,7 +73,7 @@ A change is not finished until both suites have been run and reported. If a chan
 * **Derive every expectation by reading the source, not by pasting in what a run happened to print.** A test written from a run agrees with the code by construction, bugs included. This applies to JUnit assertions as much as to the plan's expected output.
 * **Pin the message, not just the failure.** `assertThrows` alone passes whether the user is told something useful or something wrong.
 * **Test both sides of a boundary.** The first item as well as one before it, the last as well as one past it, the day an event starts and ends as well as the days around them. A mistake at the edges survives any test that only asks about the middle.
-* **When the code does something you did not expect, find out what it actually does before deciding it is wrong.** If the behaviour is defensible, record it in a test that names it, with a comment saying what would change it — a test that documents a rough edge is how the fix later gets confirmed. If it is a real bug, report it and let the user decide; do not quietly assert the buggy behaviour as correct.
+* **When the code does something you did not expect, find out what it actually does before deciding it is wrong.** If the behavior is defensible, record it in a test whose name says so, with an inline `//` comment in the body saying what would change it — a test that documents a rough edge is how the fix later gets confirmed. If it is a real bug, report it and let the user decide; do not quietly assert the buggy behavior as correct.
 * **Say when coverage moves or is lost.** Rewriting a case's expected output is a test silently replaced unless you say so, and a change that makes a path unreachable from one suite should say where that path is covered instead.
 
 ## Git

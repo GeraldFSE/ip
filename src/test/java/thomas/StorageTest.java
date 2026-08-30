@@ -21,58 +21,69 @@ import thomas.task.Task;
 import thomas.task.TodoTask;
 
 /**
- * Tests {@link Storage}.
- * <p>
- * This is the class where a bug costs the user something they cannot get back:
- * every other mistake in the program is visible on screen and survives until the
- * next command, while a save file written wrongly or read wrongly loses tasks
- * silently, between one run and the next. That is what makes it worth testing
- * ahead of the display code.
- * <p>
+ * Tests Storage.
+ * This is the class where a bug costs the user something they cannot get back.
+ * Every other mistake is visible on screen and survives until the next command,
+ * while a save file written or read wrongly loses tasks silently between one run
+ * and the next.
  * Decoding is the part with the decisions in it, and it is deliberately strict:
  * each task type is written with an exact number of fields, so a description
- * that happens to contain the field separator is refused rather than loaded back
- * truncated. A damaged line is skipped and complained about rather than
- * abandoning the file, so the cases below check both halves of that -- what was
- * skipped, and that everything else still loaded.
- * <p>
- * {@code parseSavedTask} is private, which is right: nothing outside needs to
- * turn a line into a task. It is reached here through {@link Storage#load()}
- * against a real file in a temporary folder, which is what {@code Storage}
- * taking its path as an argument is for. JUnit creates and removes that folder,
- * so no case can see another's file.
+ * holding the field separator is refused rather than loaded back truncated. A
+ * damaged line is skipped and complained about rather than abandoning the file,
+ * so the cases below check both halves of that.
+ * The decoder itself is private, and is reached here through load against a real
+ * file in a temporary folder that JUnit creates and removes, so no case can see
+ * another's file.
  */
 public class StorageTest {
 
-    /** A folder JUnit makes fresh for each test and deletes afterwards. */
+    /** Folder JUnit makes fresh for each test and deletes afterwards */
     @TempDir
     private Path folder;
 
-    /** The save file each case works on, inside that folder. */
+    /**
+     * Returns the save file each case works on, inside the temporary folder.
+     *
+     * @return Path to this case's save file.
+     */
     private Path saveFile() {
         return folder.resolve("tasklist.txt");
     }
 
-    /** Creates a storage over this case's save file. */
+    /**
+     * Returns a storage over this case's save file.
+     *
+     * @return New storage.
+     */
     private Storage storage() {
         return new Storage(saveFile().toString());
     }
 
-    /** Writes the given lines to the save file as the whole of its contents. */
+    /**
+     * Writes the given lines to the save file as the whole of its contents.
+     *
+     * @param lines Lines to write.
+     * @throws IOException If the file cannot be written.
+     */
     private void writeSaveFile(String... lines) throws IOException {
         Files.write(saveFile(), List.of(lines));
     }
 
-    /** Returns the save file's lines, ignoring how they were separated. */
+    /**
+     * Returns the save file's lines, ignoring how they were separated.
+     *
+     * @return Lines the file holds, in order.
+     * @throws IOException If the file cannot be read.
+     */
     private List<String> readSaveFile() throws IOException {
         return Files.readAllLines(saveFile());
     }
 
     // ---- load: the file itself ----
 
-    /** A missing file is a first run, not a failure. */
     @Test
     public void load_missingFile_returnsEmptyList() throws IOException {
+        // A missing file is a first run, not a failure.
         Storage storage = storage();
 
         assertTrue(storage.load().isEmpty());
@@ -88,9 +99,9 @@ public class StorageTest {
         assertTrue(storage.getSkippedLines().isEmpty());
     }
 
-    /** Blank lines are passed over quietly: they are not damage worth reporting. */
     @Test
     public void load_blankLines_skippedWithoutComplaint() throws IOException {
+        // Blank lines are passed over quietly: they are not damage worth reporting.
         writeSaveFile("", "T | 0 | read book", "   ");
         Storage storage = storage();
 
@@ -139,12 +150,10 @@ public class StorageTest {
         assertEquals("[T][ ] read book", storage().load().get(0).toString());
     }
 
-    /**
-     * Only "1" means done, and anything else is read as not done rather than as
-     * a corrupt line: a damaged flag costs the tick, not the whole task.
-     */
     @Test
     public void load_damagedDoneFlag_taskLoadsAsNotDone() throws IOException {
+        // Only "1" means done, and anything else is read as not done rather than as a corrupt line: a damaged flag
+        // costs the tick, not the whole task.
         writeSaveFile("T | x | read book");
         Storage storage = storage();
 
@@ -189,13 +198,10 @@ public class StorageTest {
         assertEquals(List.of("too few fields: T | 0"), storage.getSkippedLines());
     }
 
-    /**
-     * The field count is exact rather than a minimum, which is what catches a
-     * description containing the separator: it splits into an extra field, and
-     * loading it back would silently truncate the description.
-     */
     @Test
     public void load_descriptionContainingSeparator_lineSkipped() throws IOException {
+        // The field count is exact rather than a minimum, which is what catches a description containing the
+        // separator: it splits into an extra field, and loading it back would silently truncate the description.
         writeSaveFile("T | 0 | read book | and return it");
         Storage storage = storage();
 
@@ -204,12 +210,10 @@ public class StorageTest {
                 storage.getSkippedLines());
     }
 
-    /**
-     * Splitting keeps trailing empty fields, so a line ending in a separator is
-     * reported rather than quietly losing its last field.
-     */
     @Test
     public void load_trailingSeparator_lineSkipped() throws IOException {
+        // Splitting keeps trailing empty fields, so a line ending in a separator is reported rather than quietly
+        // losing its last field.
         writeSaveFile("T | 0 | read book | ");
         Storage storage = storage();
 
@@ -238,9 +242,9 @@ public class StorageTest {
                 storage.getSkippedLines());
     }
 
-    /** A date the parser cannot read is reported in the same words the user sees. */
     @Test
     public void load_unreadableDate_lineSkipped() throws IOException {
+        // A date the parser cannot read is reported in the same words the user sees.
         writeSaveFile("D | 0 | return book | tomorrow");
         Storage storage = storage();
 
@@ -250,13 +254,10 @@ public class StorageTest {
                 storage.getSkippedLines());
     }
 
-    /**
-     * Loading goes through {@link EventTask}'s constructor, so a line edited by
-     * hand to run backwards is refused here too rather than loading an event no
-     * command could have created.
-     */
     @Test
     public void load_eventEndingBeforeItStarts_lineSkipped() throws IOException {
+        // Loading goes through the event constructor, so a line edited by hand to run backwards is refused here too
+        // rather than loading an event no command could have created.
         writeSaveFile("E | 0 | project meeting | 2019-12-02 1600 | 2019-12-02 1400");
         Storage storage = storage();
 
@@ -265,9 +266,9 @@ public class StorageTest {
                 storage.getSkippedLines());
     }
 
-    /** One damaged line must not cost the user every other task in the file. */
     @Test
     public void load_someLinesDamaged_othersStillLoad() throws IOException {
+        // One damaged line must not cost the user every other task in the file.
         writeSaveFile("T | 0 | read book",
                 "X | 0 | nonsense",
                 "T | 0 | buy book");
@@ -281,9 +282,9 @@ public class StorageTest {
         assertEquals(1, storage.getSkippedLines().size());
     }
 
-    /** Complaints come back in the order the lines appeared. */
     @Test
     public void load_severalLinesDamaged_complaintsInFileOrder() throws IOException {
+        // Complaints come back in the order the lines appeared.
         writeSaveFile("X | 0 | first", "T | 0", "Y | 0 | third");
         Storage storage = storage();
 
@@ -295,12 +296,10 @@ public class StorageTest {
                 storage.getSkippedLines());
     }
 
-    /**
-     * The complaints are cleared at the start of each load, so a second load
-     * reports what that load skipped rather than everything ever skipped.
-     */
     @Test
     public void load_calledTwice_reportsOnlyTheLastLoad() throws IOException {
+        // The complaints are cleared at the start of each load, so a second load reports what that load skipped rather
+        // than everything ever skipped.
         writeSaveFile("X | 0 | nonsense");
         Storage storage = storage();
         storage.load();
@@ -348,9 +347,9 @@ public class StorageTest {
         assertTrue(readSaveFile().isEmpty());
     }
 
-    /** Saving replaces the file, so tasks deleted in this run do not come back. */
     @Test
     public void save_overExistingFile_replacesItsContents() throws IOException {
+        // Saving replaces the file, so tasks deleted in this run do not come back.
         writeSaveFile("T | 0 | read book", "T | 0 | return book");
         TaskList tasks = new TaskList();
         tasks.add(new TodoTask("buy book"));
@@ -360,12 +359,10 @@ public class StorageTest {
         assertEquals(List.of("T | 0 | buy book"), readSaveFile());
     }
 
-    /**
-     * Saving runs after every change to the task list, so it must only read the
-     * list: emptying it here would delete the tasks it is meant to be saving.
-     */
     @Test
     public void save_anyList_leavesTheListUnchanged() throws IOException {
+        // Saving runs after every change to the task list, so it must only read the list: emptying it here would
+        // delete the tasks it is meant to be saving.
         TaskList tasks = new TaskList();
         tasks.add(new TodoTask("read book"));
 
@@ -374,9 +371,9 @@ public class StorageTest {
         assertEquals(1, tasks.size());
     }
 
-    /** The folder a save file sits in is created if it is not there yet. */
     @Test
     public void save_missingFolder_createsIt() throws IOException {
+        // The folder a save file sits in is created if it is not there yet.
         Path nested = folder.resolve("data").resolve("tasklist.txt");
         TaskList tasks = new TaskList();
         tasks.add(new TodoTask("read book"));
@@ -389,14 +386,11 @@ public class StorageTest {
 
     // ---- the two sides together ----
 
-    /**
-     * The point of the whole class: whatever is written can be read back as the
-     * same tasks. Encoding lives on the tasks and decoding lives in
-     * {@code Storage}, so only a test that runs both catches the two drifting
-     * apart -- each side on its own is self-consistent.
-     */
     @Test
     public void saveThenLoad_everyTaskType_survivesTheRoundTrip() throws IOException, ThomasException {
+        // The point of the whole class: whatever is written can be read back as the same tasks. Encoding lives on the
+        // tasks and decoding lives in the storage, so only a test that runs both catches the two drifting apart, since
+        // each side on its own is self-consistent.
         TaskList original = new TaskList();
         Task todo = new TodoTask("read book");
         todo.markAsDone();
@@ -416,9 +410,9 @@ public class StorageTest {
         }
     }
 
-    /** A description with awkward characters still comes back whole. */
     @Test
     public void saveThenLoad_descriptionWithSpacesAndPunctuation_survives() throws IOException {
+        // A description with awkward characters still comes back whole.
         TaskList original = new TaskList();
         original.add(new TodoTask("read  book (chapter 3) -- twice!"));
         Storage storage = storage();
@@ -429,14 +423,11 @@ public class StorageTest {
                 storage.load().get(0).toString());
     }
 
-    /**
-     * A description containing the field separator cannot survive, and is lost
-     * on the way back in rather than coming back truncated. This is the known
-     * cost of the format, recorded here so that changing it is a deliberate act
-     * rather than an accident.
-     */
     @Test
     public void saveThenLoad_descriptionContainingSeparator_isSkipped() throws IOException {
+        // A description containing the field separator cannot survive, and is lost on the way back in rather than
+        // coming back truncated. This is the known cost of the format, recorded here so that changing it is a
+        // deliberate act rather than an accident.
         TaskList original = new TaskList();
         original.add(new TodoTask("read book | and return it"));
         Storage storage = storage();

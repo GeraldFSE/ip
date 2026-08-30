@@ -5,23 +5,16 @@ import thomas.TaskList;
 import thomas.Ui;
 
 /**
- * Ends the session: the {@code bye} command.
- * <p>
- * The only command that answers true to {@link #isExit()}, which is how the
- * read loop knows to stop without ever testing which command it is holding.
+ * Ends the session, serving the bye command.
+ * The only command that reports itself as an exit, which is how the read loop
+ * knows to stop without testing which command it is holding.
  */
 public class ExitCommand extends Command {
     /**
      * Does nothing.
-     * <p>
-     * Saying goodbye is deliberately not done here. The session also ends when
-     * the input runs out with no {@code bye} typed at all, and the farewell must
-     * be printed in both cases; it therefore belongs after the read loop, which
-     * is the one place both endings pass through. Printing it here as well would
-     * say it twice on the way out.
-     * <p>
-     * There is nothing to save either: {@code bye} changes no tasks, and every
-     * command that does change them has already saved.
+     * The farewell belongs after the read loop, since the session also ends when
+     * the input runs out, and printing it here as well would say it twice.
+     * There is nothing to save either, since bye changes no tasks.
      *
      * @param tasks Unused.
      * @param ui Unused.
@@ -34,7 +27,7 @@ public class ExitCommand extends Command {
     }
 
     /**
-     * Reports that the chatbot should stop.
+     * Returns that the chatbot should stop.
      *
      * @return Always true.
      */

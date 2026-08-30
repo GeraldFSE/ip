@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import thomas.command.AddCommand;
-import thomas.command.Command;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
 import thomas.command.FindCommand;
@@ -17,20 +16,16 @@ import thomas.command.OnCommand;
 import thomas.command.UnmarkCommand;
 
 /**
- * Tests {@link Parser#parse(String)}.
- * <p>
- * {@code parse} is tested rather than any other method because it is a pure
- * function of one string: it reads no file, prints nothing and keeps no state
- * between calls, so a test can hand it a line and check what comes back without
- * any setting up or tearing down. It is also where every rule about the shape of
- * the input lives, which makes it the one place a typo in a separator or a
- * message can be caught.
- * <p>
+ * Tests the parse method.
+ * It is tested ahead of any other method because it is a pure function of one
+ * string: it reads no file, prints nothing and keeps no state between calls, so
+ * a test can hand it a line and check what comes back without any setting up or
+ * tearing down. It is also where every rule about the shape of the input lives,
+ * which makes it the one place a typo in a separator or a message is caught.
  * Two things are checked of each line. A line that is understood must produce
- * the right kind of {@link Command}; a line that is not must fail with the
- * message the user is meant to read, so these tests pin the wording as well as
- * the fact of the failure. The commands keep their parsed arguments private,
- * which is deliberate -- nothing but {@code execute} needs them -- so the tests
+ * the right kind of command, and a line that is not must fail with the message
+ * the user is meant to read, so these tests pin the wording as well as the fact
+ * of the failure. The commands keep their parsed arguments private, so the tests
  * assert the command's type and leave what it does with those arguments to the
  * text-UI tests.
  */
@@ -48,12 +43,10 @@ public class ParserTest {
         assertInstanceOf(ListCommand.class, Parser.parse("list"));
     }
 
-    /**
-     * A keyword taking no argument ignores whatever follows it, because the
-     * argument is only read by the commands that need one.
-     */
     @Test
     public void parse_listWithTrailingText_returnsListCommand() throws ThomasException {
+        // A keyword taking no argument ignores whatever follows it, because the argument is only read by the commands
+        // that need one.
         assertInstanceOf(ListCommand.class, Parser.parse("list everything"));
     }
 
@@ -71,14 +64,14 @@ public class ParserTest {
         assertEquals("Erm sorry, what does that mean again?", e.getMessage());
     }
 
-    /** Matching is case sensitive, so {@code List} is not the {@code list} command. */
     @Test
     public void parse_wrongCaseKeyword_exceptionThrown() {
+        // Matching is case sensitive, so "List" is not the list command.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("List"));
         assertEquals("Erm sorry, what does that mean again?", e.getMessage());
     }
 
-    // ---- todo ----
+    // ---- to-do ----
 
     @Test
     public void parse_todoWithDescription_returnsAddCommand() throws ThomasException {
@@ -91,12 +84,10 @@ public class ParserTest {
         assertEquals("HEYY!! The description of a todo cannot be empty!", e.getMessage());
     }
 
-    /**
-     * A keyword followed by spaces only splits into two parts, so the blank
-     * check rather than the length check is what has to catch this.
-     */
     @Test
     public void parse_todoBlankDescription_exceptionThrown() {
+        // A keyword followed by spaces only splits into two parts, so the blank check rather than the length check is
+        // what has to catch this.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("todo    "));
         assertEquals("HEYY!! The description of a todo cannot be empty!", e.getMessage());
     }
@@ -121,32 +112,26 @@ public class ParserTest {
         assertEquals("Are you forgetting something!! When is the deadline!", e.getMessage());
     }
 
-    /**
-     * The separator carries a leading space so that a word merely ending in
-     * "by" is not mistaken for the marker.
-     */
     @Test
     public void parse_deadlineDescriptionEndingInBy_exceptionThrown() {
+        // The separator carries a leading space so that a word merely ending in "by" is not mistaken for the marker.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline put it on standby 2019-12-02 1800"));
         assertEquals("Are you forgetting something!! When is the deadline!", e.getMessage());
     }
 
-    /**
-     * A line that is nothing but the marker has no space in front of it once
-     * trimmed, so the split fails even though the marker is there: the missing
-     * part is the description.
-     */
     @Test
     public void parse_deadlineMarkerOnly_exceptionThrown() {
+        // A line that is nothing but the marker has no space in front of it once trimmed, so the split fails even
+        // though the marker is there: the missing part is the description.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline /by 2019-12-02 1800"));
         assertEquals("HEYY!! The description of a deadline cannot be empty!", e.getMessage());
     }
 
-    /** Here the split does succeed, and the empty description is caught afterwards. */
     @Test
     public void parse_deadlineBlankDescription_exceptionThrown() {
+        // Here the split does succeed, and the empty description is caught afterwards.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline    /by 2019-12-02 1800"));
         assertEquals("HEYY!! The description of a deadline cannot be empty!", e.getMessage());
@@ -167,9 +152,9 @@ public class ParserTest {
                 + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
-    /** A date is not enough on its own: the time is required too. */
     @Test
     public void parse_deadlineDateWithoutTime_exceptionThrown() {
+        // A date is not enough on its own: the time is required too.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline return book /by 2019-12-02"));
         assertEquals("I can't read '2019-12-02' as a deadline date! "
@@ -204,12 +189,10 @@ public class ParserTest {
         assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
     }
 
-    /**
-     * The markers are split off one at a time, so writing them the wrong way
-     * round is rejected rather than being silently swapped.
-     */
     @Test
     public void parse_eventMarkersInWrongOrder_exceptionThrown() {
+        // The markers are split off one at a time, so writing them the wrong way round is rejected rather than being
+        // silently swapped.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /to 2019-12-02 1600 /from 2019-12-02 1400"));
         assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
@@ -236,9 +219,9 @@ public class ParserTest {
         assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
     }
 
-    /** Each date names itself in its own message, so the user knows which one to fix. */
     @Test
     public void parse_eventUnreadableStartDate_exceptionThrown() {
+        // Each date names itself in its own message, so the user knows which one to fix.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from Mon 2pm /to 2019-12-02 1600"));
         assertEquals("I can't read 'Mon 2pm' as a start date! "
@@ -253,36 +236,30 @@ public class ParserTest {
                 + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
-    /**
-     * An event running backwards is refused, though not by the parser: the
-     * check is {@link thomas.task.EventTask}'s constructor, so that loading the
-     * save file is held to it too, and the parser lets the exception through.
-     */
     @Test
     public void parse_eventEndingBeforeItStarts_exceptionThrown() {
+        // An event running backwards is refused, though not by the parser. The check is the event constructor, so that
+        // loading the save file is held to it too, and the parser lets the exception through.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from 2019-12-02 1600 /to 2019-12-02 1400"));
         assertEquals("HUH?! Your event ends before it starts! Check your /from and /to.",
                 e.getMessage());
     }
 
-    /** An event lasting no time is odd but says nothing false, so it is allowed. */
     @Test
     public void parse_eventStartingWhenItEnds_returnsAddCommand() throws ThomasException {
+        // An event lasting no time is odd but says nothing false, so it is allowed.
         assertInstanceOf(AddCommand.class, Parser.parse(
                 "event project meeting /from 2019-12-02 1400 /to 2019-12-02 1400"));
     }
 
     // ---- descriptions holding the save file's field separator ----
 
-    /**
-     * A description containing " | " is refused as it is typed, because it could
-     * not survive being saved: the task would be accepted and listed, then lost
-     * on the next run. All three add commands are checked, since the rule is one
-     * helper called from three places rather than one inherited check.
-     */
     @Test
     public void parse_todoDescriptionWithSeparator_exceptionThrown() {
+        // A description containing " | " is refused as it is typed, because it could not survive being saved: the task
+        // would be accepted and listed, then lost on the next run. All three add commands are checked, since the rule
+        // is one helper called from three places rather than one inherited check.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("todo read book | and return it"));
         assertEquals("HEYY!! A description can't contain ' | ' -- "
@@ -305,19 +282,16 @@ public class ParserTest {
                 + "that's how I keep your tasks in the save file.", e.getMessage());
     }
 
-    /**
-     * Only the separator as the save file writes it is refused. A bare pipe
-     * saves and loads back correctly, so refusing it too would take away a
-     * character the format has no trouble with.
-     */
     @Test
     public void parse_todoDescriptionWithBarePipe_returnsAddCommand() throws ThomasException {
+        // Only the separator as the save file writes it is refused. A bare pipe saves and loads back correctly, so
+        // refusing it too would take away a character the format has no trouble with.
         assertInstanceOf(AddCommand.class, Parser.parse("todo read book|and return it"));
     }
 
-    /** A pipe with a space on one side only is likewise not the separator. */
     @Test
     public void parse_todoDescriptionWithHalfSpacedPipe_returnsAddCommand() throws ThomasException {
+        // A pipe with a space on one side only is likewise not the separator.
         assertInstanceOf(AddCommand.class, Parser.parse("todo read book |and return it"));
     }
 
@@ -338,12 +312,10 @@ public class ParserTest {
         assertInstanceOf(DeleteCommand.class, Parser.parse("delete 2"));
     }
 
-    /**
-     * Whether a task carries that number is the list's to answer, so a number
-     * outside the list still parses; only the digits are checked here.
-     */
     @Test
     public void parse_markNumberOutsideList_returnsMarkCommand() throws ThomasException {
+        // Whether a task carries that number is the list's to answer, so a number outside the list still parses; only
+        // the digits are checked here.
         assertInstanceOf(MarkCommand.class, Parser.parse("mark 999"));
     }
 
@@ -353,9 +325,9 @@ public class ParserTest {
         assertEquals("HEYY!! You need a valid number to mark", e.getMessage());
     }
 
-    /** Each of the three names itself in the missing-argument message. */
     @Test
     public void parse_deleteWithoutNumber_exceptionThrown() {
+        // Each of the three names itself in the missing-argument message.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("delete"));
         assertEquals("HEYY!! You need a valid number to delete", e.getMessage());
     }
@@ -421,9 +393,9 @@ public class ParserTest {
         assertEquals("I can't read 'tomorrow' as a day! Write it as 2019-12-02.", e.getMessage());
     }
 
-    /** {@code on} asks about a whole day, so a time is refused rather than ignored. */
     @Test
     public void parse_onDayWithTime_exceptionThrown() {
+        // The on command asks about a whole day, so a time is refused.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("on 2019-12-02 1800"));
         assertEquals("I can't read '2019-12-02 1800' as a day! Write it as 2019-12-02.", e.getMessage());
     }
