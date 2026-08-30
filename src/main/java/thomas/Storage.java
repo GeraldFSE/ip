@@ -45,8 +45,8 @@ public class Storage {
      * from. Nothing is opened here: a save file that does not exist yet is the
      * normal first run, and is dealt with by {@link #load()}.
      *
-     * @param filePath where the task list is kept, for example
-     *                 {@code "./data/tasklist.txt"}
+     * @param filePath Where the task list is kept, for example
+     *                 {@code "./data/tasklist.txt"}.
      */
     public Storage(String filePath) {
         this.filePath = filePath;
@@ -55,10 +55,10 @@ public class Storage {
     /**
      * Checks that a save file line holds exactly the fields its type needs.
      *
-     * @param fields   the line already split on the field separator
-     * @param expected how many fields this task type is written with
-     * @param line     the original line, quoted back in the error message
-     * @throws ThomasException if the count does not match
+     * @param fields The line already split on the field separator.
+     * @param expected How many fields this task type is written with.
+     * @param line The original line, quoted back in the error message.
+     * @throws ThomasException If the count does not match.
      */
     private static void requireFieldCount(String[] fields, int expected, String line)
             throws ThomasException {
@@ -75,9 +75,9 @@ public class Storage {
      * display text, so the shape is fixed and known: type letter, done flag,
      * description, then whatever extra fields that type carries.
      *
-     * @param line one line of the save file, without its line separator
-     * @return the task the line describes
-     * @throws ThomasException if the type is unknown or fields are missing
+     * @param line One line of the save file, without its line separator.
+     * @return The task the line describes.
+     * @throws ThomasException If the type is unknown or fields are missing.
      */
     private static Task parseSavedTask(String line) throws ThomasException {
         // -1 keeps trailing empty fields, so a line ending in a separator is
@@ -127,7 +127,7 @@ public class Storage {
      * shows these through {@link Ui}, so that this class stays free of any
      * knowledge of how the user is talked to.
      *
-     * @return one message per skipped line, in the order the lines appeared
+     * @return One message per skipped line, in the order the lines appeared.
      */
     public ArrayList<String> getSkippedLines() {
         return skippedLines;
@@ -141,8 +141,8 @@ public class Storage {
      * {@link #getSkippedLines()} rather than abandoning the whole file: one
      * damaged line should not cost the user every other task.
      *
-     * @return the tasks the file holds, in the order they were written
-     * @throws IOException if the file exists but cannot be read
+     * @return The tasks the file holds, in the order they were written.
+     * @throws IOException If the file exists but cannot be read.
      */
     public ArrayList<Task> load() throws IOException {
         // Cleared rather than appended to, so a second load reports only what
@@ -182,8 +182,8 @@ public class Storage {
      * task list, so mutating it here would delete the tasks it is meant to be
      * saving.
      *
-     * @param tasks the tasks to write, left unchanged
-     * @throws IOException if the folder or file cannot be written
+     * @param tasks The tasks to write, left unchanged.
+     * @throws IOException If the folder or file cannot be written.
      */
     public void save(TaskList tasks) throws IOException {
         File file = new File(filePath);

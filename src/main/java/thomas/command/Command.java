@@ -30,12 +30,12 @@ public abstract class Command {
     /**
      * Carries out this command.
      *
-     * @param tasks   the task list to read or change
-     * @param ui      how to tell the user what happened
-     * @param storage where to write the tasks when they change
-     * @throws ThomasException if the command cannot be carried out, for example
+     * @param tasks The task list to read or change.
+     * @param ui How to tell the user what happened.
+     * @param storage Where to write the tasks when they change.
+     * @throws ThomasException If the command cannot be carried out, for example
      *                         because it names a task that does not exist --
-     *                         which cannot be known until the list is in hand
+     *                         which cannot be known until the list is in hand.
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
 
@@ -46,7 +46,7 @@ public abstract class Command {
      * {@link ExitCommand} overrides it. Asking the command means the read loop
      * never tests which command it is holding.
      *
-     * @return true if this command ends the session
+     * @return True if this command ends the session.
      */
     public boolean isExit() {
         return false;
@@ -61,9 +61,9 @@ public abstract class Command {
      * catching the {@link IOException} here means a save failure costs the user
      * a warning rather than the session.
      *
-     * @param tasks   the tasks to write
-     * @param ui      used to report a failed save
-     * @param storage where to write them
+     * @param tasks The tasks to write.
+     * @param ui Used to report a failed save.
+     * @param storage Where to write them.
      */
     protected void save(TaskList tasks, Ui ui, Storage storage) {
         try {

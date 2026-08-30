@@ -40,7 +40,7 @@ public class TaskList {
      * Creates a task list holding tasks that already exist, as loaded from the
      * save file.
      *
-     * @param tasks the tasks to start with, in list order; taken over as-is
+     * @param tasks The tasks to start with, in list order; taken over as-is.
      */
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
@@ -49,7 +49,7 @@ public class TaskList {
     /**
      * Returns how many tasks are stored.
      *
-     * @return the number of tasks
+     * @return The number of tasks.
      */
     public int size() {
         return tasks.size();
@@ -62,8 +62,8 @@ public class TaskList {
      * valid. A number that came from the user goes through
      * {@link #getByNumber(int)} instead, which checks it.
      *
-     * @param index the position, from 0 to {@code size() - 1}
-     * @return the task at that position
+     * @param index The position, from 0 to {@code size() - 1}.
+     * @return The task at that position.
      */
     public Task get(int index) {
         return tasks.get(index);
@@ -72,7 +72,7 @@ public class TaskList {
     /**
      * Adds a task to the end of the list.
      *
-     * @param task the task to store
+     * @param task The task to store.
      */
     public void add(Task task) {
         tasks.add(task);
@@ -87,9 +87,9 @@ public class TaskList {
      * the current size rather than any capacity: a number past the end must be
      * reported, not passed to {@link ArrayList#get(int)}.
      *
-     * @param taskNumber the number as the user typed it, counting from 1
-     * @return the matching position, counting from 0
-     * @throws ThomasException if no task carries that number
+     * @param taskNumber The number as the user typed it, counting from 1.
+     * @return The matching position, counting from 0.
+     * @throws ThomasException If no task carries that number.
      */
     private int requirePosition(int taskNumber) throws ThomasException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
@@ -102,9 +102,9 @@ public class TaskList {
     /**
      * Returns the task the user named by its number.
      *
-     * @param taskNumber the number as the user typed it, counting from 1
-     * @return the task carrying that number
-     * @throws ThomasException if no task carries that number
+     * @param taskNumber The number as the user typed it, counting from 1.
+     * @return The task carrying that number.
+     * @throws ThomasException If no task carries that number.
      */
     public Task getByNumber(int taskNumber) throws ThomasException {
         return tasks.get(requirePosition(taskNumber));
@@ -117,9 +117,9 @@ public class TaskList {
      * closes the gap: everything after it shifts down one, so the numbering
      * stays contiguous and the numbers the user sees never develop holes.
      *
-     * @param taskNumber the number as the user typed it, counting from 1
-     * @return the task that was removed
-     * @throws ThomasException if no task carries that number
+     * @param taskNumber The number as the user typed it, counting from 1.
+     * @return The task that was removed.
+     * @throws ThomasException If no task carries that number.
      */
     public Task deleteByNumber(int taskNumber) throws ThomasException {
         return tasks.remove(requirePosition(taskNumber));
@@ -139,8 +139,8 @@ public class TaskList {
      * never asks a task what type it is: a new dated task type overrides that
      * method and is filtered correctly here without this loop changing.
      *
-     * @param day the day being asked about
-     * @return the positions of the matching tasks, counting from 0, in list order
+     * @param day The day being asked about.
+     * @return The positions of the matching tasks, counting from 0, in list order.
      */
     public ArrayList<Integer> positionsOn(LocalDate day) {
         ArrayList<Integer> positions = new ArrayList<>();

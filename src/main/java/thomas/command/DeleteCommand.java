@@ -22,8 +22,8 @@ public class DeleteCommand extends Command {
     /**
      * Creates the command for one task number.
      *
-     * @param taskNumber the number as the user typed it, counting from 1 and not
-     *                   yet checked against the list
+     * @param taskNumber The number as the user typed it, counting from 1 and not
+     *                   yet checked against the list.
      */
     public DeleteCommand(int taskNumber) {
         this.taskNumber = taskNumber;
@@ -35,10 +35,10 @@ public class DeleteCommand extends Command {
      * The removed task is shown back to the user, so the count reported is the
      * size after the removal.
      *
-     * @param tasks   the list to remove from
-     * @param ui      used to confirm the removal
-     * @param storage where the shortened list is written
-     * @throws ThomasException if no task carries that number
+     * @param tasks The list to remove from.
+     * @param ui Used to confirm the removal.
+     * @param storage Where the shortened list is written.
+     * @throws ThomasException If no task carries that number.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {

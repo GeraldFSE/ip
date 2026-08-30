@@ -7,8 +7,8 @@ import thomas.ThomasException;
  * <p>
  * The set of commands is closed, so a word the user typed either maps to one of
  * these constants or is not a command at all. Naming them here means the
- * compiler checks every use: a misspelt {@code case DEADLINE} does not compile,
- * where a misspelt {@code keyword.equals("dedline")} used to compile into a
+ * compiler checks every use: a misspelled {@code case DEADLINE} does not compile,
+ * where a misspelled {@code keyword.equals("dedline")} used to compile into a
  * branch that could never run.
  * <p>
  * This is the vocabulary of the language the user types, not a command that can
@@ -46,9 +46,9 @@ public enum CommandType {
      * and only real commands need handling. Matching is case sensitive, as it
      * was when each keyword was compared with {@code equals}.
      *
-     * @param keyword the first word of the line the user typed
-     * @return the matching kind of command
-     * @throws ThomasException if no command has that keyword
+     * @param keyword The first word of the line the user typed.
+     * @return The matching kind of command.
+     * @throws ThomasException If no command has that keyword.
      */
     public static CommandType fromKeyword(String keyword) throws ThomasException {
         for (CommandType type : values()) {

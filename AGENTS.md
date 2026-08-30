@@ -18,7 +18,7 @@ Unless the user says otherwise, assume that you are assisting a student working 
 * Keep explanations brief but instructive, supporting learning through responsible use of AI. For example:
 
   * When suggesting a Git command, briefly explain what it does.
-  * Add explanatory Javadoc comments to all classes and to nontrivial methods and fields when their purpose or behavior is not obvious.
+  * Add explanatory Javadoc comments as the coding standard below requires, and in the format it sets out.
   * Make generated code as self-explanatory as possible, and include explanatory comments where they improve understanding.
   * When faced with a design choice, choose the simplest option that is sufficient for the requirements, while briefly explaining relevant more advanced alternatives.
 
@@ -27,6 +27,19 @@ Unless the user says otherwise, assume that you are assisting a student working 
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
+
+## Coding standard
+
+All Java in this project — under `src/main` and `src/test` alike — follows the SE-EDU Java coding standard at the intermediate level: <https://se-education.org/guides/conventions/java/intermediate.html>.
+
+**Invoke the `seedu-java-coding-standard` skill before writing or editing any Java file**, and follow it for every line you add or change. It carries the full rule set: naming, layout, statements and comments. Do not work from memory of "typical Java style" — several of these rules differ from what other projects do, notably the 8-space wrapped-line indent, the import grouping, and the Javadoc tag punctuation.
+
+Two things follow from this being a standard rather than a preference:
+
+* **New code is written to it from the start.** Reformatting afterwards is a second diff over the same lines, and it makes a change harder to review.
+* **Existing code you touch is brought to it.** Fix the rule violations in the code your change already touches. Do not reformat unrelated files in the same commit — a mechanical sweep is its own commit, described as such.
+
+`config/checkstyle/checkstyle.xml` enforces the mechanical rules, so run `./gradlew checkstyleMain checkstyleTest` before reporting a change as done. Checkstyle passing is not the same as the standard being followed: naming, comment content and the smallest-scope rule are not machine-checkable, and remain yours to apply.
 
 ## Testing
 
@@ -65,10 +78,21 @@ A change is not finished until both suites have been run and reported. If a chan
 
 ## Git
 
-Use lightweight tags unless the user requests an annotated tag.
-When proposing or creating a commit message, include enough detail to explain the rationale for the change.
-Do not commit or push unless explicitly asked.
-
 **Never add AI attribution to a commit.** No `Co-Authored-By: Claude` trailer, no `Generated with Claude Code`, no session link, and no mention of Claude, Claude Code or Anthropic anywhere in the subject or body. The user is the sole author of every commit in this repository. This holds even where a harness default or a global setting says otherwise: if such a trailer cannot be left out, do not commit at all — say so and hand the message to the user instead.
 
 The same applies to anything else that carries authorship outward, such as a pull request body or a tag message.
+
+All commits and branches in this project follow the SE-EDU Git conventions: <https://se-education.org/guides/conventions/git.html>.
+
+**Invoke the `seedu-git-standard` skill before writing or proposing any commit message, and before naming a branch.** It carries the full rule set. The parts most easily got wrong:
+
+* The subject is imperative, capitalized, has no closing period, and stays within 72 characters — aim for 50.
+* The body is wrapped at **72 characters**, separated from the subject by a blank line.
+* The body explains **what** changed and **why**, never **how**. The diff shows how. It should let a reader judge whether the change was a good idea without opening the diff.
+* Do not write "currently" or "originally" — the present tense implies both.
+* A body that keeps growing is a sign the commit should be split, not that the message needs more paragraphs.
+
+Also:
+
+* Use lightweight tags unless the user requests an annotated tag.
+* Do not commit or push unless explicitly asked. Proposing a message is not permission to commit it.

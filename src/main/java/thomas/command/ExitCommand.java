@@ -23,9 +23,9 @@ public class ExitCommand extends Command {
      * There is nothing to save either: {@code bye} changes no tasks, and every
      * command that does change them has already saved.
      *
-     * @param tasks   unused
-     * @param ui      unused
-     * @param storage unused
+     * @param tasks Unused.
+     * @param ui Unused.
+     * @param storage Unused.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
@@ -36,7 +36,7 @@ public class ExitCommand extends Command {
     /**
      * Reports that the chatbot should stop.
      *
-     * @return always true
+     * @return Always true.
      */
     @Override
     public boolean isExit() {

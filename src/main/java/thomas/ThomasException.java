@@ -17,7 +17,7 @@ public class ThomasException extends Exception {
     /**
      * Creates an exception carrying a message meant for the user.
      *
-     * @param message what went wrong, phrased for the person typing
+     * @param message What went wrong, phrased for the person typing.
      */
     public ThomasException(String message) {
         super(message);

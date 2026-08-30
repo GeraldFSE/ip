@@ -31,10 +31,10 @@ public class EventTask extends Task {
      * A start equal to the end is allowed. An event lasting no time is odd but
      * says nothing false, while one ending before it begins cannot be true.
      *
-     * @param description the task text, without the {@code event} keyword
-     * @param from        the date and time the event starts
-     * @param to          the date and time the event ends, not before {@code from}
-     * @throws ThomasException if {@code to} falls before {@code from}
+     * @param description The task text, without the {@code event} keyword.
+     * @param from The date and time the event starts.
+     * @param to The date and time the event ends, not before {@code from}.
+     * @throws ThomasException If {@code to} falls before {@code from}.
      */
     public EventTask(String description, LocalDateTime from, LocalDateTime to)
             throws ThomasException {
@@ -50,8 +50,8 @@ public class EventTask extends Task {
     /**
      * Returns the event with its type tag and time range.
      *
-     * @return for example
-     *         {@code "[E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 02 2019, 4:00 PM)"}
+     * @return For example
+     *         {@code "[E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 02 2019, 4:00 PM)"}.
      */
     @Override
     public String toString() {
@@ -72,8 +72,8 @@ public class EventTask extends Task {
      * last day of every event -- a mistake that still passes any test where the
      * day asked about falls in the middle.
      *
-     * @param day the day being asked about
-     * @return true if the event is running on that day
+     * @param day The day being asked about.
+     * @return True if the event is running on that day.
      */
     @Override
     public boolean occursOn(LocalDate day) {
@@ -89,7 +89,7 @@ public class EventTask extends Task {
      * As in {@link DeadlineTask}, the dates are written in the format they are
      * typed in, so the parser can read back whatever is saved.
      *
-     * @return for example {@code "E | 0 | project meeting | 2019-12-02 1400 | 2019-12-02 1600"}
+     * @return For example {@code "E | 0 | project meeting | 2019-12-02 1400 | 2019-12-02 1600"}.
      */
     @Override
     public String toSaveFormat() {

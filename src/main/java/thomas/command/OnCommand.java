@@ -16,7 +16,7 @@ public class OnCommand extends Command {
     /**
      * Creates the command for one day.
      *
-     * @param day the day to report on
+     * @param day The day to report on.
      */
     public OnCommand(LocalDate day) {
         this.day = day;
@@ -27,9 +27,9 @@ public class OnCommand extends Command {
      * <p>
      * Nothing is saved, because nothing changed.
      *
-     * @param tasks   the tasks to search
-     * @param ui      used to print the matches
-     * @param storage unused
+     * @param tasks The tasks to search.
+     * @param ui Used to print the matches.
+     * @param storage Unused.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
