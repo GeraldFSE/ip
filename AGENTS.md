@@ -18,7 +18,7 @@ Unless the user says otherwise, assume that you are assisting a student working 
 * Keep explanations brief but instructive, supporting learning through responsible use of AI. For example:
 
   * When suggesting a Git command, briefly explain what it does.
-  * Add explanatory Javadoc comments to all classes and to nontrivial methods and fields when their purpose or behavior is not obvious.
+  * Add explanatory Javadoc comments as the coding standard below requires, and in the format it sets out.
   * Make generated code as self-explanatory as possible, and include explanatory comments where they improve understanding.
   * When faced with a design choice, choose the simplest option that is sufficient for the requirements, while briefly explaining relevant more advanced alternatives.
 
@@ -27,6 +27,19 @@ Unless the user says otherwise, assume that you are assisting a student working 
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
+
+## Coding standard
+
+All Java in this project — under `src/main` and `src/test` alike — follows the SE-EDU Java coding standard at the intermediate level: <https://se-education.org/guides/conventions/java/intermediate.html>.
+
+**Invoke the `seedu-java-coding-standard` skill before writing or editing any Java file**, and follow it for every line you add or change. It carries the full rule set: naming, layout, statements and comments. Do not work from memory of "typical Java style" — several of these rules differ from what other projects do, notably the 8-space wrapped-line indent, the import grouping, and the Javadoc tag punctuation.
+
+Two things follow from this being a standard rather than a preference:
+
+* **New code is written to it from the start.** Reformatting afterwards is a second diff over the same lines, and it makes a change harder to review.
+* **Existing code you touch is brought to it.** Fix the rule violations in the code your change already touches. Do not reformat unrelated files in the same commit — a mechanical sweep is its own commit, described as such.
+
+`config/checkstyle/checkstyle.xml` enforces the mechanical rules, so run `./gradlew checkstyleMain checkstyleTest` before reporting a change as done. Checkstyle passing is not the same as the standard being followed: naming, comment content and the smallest-scope rule are not machine-checkable, and remain yours to apply.
 
 ## Testing
 
