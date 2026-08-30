@@ -13,9 +13,9 @@ public class ListCommand extends Command {
      * <p>
      * Nothing is saved, because nothing changed.
      *
-     * @param tasks   the tasks to show
-     * @param ui      used to print them
-     * @param storage unused
+     * @param tasks The tasks to show.
+     * @param ui Used to print them.
+     * @param storage Unused.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

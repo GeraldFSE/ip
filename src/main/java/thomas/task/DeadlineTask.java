@@ -18,8 +18,8 @@ public class DeadlineTask extends Task {
     /**
      * Creates a deadline that is not yet done.
      *
-     * @param description the task text, without the {@code deadline} keyword
-     * @param by          the date and time the task is due
+     * @param description The task text, without the {@code deadline} keyword.
+     * @param by The date and time the task is due.
      */
     public DeadlineTask(String description, LocalDateTime by) {
         super(description);
@@ -29,7 +29,7 @@ public class DeadlineTask extends Task {
     /**
      * Returns the deadline with its type tag and due date.
      *
-     * @return for example {@code "[D][ ] return book (by: Dec 02 2019, 6:00 PM)"}
+     * @return For example {@code "[D][ ] return book (by: Dec 02 2019, 6:00 PM)"}.
      */
     @Override
     public String toString() {
@@ -42,8 +42,8 @@ public class DeadlineTask extends Task {
      * The time of day is dropped for the comparison, so a deadline at any hour
      * counts as being on that day.
      *
-     * @param day the day being asked about
-     * @return true if the task is due on that day
+     * @param day The day being asked about.
+     * @return True if the task is due on that day.
      */
     @Override
     public boolean occursOn(LocalDate day) {
@@ -57,7 +57,7 @@ public class DeadlineTask extends Task {
      * The date is written in the format it is typed in, so the save file holds
      * nothing the parser cannot read back.
      *
-     * @return for example {@code "D | 0 | return book | 2019-12-02 1800"}
+     * @return For example {@code "D | 0 | return book | 2019-12-02 1800"}.
      */
     @Override
     public String toSaveFormat() {

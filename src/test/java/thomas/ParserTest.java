@@ -56,7 +56,7 @@ public class ParserTest {
         assertInstanceOf(ListCommand.class, Parser.parse("list everything"));
     }
 
-    // ---- unrecognised input ----
+    // ---- unrecognized input ----
 
     @Test
     public void parse_unknownKeyword_exceptionThrown() {

@@ -118,7 +118,7 @@ public class TaskTest {
      * in {@code ResolverStyle.SMART} unless told otherwise, and smart resolution
      * adjusts an out-of-range day rather than rejecting it.
      * <p>
-     * This is recorded rather than asserted away, because it is the behaviour the
+     * This is recorded rather than asserted away, because it is the behavior the
      * user meets today: "deadline submit /by 2019-02-30 1800" is accepted and
      * stored as the 28th, with nothing said. Adding
      * {@code .withResolverStyle(ResolverStyle.STRICT)} to

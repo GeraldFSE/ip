@@ -28,8 +28,8 @@ public class UnmarkCommand extends Command {
     /**
      * Creates the command for one task number.
      *
-     * @param taskNumber the number as the user typed it, counting from 1 and not
-     *                   yet checked against the list
+     * @param taskNumber The number as the user typed it, counting from 1 and not
+     *                   yet checked against the list.
      */
     public UnmarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
@@ -38,10 +38,10 @@ public class UnmarkCommand extends Command {
     /**
      * Marks the named task not done, saves, and says so.
      *
-     * @param tasks   the list holding the task
-     * @param ui      used to confirm the change
-     * @param storage where the changed list is written
-     * @throws ThomasException if no task carries that number
+     * @param tasks The list holding the task.
+     * @param ui Used to confirm the change.
+     * @param storage Where the changed list is written.
+     * @throws ThomasException If no task carries that number.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {

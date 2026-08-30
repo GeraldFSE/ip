@@ -56,7 +56,7 @@ public class Thomas {
      * The greeting is printed before loading, so that any complaint about the
      * save file arrives after Thomas has introduced itself rather than before.
      *
-     * @param filePath where the task list is kept
+     * @param filePath Where the task list is kept.
      */
     public Thomas(String filePath) {
         // One Ui for the whole session: it owns the Scanner over standard
@@ -120,7 +120,7 @@ public class Thomas {
     /**
      * Starts the chatbot.
      *
-     * @param args command line arguments; unused
+     * @param args Command line arguments; unused.
      */
     public static void main(String[] args) {
         new Thomas(DATA_PATH).run();

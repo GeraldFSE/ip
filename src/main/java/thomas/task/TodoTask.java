@@ -10,7 +10,7 @@ public class TodoTask extends Task {
     /**
      * Creates a to-do that is not yet done.
      *
-     * @param description the task text, without the {@code todo} keyword
+     * @param description The task text, without the {@code todo} keyword.
      */
     public TodoTask(String description) {
         super(description);
@@ -19,7 +19,7 @@ public class TodoTask extends Task {
     /**
      * Returns the to-do prefixed with its type tag.
      *
-     * @return for example {@code "[T][ ] borrow book"}
+     * @return For example {@code "[T][ ] borrow book"}.
      */
     @Override
     public String toString() {
@@ -29,7 +29,7 @@ public class TodoTask extends Task {
     /**
      * Returns the to-do encoded for the save file, tagged {@code T}.
      *
-     * @return for example {@code "T | 0 | borrow book"}
+     * @return For example {@code "T | 0 | borrow book"}.
      */
     @Override
     public String toSaveFormat() {

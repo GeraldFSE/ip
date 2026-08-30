@@ -28,7 +28,7 @@ public class AddCommand extends Command {
     /**
      * Creates the command for one new task.
      *
-     * @param task the task to store
+     * @param task The task to store.
      */
     public AddCommand(Task task) {
         this.task = task;
@@ -37,9 +37,9 @@ public class AddCommand extends Command {
     /**
      * Appends the task, saves, and reports the new size of the list.
      *
-     * @param tasks   the list to append to
-     * @param ui      used to confirm the addition
-     * @param storage where the longer list is written
+     * @param tasks The list to append to.
+     * @param ui Used to confirm the addition.
+     * @param storage Where the longer list is written.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

@@ -39,7 +39,7 @@ public class Ui {
      * Public because it is the general-purpose way to say something; the named
      * methods below are the messages that are worded the same way every time.
      *
-     * @param lines the text lines to display, without indentation or newlines
+     * @param lines The text lines to display, without indentation or newlines.
      */
     public void showBlock(String... lines) {
         System.out.print(DIVIDER + "\n");
@@ -52,7 +52,7 @@ public class Ui {
     /**
      * Reports that there is another command to read.
      *
-     * @return true if the user has typed another line and the input has not ended
+     * @return True if the user has typed another line and the input has not ended.
      */
     public boolean hasNextCommand() {
         return userInput.hasNextLine();
@@ -65,7 +65,7 @@ public class Ui {
      * {@code todo read book} is one line, and {@code next()} would hand back one
      * word at a time.
      *
-     * @return the line the user typed, exactly as typed
+     * @return The line the user typed, exactly as typed.
      */
     public String readCommand() {
         return userInput.nextLine();
@@ -92,7 +92,7 @@ public class Ui {
     /**
      * Reports a problem with what the user asked for.
      *
-     * @param message the explanation to show, already worded for the user
+     * @param message The explanation to show, already worded for the user.
      */
     public void showError(String message) {
         showBlock(message);
@@ -101,7 +101,7 @@ public class Ui {
     /**
      * Reports that the saved tasks could not be read at all.
      *
-     * @param message the reason the file could not be read
+     * @param message The reason the file could not be read.
      */
     public void showLoadingError(String message) {
         showBlock("Uh oh! I could not read your saved tasks: " + message,
@@ -111,7 +111,7 @@ public class Ui {
     /**
      * Reports one save file line that could not be understood, having skipped it.
      *
-     * @param message what was wrong with the line
+     * @param message What was wrong with the line.
      */
     public void showSkippedLine(String message) {
         showBlock("Skipping a line I could not read: " + message);
@@ -120,7 +120,7 @@ public class Ui {
     /**
      * Reports that the task list could not be written to disk.
      *
-     * @param message the reason the file could not be written
+     * @param message The reason the file could not be written.
      */
     public void showSavingError(String message) {
         showBlock("Uh oh! I could not save your tasks: " + message);
@@ -133,8 +133,8 @@ public class Ui {
      * place; {@code task} is a {@link Task}, and polymorphism picks the right
      * {@code toString()} for whichever subclass was actually added.
      *
-     * @param task      the task just stored
-     * @param taskCount how many tasks are now stored
+     * @param task The task just stored.
+     * @param taskCount How many tasks are now stored.
      */
     public void showAdded(Task task, int taskCount) {
         showBlock("Got it. I've added this task:",
@@ -145,8 +145,8 @@ public class Ui {
     /**
      * Confirms that a task was removed and reports the new size of the list.
      *
-     * @param task      the task just removed
-     * @param taskCount how many tasks are left
+     * @param task The task just removed.
+     * @param taskCount How many tasks are left.
      */
     public void showRemoved(Task task, int taskCount) {
         showBlock("Noted. I've removed this task:",
@@ -157,7 +157,7 @@ public class Ui {
     /**
      * Confirms that a task is now done.
      *
-     * @param task the task just marked
+     * @param task The task just marked.
      */
     public void showMarked(Task task) {
         showBlock("Nice! I've marked this task as done:", "   " + task);
@@ -166,7 +166,7 @@ public class Ui {
     /**
      * Confirms that a task is no longer done.
      *
-     * @param task the task just unmarked
+     * @param task The task just unmarked.
      */
     public void showUnmarked(Task task) {
         showBlock("OK, I've marked this task as not done yet:", "   " + task);
@@ -175,7 +175,7 @@ public class Ui {
     /**
      * Prints the whole task list, numbered from 1.
      *
-     * @param tasks the tasks to show, in list order
+     * @param tasks The tasks to show, in list order.
      */
     public void showTaskList(TaskList tasks) {
         // Number the tasks for display; tasks itself stays unnumbered.
@@ -198,8 +198,8 @@ public class Ui {
      * keep the number it has in the whole list, so a number shown here is the
      * number {@code mark} and {@code delete} take.
      *
-     * @param tasks the whole task list
-     * @param day   the day to report on
+     * @param tasks The whole task list.
+     * @param day The day to report on.
      */
     public void showTasksOnDay(TaskList tasks, LocalDate day) {
         // An ArrayList rather than a sized array as showTaskList uses: how many

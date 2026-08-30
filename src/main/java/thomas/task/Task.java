@@ -83,7 +83,7 @@ public class Task {
     /**
      * Creates a task that is not yet done.
      *
-     * @param description the task text as entered by the user
+     * @param description The task text as entered by the user.
      */
     public Task(String description) {
         this.description = description;
@@ -106,12 +106,12 @@ public class Task {
      * that callers have one kind of user error to report and no Java class name
      * reaches the user.
      *
-     * @param text  the date as written, expected as {@code yyyy-mm-dd HHmm}
-     * @param field which date this is, named as it should read in the message
+     * @param text The date as written, expected as {@code yyyy-mm-dd HHmm}.
+     * @param field Which date this is, named as it should read in the message
      *              and so carrying its own article, for example
-     *              {@code "a deadline date"} against {@code "an end date"}
-     * @return the date and time the text names
-     * @throws ThomasException if the text is not a date and time in that form
+     *              {@code "a deadline date"} against {@code "an end date"}.
+     * @return The date and time the text names.
+     * @throws ThomasException If the text is not a date and time in that form.
      */
     public static LocalDateTime parseDate(String text, String field) throws ThomasException {
         try {
@@ -126,7 +126,7 @@ public class Task {
     /**
      * Returns the icon showing whether this task is done.
      *
-     * @return {@code "[X]"} when done, {@code "[ ]"} otherwise
+     * @return {@code "[X]"} when done, {@code "[ ]"} otherwise.
      */
     public String getStatusIcon() {
         return (isDone ? "[X]" : "[ ]"); // mark done task with X
@@ -150,7 +150,7 @@ public class Task {
      * future task type can change how it appears by overriding this method
      * alone.
      *
-     * @return for example {@code "[X] read book"}
+     * @return For example {@code "[X] read book"}.
      */
     @Override
     public String toString() {
@@ -166,8 +166,8 @@ public class Task {
      * task what type it is: adding another dated task type means overriding
      * this method, not extending a chain of {@code instanceof} checks.
      *
-     * @param day the day being asked about
-     * @return true if this task falls on that day
+     * @param day The day being asked about.
+     * @return True if this task falls on that day.
      */
     public boolean occursOn(LocalDate day) {
         return false;
@@ -186,7 +186,7 @@ public class Task {
      * brackets. Subclasses prefix their type letter and append their own
      * fields, exactly as they do for {@code toString()}.
      *
-     * @return for example {@code "1 | read book"}
+     * @return For example {@code "1 | read book"}.
      */
     public String toSaveFormat() {
         return (isDone ? "1" : "0") + FIELD_SEPARATOR + this.description;
