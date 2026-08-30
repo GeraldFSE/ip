@@ -85,15 +85,15 @@ public class Parser {
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
         return switch (parser.commandType) {
-        case BYE -> new ExitCommand();
-        case LIST -> new ListCommand();
-        case ON -> new OnCommand(parser.parseDay());
-        case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
-        case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
-        case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
-        // The three add commands differ only in the task they build, which
-        // parseNewTask settles, so one AddCommand serves all three.
-        case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
+            case BYE -> new ExitCommand();
+            case LIST -> new ListCommand();
+            case ON -> new OnCommand(parser.parseDay());
+            case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
+            case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
+            case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
+            // The three add commands differ only in the task they build, which
+            // parseNewTask settles, so one AddCommand serves all three.
+            case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
         };
     }
 
@@ -118,6 +118,38 @@ public class Parser {
             throw new ThomasException(message);
         }
         return parts[1].trim();
+    }
+
+    /**
+     * Returns a description, refusing one that holds the save file's field
+     * separator.
+     * <p>
+     * A description containing {@code " | "} cannot survive being saved: it
+     * splits into an extra field, which {@link Storage} refuses on the way back
+     * in rather than loading the description back truncated. Without this check
+     * the task is accepted, listed, and then gone on the next run, with a
+     * complaint about a save file line the user never knew existed -- a loss
+     * noticed long after the moment anything could be done about it. Refusing it
+     * as it is typed turns that into an answer the user can act on.
+     * <p>
+     * Refused here rather than in {@link Task}'s constructor, which is where the
+     * event ordering rule lives, because the two rules can be broken by
+     * different routes. A save file can hold an event running backwards, so
+     * loading has to be held to that rule as well as typing; it cannot hold a
+     * description containing the separator, since the field count catches that
+     * first. Typing is the only way one can be made, so typing is where it is
+     * caught.
+     *
+     * @param description the description, already trimmed
+     * @return that same description
+     * @throws ThomasException if it contains the field separator
+     */
+    private static String requireSeparatorFree(String description) throws ThomasException {
+        if (description.contains(Task.FIELD_SEPARATOR)) {
+            throw new ThomasException("HEYY!! A description can't contain '" + Task.FIELD_SEPARATOR
+                    + "' -- that's how I keep your tasks in the save file.");
+        }
+        return description;
     }
 
     /**
@@ -184,12 +216,12 @@ public class Parser {
      */
     private Task parseNewTask() throws ThomasException {
         return switch (commandType) {
-        case TODO -> parseTodo();
-        case DEADLINE -> parseDeadline();
-        case EVENT -> parseEvent();
-        // Reached only by calling this for a command that adds no task, which
-        // is a mistake in the caller rather than anything the user did.
-        default -> throw new AssertionError("Not an add command: " + commandType);
+            case TODO -> parseTodo();
+            case DEADLINE -> parseDeadline();
+            case EVENT -> parseEvent();
+            // Reached only by calling this for a command that adds no task, which
+            // is a mistake in the caller rather than anything the user did.
+            default -> throw new AssertionError("Not an add command: " + commandType);
         };
     }
 
@@ -197,18 +229,21 @@ public class Parser {
      * Builds the task {@code todo <description>} describes.
      *
      * @return the new todo
-     * @throws ThomasException if the description is missing
+     * @throws ThomasException if the description is missing, or contains the
+     *                         save file's field separator
      */
     private Task parseTodo() throws ThomasException {
-        return new TodoTask(requireArgument("HEYY!! The description of a todo cannot be empty!"));
+        return new TodoTask(requireSeparatorFree(
+                requireArgument("HEYY!! The description of a todo cannot be empty!")));
     }
 
     /**
      * Builds the task {@code deadline <description> /by <date>} describes.
      *
      * @return the new deadline
-     * @throws ThomasException if the description, the marker or the date is missing
-     *                         or the date cannot be read
+     * @throws ThomasException if the description, the marker or the date is missing,
+     *                         the date cannot be read, or the description contains
+     *                         the save file's field separator
      */
     private Task parseDeadline() throws ThomasException {
         String arguments = requireArgument("HEYY!! The description of a deadline cannot be empty!");
@@ -240,7 +275,7 @@ public class Parser {
         }
 
         LocalDateTime byDate = Task.parseDate(by, "a deadline date");
-        return new DeadlineTask(description, byDate);
+        return new DeadlineTask(requireSeparatorFree(description), byDate);
     }
 
     /**
@@ -249,8 +284,9 @@ public class Parser {
      *
      * @return the new event
      * @throws ThomasException if the description, either marker or either date is
-     *                         missing, a date cannot be read, or the event ends
-     *                         before it starts
+     *                         missing, a date cannot be read, the description
+     *                         contains the save file's field separator, or the
+     *                         event ends before it starts
      */
     private Task parseEvent() throws ThomasException {
         String arguments = requireArgument("HEYY!! The description of an event cannot be empty!");
@@ -290,6 +326,6 @@ public class Parser {
 
         LocalDateTime fromDate = Task.parseDate(from, "a start date");
         LocalDateTime toDate = Task.parseDate(to, "an end date");
-        return new EventTask(description, fromDate, toDate);
+        return new EventTask(requireSeparatorFree(description), fromDate, toDate);
     }
 }

@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.Parser;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.Ui;

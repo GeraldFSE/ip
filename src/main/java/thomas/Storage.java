@@ -3,9 +3,7 @@ package thomas;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -96,22 +94,22 @@ public class Storage {
         // otherwise be loaded back silently truncated.
         String description = fields[2];
         Task task = switch (fields[0]) {
-        case "T" -> {
-            requireFieldCount(fields, 3, line);
-            yield new TodoTask(description);
-        }
-        case "D" -> {
-            requireFieldCount(fields, 4, line);
-            LocalDateTime byDate = Task.parseDate(fields[3], "a deadline date");
-            yield new DeadlineTask(description, byDate);
-        }
-        case "E" -> {
-            requireFieldCount(fields, 5, line);
-            LocalDateTime fromDate = Task.parseDate(fields[3], "a start date");
-            LocalDateTime toDate = Task.parseDate(fields[4], "an end date");
-            yield new EventTask(description, fromDate, toDate);
-        }
-        default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
+            case "T" -> {
+                requireFieldCount(fields, 3, line);
+                yield new TodoTask(description);
+            }
+            case "D" -> {
+                requireFieldCount(fields, 4, line);
+                LocalDateTime byDate = Task.parseDate(fields[3], "a deadline date");
+                yield new DeadlineTask(description, byDate);
+            }
+            case "E" -> {
+                requireFieldCount(fields, 5, line);
+                LocalDateTime fromDate = Task.parseDate(fields[3], "a start date");
+                LocalDateTime toDate = Task.parseDate(fields[4], "an end date");
+                yield new EventTask(description, fromDate, toDate);
+            }
+            default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
         };
 
         // "1" means done; anything else is treated as not done, so a damaged
