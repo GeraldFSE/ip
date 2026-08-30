@@ -19,44 +19,27 @@ import thomas.task.Task;
 import thomas.task.TodoTask;
 
 /**
- * Makes sense of one line the user typed.
- * <p>
- * {@link #parse} is the whole of this class from the outside: hand it a line and
- * it hands back a {@link Command} ready to be carried out. Everything that knows
- * the shape of the input -- where the keyword ends, that a deadline is written
- * {@code /by} and an event {@code /from ... /to ...}, which mistake each
- * complaint names -- is settled in here, so no other class ever sees the raw
- * text.
- * <p>
- * A {@code Parser} object is the working state of one such call: the line split
- * once, so the methods reading the arguments do not each split it again. That is
- * why the constructor is private, and why nothing outside holds one.
- * <p>
- * Every failure leaves as a {@link ThomasException} carrying a message meant for
- * the user, so the caller has one kind of error to report and no Java class name
- * ever reaches the screen.
+ * Makes sense of one line the user typed and returns the command it asks for.
+ * Everything that knows the shape of the input is settled here, so that no
+ * other class ever sees the raw text.
+ * Every failure leaves as a ThomasException carrying a message meant for the
+ * user, so that the caller has one kind of error to report.
  */
 public class Parser {
-    /** The kind of command the line names. */
+    /** Kind of command the line names */
     private final CommandType commandType;
 
-    /**
-     * The line split into keyword and argument.
-     * <p>
-     * Split on the first space only, so {@code parts[0]} is the command keyword
-     * and {@code parts[1]}, when present, is everything after it -- descriptions
-     * contain spaces, so the rest of the line must stay in one piece.
-     */
+    /** Line split once into keyword and argument, on the first space only */
     private final String[] parts;
 
     /**
-     * Reads a line far enough to know which command it is.
-     * <p>
-     * An unrecognised keyword is rejected here, so the arguments are only ever
-     * read for a command that really exists.
+     * Creates a parser for one typed line, reading it far enough to know which
+     * command it is.
+     * An unrecognized keyword is rejected here, so that the arguments are only
+     * ever read for a command that really exists.
      *
-     * @param line the line exactly as the user typed it
-     * @throws ThomasException if the first word is not a command
+     * @param line Line exactly as the user typed it.
+     * @throws ThomasException If the first word is not a command.
      */
     private Parser(String line) throws ThomasException {
         this.parts = line.split(" ", 2);
@@ -64,23 +47,16 @@ public class Parser {
     }
 
     /**
-     * Turns a typed line into the command it asks for, arguments and all.
-     * <p>
-     * Each command is built with what it needs already read and checked, so
-     * carrying it out afterwards does no parsing. A line that cannot be
-     * understood throws here rather than producing a command that would fail
-     * halfway through doing something.
-     * <p>
-     * The {@code switch} is an expression over an enum, so the compiler checks
-     * that every {@link CommandType} is covered: adding a keyword without giving
-     * it a command stops the build rather than silently doing nothing at run
-     * time. That is what makes a {@code default} branch unnecessary here, where
-     * the read loop this replaced needed one.
+     * Returns the command a typed line asks for, arguments and all.
+     * Each command is built with what it needs already read and checked, so that
+     * carrying it out afterwards does no parsing. If the line cannot be
+     * understood it is rejected here, rather than producing a command that would
+     * fail halfway through doing something.
      *
-     * @param fullCommand the line exactly as the user typed it
-     * @return the command that line asks for
-     * @throws ThomasException if the line is not a command Thomas understands, or
-     *                         its arguments are missing or unreadable
+     * @param fullCommand Line exactly as the user typed it.
+     * @return Command that line asks for.
+     * @throws ThomasException If the line is not a command Thomas understands, or
+     *                         its arguments are missing or unreadable.
      */
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
@@ -99,19 +75,12 @@ public class Parser {
 
     /**
      * Returns this command's argument, rejecting a command given without one.
-     * <p>
-     * {@code parts} holds a single element when the user typed a bare keyword
-     * such as {@code todo}. Checking {@code isBlank()} as well covers the other
-     * case the length misses: {@code "todo    "} splits into two parts, the
-     * second all spaces.
-     * <p>
-     * Returning the argument rather than only checking it keeps the indexing
-     * into {@code parts} in one place, instead of every caller reaching back for
-     * {@code parts[1]} after asking whether it exists.
+     * A bare keyword such as "todo" leaves no argument, and a keyword followed
+     * by spaces alone leaves a blank one. Both are refused.
      *
-     * @param message what to tell the user when the argument is missing
-     * @return the argument, with surrounding spaces removed
-     * @throws ThomasException if there is no argument, or it is only spaces
+     * @param message What to tell the user when the argument is missing.
+     * @return Argument, with surrounding spaces removed.
+     * @throws ThomasException If there is no argument, or it is only spaces.
      */
     private String requireArgument(String message) throws ThomasException {
         if (parts.length < 2 || parts[1].isBlank()) {
@@ -123,26 +92,16 @@ public class Parser {
     /**
      * Returns a description, refusing one that holds the save file's field
      * separator.
-     * <p>
-     * A description containing {@code " | "} cannot survive being saved: it
-     * splits into an extra field, which {@link Storage} refuses on the way back
-     * in rather than loading the description back truncated. Without this check
-     * the task is accepted, listed, and then gone on the next run, with a
-     * complaint about a save file line the user never knew existed -- a loss
-     * noticed long after the moment anything could be done about it. Refusing it
-     * as it is typed turns that into an answer the user can act on.
-     * <p>
-     * Refused here rather than in {@link Task}'s constructor, which is where the
-     * event ordering rule lives, because the two rules can be broken by
-     * different routes. A save file can hold an event running backwards, so
-     * loading has to be held to that rule as well as typing; it cannot hold a
-     * description containing the separator, since the field count catches that
-     * first. Typing is the only way one can be made, so typing is where it is
-     * caught.
+     * A description containing the separator cannot survive being saved, since
+     * it writes a line with an extra field that the loader refuses. Refusing it
+     * as it is typed turns a task lost on the next run into an answer the user
+     * can act on.
+     * Refused here rather than in the task itself, because the save file cannot
+     * hold such a description, so typing is the only way one can be made.
      *
-     * @param description the description, already trimmed
-     * @return that same description
-     * @throws ThomasException if it contains the field separator
+     * @param description Description, already trimmed.
+     * @return That same description.
+     * @throws ThomasException If it contains the field separator.
      */
     private static String requireSeparatorFree(String description) throws ThomasException {
         if (description.contains(Task.FIELD_SEPARATOR)) {
@@ -153,18 +112,16 @@ public class Parser {
     }
 
     /**
-     * Reads the task number given to {@code mark}, {@code unmark} or
-     * {@code delete}.
-     * <p>
+     * Returns the task number given to mark, unmark or delete.
      * Only that the argument is a whole number is settled here. Whether a task
-     * actually carries that number is {@link TaskList}'s to answer, since only
-     * the list knows how many tasks there are; a parser never sees the list.
+     * carries that number is the task list's to answer, since a parser never
+     * sees the list.
      *
-     * @param action the command being run, used to word the missing-argument
-     *               message, for example {@code "mark"}
-     * @return the number the user typed, counting from 1 and not yet checked
-     *         against the list
-     * @throws ThomasException if the number is missing or is not a whole number
+     * @param action Command being run, used to word the missing-argument
+     *               message, for example "mark".
+     * @return Number the user typed, counting from 1 and not yet checked against
+     *         the list.
+     * @throws ThomasException If the number is missing or is not a whole number.
      */
     private int parseTaskNumber(String action) throws ThomasException {
         String argument = requireArgument("HEYY!! You need a valid number to " + action);
@@ -177,17 +134,13 @@ public class Parser {
     }
 
     /**
-     * Reads the whole day given to {@code on}.
-     * <p>
-     * Separate from {@link Task#parseDate} because the two read different
-     * things. A task happens at a moment, so it needs a date and a time;
-     * {@code on} asks about a whole day, so a time would be meaningless there
-     * and is refused rather than ignored. Returning a {@link LocalDate} rather
-     * than a {@link LocalDateTime} is what says so in the type.
+     * Returns the whole day given to the on command.
+     * A day carries no time of day, so a time given here is refused rather than
+     * ignored.
      *
-     * @return the day the argument names
-     * @throws ThomasException if the day is missing or is not written as
-     *                         {@code yyyy-mm-dd}
+     * @return Day the argument names.
+     * @throws ThomasException If the day is missing or is not written as
+     *                         yyyy-mm-dd.
      */
     private LocalDate parseDay() throws ThomasException {
         String text = requireArgument("HEYY!! Which day do you want to see?");
@@ -200,19 +153,14 @@ public class Parser {
     }
 
     /**
-     * Builds the task that {@code todo}, {@code deadline} or {@code event}
-     * describes.
-     * <p>
+     * Returns the task that a todo, deadline or event line describes.
      * The three add commands are read through one method because the caller
-     * treats them alike: whichever was typed, it ends with a task to append and
-     * announce. Which subclass comes back is this method's business, and the
-     * caller only handles a {@link Task}.
-     * <p>
-     * A task is returned only if every part of it parsed, so a half-built task
-     * never escapes to be added to the list.
+     * treats them alike. A task is returned only if every part of it parsed, so
+     * a half-built task never reaches the list.
      *
-     * @return the task the line describes
-     * @throws ThomasException if a description, marker or date is missing or unreadable
+     * @return Task the line describes.
+     * @throws ThomasException If a description, marker or date is missing or
+     *                         unreadable.
      */
     private Task parseNewTask() throws ThomasException {
         return switch (commandType) {
@@ -226,11 +174,11 @@ public class Parser {
     }
 
     /**
-     * Builds the task {@code todo <description>} describes.
+     * Returns the task a todo line describes.
      *
-     * @return the new todo
-     * @throws ThomasException if the description is missing, or contains the
-     *                         save file's field separator
+     * @return New todo.
+     * @throws ThomasException If the description is missing, or contains the
+     *                         save file's field separator.
      */
     private Task parseTodo() throws ThomasException {
         return new TodoTask(requireSeparatorFree(
@@ -238,12 +186,13 @@ public class Parser {
     }
 
     /**
-     * Builds the task {@code deadline <description> /by <date>} describes.
+     * Returns the task a deadline line describes.
      *
-     * @return the new deadline
-     * @throws ThomasException if the description, the marker or the date is missing,
-     *                         the date cannot be read, or the description contains
-     *                         the save file's field separator
+     * @return New deadline.
+     * @throws ThomasException If the description, the marker or the date is
+     *                         missing, the date cannot be read, or the
+     *                         description contains the save file's field
+     *                         separator.
      */
     private Task parseDeadline() throws ThomasException {
         String arguments = requireArgument("HEYY!! The description of a deadline cannot be empty!");
@@ -279,14 +228,13 @@ public class Parser {
     }
 
     /**
-     * Builds the task {@code event <description> /from <date> /to <date>}
-     * describes.
+     * Returns the task an event line describes.
      *
-     * @return the new event
-     * @throws ThomasException if the description, either marker or either date is
-     *                         missing, a date cannot be read, the description
+     * @return New event.
+     * @throws ThomasException If the description, either marker or either date
+     *                         is missing, a date cannot be read, the description
      *                         contains the save file's field separator, or the
-     *                         event ends before it starts
+     *                         event ends before it starts.
      */
     private Task parseEvent() throws ThomasException {
         String arguments = requireArgument("HEYY!! The description of an event cannot be empty!");

@@ -6,35 +6,27 @@ import java.time.LocalDateTime;
 import thomas.ThomasException;
 
 /**
- * A task that runs from one date and time to another.
- * <p>
- * Like {@link DeadlineTask}, the start and end are kept as
- * {@link LocalDateTime}s: read in as {@code yyyy-mm-dd HHmm} and shown back in
- * a friendlier form, using the formats {@link Task} holds for both.
+ * Represents a task that runs from one date and time to another.
+ * The start and end are kept as date-time values rather than as the text the
+ * user typed, so that they can be read in one format and shown in another.
  */
 public class EventTask extends Task {
-    /** When the event starts, as given after {@code /from}. */
+    /** Date and time the event starts, as given after /from */
     protected LocalDateTime from;
 
-    /** When the event ends, as given after {@code /to}. */
+    /** Date and time the event ends, as given after /to */
     protected LocalDateTime to;
 
     /**
      * Creates an event that is not yet done.
-     * <p>
-     * An event that ends before it starts is refused here rather than in the
-     * command that reads it, so there is no way to make one at all: the save
-     * file is loaded through this constructor too, so a line edited by hand to
-     * run backwards is reported and skipped instead of loading an event no
-     * command could have created.
-     * <p>
-     * A start equal to the end is allowed. An event lasting no time is odd but
-     * says nothing false, while one ending before it begins cannot be true.
+     * The check is made here rather than in the command that reads the event, so
+     * that the save file is held to the same rule. If the end equals the start
+     * the event is allowed, since an event lasting no time says nothing false.
      *
-     * @param description the task text, without the {@code event} keyword
-     * @param from        the date and time the event starts
-     * @param to          the date and time the event ends, not before {@code from}
-     * @throws ThomasException if {@code to} falls before {@code from}
+     * @param description Task text, without the event keyword.
+     * @param from Date and time the event starts.
+     * @param to Date and time the event ends, not before the start.
+     * @throws ThomasException If the end falls before the start.
      */
     public EventTask(String description, LocalDateTime from, LocalDateTime to)
             throws ThomasException {
@@ -50,8 +42,8 @@ public class EventTask extends Task {
     /**
      * Returns the event with its type tag and time range.
      *
-     * @return for example
-     *         {@code "[E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 02 2019, 4:00 PM)"}
+     * @return For example "[E][ ] project meeting (from: Dec 02 2019, 2:00 PM
+     *         to: Dec 02 2019, 4:00 PM)".
      */
     @Override
     public String toString() {
@@ -60,20 +52,12 @@ public class EventTask extends Task {
     }
 
     /**
-     * Returns whether this event is running on a given day.
-     * <p>
-     * An event covers every day from its start to its end, so this is a range
-     * test rather than a match against the start alone: an event running from
-     * the 2nd to the 4th is happening on the 3rd as much as on the 2nd.
-     * <p>
-     * Both ends count as part of the event, which is why the test is written as
-     * two negated comparisons. The reading that first suggests itself,
-     * {@code day.isAfter(start) && day.isBefore(end)}, excludes the first and
-     * last day of every event -- a mistake that still passes any test where the
-     * day asked about falls in the middle.
+     * Returns whether this event is running on the given day.
+     * An event covers every day from its start to its end, and both end days
+     * count as part of it.
      *
-     * @param day the day being asked about
-     * @return true if the event is running on that day
+     * @param day Day being asked about.
+     * @return True if the event is running on that day.
      */
     @Override
     public boolean occursOn(LocalDate day) {
@@ -83,13 +67,13 @@ public class EventTask extends Task {
     }
 
     /**
-     * Returns the event encoded for the save file, tagged {@code E} with the
-     * start and end as the fourth and fifth fields.
-     * <p>
-     * As in {@link DeadlineTask}, the dates are written in the format they are
-     * typed in, so the parser can read back whatever is saved.
+     * Returns the event encoded for the save file, tagged E with the start and
+     * end as the fourth and fifth fields.
+     * The dates are written in the format they are typed in, so that the parser
+     * can read back whatever is saved.
      *
-     * @return for example {@code "E | 0 | project meeting | 2019-12-02 1400 | 2019-12-02 1600"}
+     * @return For example "E | 0 | project meeting | 2019-12-02 1400 |
+     *         2019-12-02 1600".
      */
     @Override
     public String toSaveFormat() {

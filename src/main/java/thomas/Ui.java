@@ -8,38 +8,29 @@ import thomas.task.Task;
 
 /**
  * Deals with everything the user sees and types.
- * <p>
- * All console reading and writing lives here, so the rest of the program never
- * calls {@link System#out} or builds a {@link Scanner} of its own. That keeps
- * the look of the chatbot -- the indentation, the dividers, the wording of each
- * message -- in one file, and means the command handling can be read without
- * stepping over formatting code.
- * <p>
- * A {@code Ui} owns the {@link Scanner} over standard input, so the object is
- * created once and reused for the whole session rather than per command; a new
- * {@code Scanner} each time would buffer ahead and lose input.
+ * All console reading and writing lives here, so that the look of the chatbot
+ * stays in one file and the command handling can be read without stepping over
+ * formatting code.
+ * The scanner over standard input is owned by this class and reused for the
+ * whole session, since a new one each time would buffer ahead and lose input.
  */
 public class Ui {
-    /** Indentation applied to every line of chatbot text. */
+    /** Indentation applied to every line of chatbot text */
     private static final String INDENT = "     ";
 
-    /**
-     * Horizontal rule printed above and below each block of chatbot output.
-     * Indented one space less than the text it wraps, as the sample output shows.
-     */
+    /** Horizontal rule printed above and below each block of chatbot output */
     private static final String DIVIDER =
             "    ____________________________________________________________";
 
-    /** Reads the user's command lines from standard input. */
+    /** Reader for the user's command lines, over standard input */
     private final Scanner userInput = new Scanner(System.in);
 
     /**
-     * Prints lines as one chatbot block: indented, wrapped in dividers.
-     * <p>
-     * Public because it is the general-purpose way to say something; the named
-     * methods below are the messages that are worded the same way every time.
+     * Prints lines as one chatbot block, indented and wrapped in dividers.
+     * Public because it is the general-purpose way to say something, while the
+     * named methods below are the messages worded the same way every time.
      *
-     * @param lines the text lines to display, without indentation or newlines
+     * @param lines Text lines to display, without indentation or newlines.
      */
     public void showBlock(String... lines) {
         System.out.print(DIVIDER + "\n");
@@ -50,22 +41,21 @@ public class Ui {
     }
 
     /**
-     * Reports that there is another command to read.
+     * Returns whether there is another command to read.
      *
-     * @return true if the user has typed another line and the input has not ended
+     * @return True if the user has typed another line and the input has not
+     *         ended.
      */
     public boolean hasNextCommand() {
         return userInput.hasNextLine();
     }
 
     /**
-     * Reads one command line.
-     * <p>
-     * {@code nextLine()}, not {@code next()}: a command such as
-     * {@code todo read book} is one line, and {@code next()} would hand back one
-     * word at a time.
+     * Returns one command line.
+     * A whole line is read rather than one word, since a command such as
+     * "todo read book" carries spaces.
      *
-     * @return the line the user typed, exactly as typed
+     * @return Line the user typed, exactly as typed.
      */
     public String readCommand() {
         return userInput.nextLine();
@@ -92,7 +82,7 @@ public class Ui {
     /**
      * Reports a problem with what the user asked for.
      *
-     * @param message the explanation to show, already worded for the user
+     * @param message Explanation to show, already worded for the user.
      */
     public void showError(String message) {
         showBlock(message);
@@ -101,7 +91,7 @@ public class Ui {
     /**
      * Reports that the saved tasks could not be read at all.
      *
-     * @param message the reason the file could not be read
+     * @param message Reason the file could not be read.
      */
     public void showLoadingError(String message) {
         showBlock("Uh oh! I could not read your saved tasks: " + message,
@@ -111,7 +101,7 @@ public class Ui {
     /**
      * Reports one save file line that could not be understood, having skipped it.
      *
-     * @param message what was wrong with the line
+     * @param message What was wrong with the line.
      */
     public void showSkippedLine(String message) {
         showBlock("Skipping a line I could not read: " + message);
@@ -120,7 +110,7 @@ public class Ui {
     /**
      * Reports that the task list could not be written to disk.
      *
-     * @param message the reason the file could not be written
+     * @param message Reason the file could not be written.
      */
     public void showSavingError(String message) {
         showBlock("Uh oh! I could not save your tasks: " + message);
@@ -128,13 +118,11 @@ public class Ui {
 
     /**
      * Confirms that a task was added and reports the new size of the list.
-     * <p>
-     * The three add commands share this acknowledgement, so it lives in one
-     * place; {@code task} is a {@link Task}, and polymorphism picks the right
-     * {@code toString()} for whichever subclass was actually added.
+     * The three add commands share this acknowledgement, and each task shows
+     * itself in the form of whichever type it is.
      *
-     * @param task      the task just stored
-     * @param taskCount how many tasks are now stored
+     * @param task Task just stored.
+     * @param taskCount Number of tasks now stored.
      */
     public void showAdded(Task task, int taskCount) {
         showBlock("Got it. I've added this task:",
@@ -145,8 +133,8 @@ public class Ui {
     /**
      * Confirms that a task was removed and reports the new size of the list.
      *
-     * @param task      the task just removed
-     * @param taskCount how many tasks are left
+     * @param task Task just removed.
+     * @param taskCount Number of tasks left.
      */
     public void showRemoved(Task task, int taskCount) {
         showBlock("Noted. I've removed this task:",
@@ -157,7 +145,7 @@ public class Ui {
     /**
      * Confirms that a task is now done.
      *
-     * @param task the task just marked
+     * @param task Task just marked.
      */
     public void showMarked(Task task) {
         showBlock("Nice! I've marked this task as done:", "   " + task);
@@ -166,7 +154,7 @@ public class Ui {
     /**
      * Confirms that a task is no longer done.
      *
-     * @param task the task just unmarked
+     * @param task Task just unmarked.
      */
     public void showUnmarked(Task task) {
         showBlock("OK, I've marked this task as not done yet:", "   " + task);
@@ -175,7 +163,7 @@ public class Ui {
     /**
      * Prints the whole task list, numbered from 1.
      *
-     * @param tasks the tasks to show, in list order
+     * @param tasks Tasks to show, in list order.
      */
     public void showTaskList(TaskList tasks) {
         // Number the tasks for display; tasks itself stays unnumbered.
@@ -192,14 +180,11 @@ public class Ui {
 
     /**
      * Prints the tasks that fall on one day.
-     * <p>
-     * Which tasks match is {@link TaskList}'s question, and it answers with
-     * their positions rather than the tasks alone. That is what lets each match
-     * keep the number it has in the whole list, so a number shown here is the
-     * number {@code mark} and {@code delete} take.
+     * Each match keeps the number it has in the whole list, so that a number
+     * shown here is the number mark and delete take.
      *
-     * @param tasks the whole task list
-     * @param day   the day to report on
+     * @param tasks Whole task list.
+     * @param day Day to report on.
      */
     public void showTasksOnDay(TaskList tasks, LocalDate day) {
         // An ArrayList rather than a sized array as showTaskList uses: how many

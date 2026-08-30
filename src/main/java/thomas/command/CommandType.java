@@ -3,16 +3,12 @@ package thomas.command;
 import thomas.ThomasException;
 
 /**
- * The kind of command a typed keyword names.
- * <p>
+ * Represents the kind of command a typed keyword names.
  * The set of commands is closed, so a word the user typed either maps to one of
  * these constants or is not a command at all. Naming them here means the
- * compiler checks every use: a misspelt {@code case DEADLINE} does not compile,
- * where a misspelt {@code keyword.equals("dedline")} used to compile into a
- * branch that could never run.
- * <p>
+ * compiler checks every use.
  * This is the vocabulary of the language the user types, not a command that can
- * be carried out. It answers "which command is this?" and nothing else.
+ * be carried out.
  */
 public enum CommandType {
     BYE("bye"),
@@ -25,12 +21,7 @@ public enum CommandType {
     DEADLINE("deadline"),
     EVENT("event");
 
-    /**
-     * The word the user types for this command.
-     * <p>
-     * Held as its own field rather than derived from {@link #name()}, so that
-     * what the user types stays independent of what the constant is called.
-     */
+    /** Word the user types for this command */
     private final String keyword;
 
     CommandType(String keyword) {
@@ -39,15 +30,13 @@ public enum CommandType {
 
     /**
      * Returns the kind of command a typed keyword names.
-     * <p>
-     * This is the one place that decides whether a word is a command, so by the
-     * time a caller has a {@code CommandType} in hand it is known to be valid
-     * and only real commands need handling. Matching is case sensitive, as it
-     * was when each keyword was compared with {@code equals}.
+     * This is the one place that decides whether a word is a command, so a
+     * caller holding a command type knows it is valid. Matching is case
+     * sensitive.
      *
-     * @param keyword the first word of the line the user typed
-     * @return the matching kind of command
-     * @throws ThomasException if no command has that keyword
+     * @param keyword First word of the line the user typed.
+     * @return Matching kind of command.
+     * @throws ThomasException If no command has that keyword.
      */
     public static CommandType fromKeyword(String keyword) throws ThomasException {
         for (CommandType type : values()) {

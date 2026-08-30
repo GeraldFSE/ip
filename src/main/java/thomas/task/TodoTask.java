@@ -1,16 +1,15 @@
 package thomas.task;
 
 /**
- * A task with no date or time attached, such as {@code borrow book}.
- * <p>
- * It adds no state of its own to {@link Task}; it exists so that a to-do can be
- * told apart from the other task types and shown with its own {@code [T]} tag.
+ * Represents a task with no date or time attached, such as "borrow book".
+ * Adds no state of its own to Task, and exists so that a to-do can be told
+ * apart from the other task types and shown with its own [T] tag.
  */
 public class TodoTask extends Task {
     /**
      * Creates a to-do that is not yet done.
      *
-     * @param description the task text, without the {@code todo} keyword
+     * @param description Task text, without the todo keyword.
      */
     public TodoTask(String description) {
         super(description);
@@ -19,7 +18,7 @@ public class TodoTask extends Task {
     /**
      * Returns the to-do prefixed with its type tag.
      *
-     * @return for example {@code "[T][ ] borrow book"}
+     * @return For example "[T][ ] borrow book".
      */
     @Override
     public String toString() {
@@ -27,9 +26,9 @@ public class TodoTask extends Task {
     }
 
     /**
-     * Returns the to-do encoded for the save file, tagged {@code T}.
+     * Returns the to-do encoded for the save file, tagged T.
      *
-     * @return for example {@code "T | 0 | borrow book"}
+     * @return For example "T | 0 | borrow book".
      */
     @Override
     public String toSaveFormat() {

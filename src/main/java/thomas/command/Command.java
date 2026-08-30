@@ -8,45 +8,33 @@ import thomas.ThomasException;
 import thomas.Ui;
 
 /**
- * One command, understood and ready to be carried out.
- * <p>
- * A {@code Command} is built by {@link Parser} from a line the user typed, with
- * whatever arguments that command takes already read and checked. Carrying it
- * out is then {@link #execute} -- so the work of understanding a line and the
- * work of doing what it asks are separated, and neither has to be read to
- * follow the other.
- * <p>
- * Each command is its own subclass rather than a branch of a switch. What that
- * buys is that everything about a command sits in one file: {@link Thomas} asks
- * for a command and runs it without knowing which one it got, and adding a new
- * one means writing a class rather than editing the loop that runs them all.
- * <p>
- * The three collaborators are handed to {@link #execute} rather than held as
- * fields, because a command is built fresh for every line and would otherwise
- * carry three references it uses once. It also keeps plain what each command is
- * allowed to touch: the tasks, the screen, and the save file.
+ * Represents one command, understood and ready to be carried out.
+ * A command is built from a typed line with its arguments already read and
+ * checked, so that understanding a line and doing what it asks stay separate.
+ * Each command is its own subclass rather than a branch of a switch, so that
+ * adding a command means writing a class rather than editing the loop that runs
+ * them all.
+ * The three collaborators are handed to execute rather than held as fields,
+ * which keeps plain what each command is allowed to touch.
  */
 public abstract class Command {
     /**
      * Carries out this command.
      *
-     * @param tasks   the task list to read or change
-     * @param ui      how to tell the user what happened
-     * @param storage where to write the tasks when they change
-     * @throws ThomasException if the command cannot be carried out, for example
-     *                         because it names a task that does not exist --
-     *                         which cannot be known until the list is in hand
+     * @param tasks Task list to read or change.
+     * @param ui Used to tell the user what happened.
+     * @param storage Used to write the tasks when they change.
+     * @throws ThomasException If the command cannot be carried out, for example
+     *                         because it names a task that does not exist.
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
 
     /**
      * Returns whether the chatbot should stop after this command.
-     * <p>
-     * False for almost every command, so that is the answer here and only
-     * {@link ExitCommand} overrides it. Asking the command means the read loop
-     * never tests which command it is holding.
+     * False for almost every command, so only the exit command overrides it.
+     * Asking the command means the read loop never tests which one it holds.
      *
-     * @return true if this command ends the session
+     * @return True if this command ends the session.
      */
     public boolean isExit() {
         return false;
@@ -54,16 +42,13 @@ public abstract class Command {
 
     /**
      * Saves the task list, reporting a failure instead of crashing.
-     * <p>
-     * Inherited by the commands that change the list, which is what makes the
-     * save automatic and keeps it worded once. {@link Storage#save} throws
-     * rather than printing, because it has no business talking to the user;
-     * catching the {@link IOException} here means a save failure costs the user
-     * a warning rather than the session.
+     * Inherited by the commands that change the list, which makes the save
+     * automatic and keeps it worded once. If the save fails the user is warned
+     * rather than losing the session.
      *
-     * @param tasks   the tasks to write
-     * @param ui      used to report a failed save
-     * @param storage where to write them
+     * @param tasks Tasks to write.
+     * @param ui Used to report a failed save.
+     * @param storage Used to write them.
      */
     protected void save(TaskList tasks, Ui ui, Storage storage) {
         try {

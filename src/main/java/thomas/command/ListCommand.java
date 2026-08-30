@@ -5,17 +5,16 @@ import thomas.TaskList;
 import thomas.Ui;
 
 /**
- * Shows every stored task, numbered: the {@code list} command.
+ * Shows every stored task, numbered, serving the list command.
  */
 public class ListCommand extends Command {
     /**
      * Prints the whole task list.
-     * <p>
-     * Nothing is saved, because nothing changed.
+     * Nothing is saved, since nothing changed.
      *
-     * @param tasks   the tasks to show
-     * @param ui      used to print them
-     * @param storage unused
+     * @param tasks Tasks to show.
+     * @param ui Used to print them.
+     * @param storage Unused.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {

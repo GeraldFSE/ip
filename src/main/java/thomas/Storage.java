@@ -14,39 +14,27 @@ import thomas.task.TodoTask;
 
 /**
  * Loads tasks from the save file and writes them back to it.
- * <p>
- * The save file format is known here and nowhere else: the encoding side lives
- * on {@link Task#toSaveFormat()} and the decoding side lives in this class, so
- * changing how a task is stored means changing those two places and no others.
- * The rest of the program asks for tasks and hands back tasks, never lines.
- * <p>
- * A {@code Storage} is created with the path it works on rather than reading a
- * constant, so the caller decides where tasks are kept -- which is also what
- * lets a test point one at a throwaway file.
+ * The decoding side of the save file format is known here and the encoding side
+ * on the tasks themselves, so that the rest of the program asks for tasks and
+ * hands back tasks, never lines.
+ * The path is given by the caller rather than read from a constant, so that the
+ * caller decides where tasks are kept.
  */
 public class Storage {
-    /** Where the task list is read from and written to. */
+    /** Path the task list is read from and written to */
     private final String filePath;
 
-    /**
-     * Save file lines from the last {@link #load()} that could not be read.
-     * <p>
-     * Collected rather than printed, because printing is {@link Ui}'s job and
-     * this class does not know about the screen. The caller shows them after
-     * loading, which is when they were noticed, so the user still sees them
-     * before the first command runs.
-     */
+    /** Complaints about save file lines the last load could not read */
     private final ArrayList<String> skippedLines = new ArrayList<>();
 
     /**
      * Creates a storage over one file.
-     * <p>
      * A relative path resolves against the directory the program was started
-     * from. Nothing is opened here: a save file that does not exist yet is the
-     * normal first run, and is dealt with by {@link #load()}.
+     * from. Nothing is opened here, since a save file that does not exist yet is
+     * the normal first run.
      *
-     * @param filePath where the task list is kept, for example
-     *                 {@code "./data/tasklist.txt"}
+     * @param filePath Path the task list is kept at, for example
+     *                 "./data/tasklist.txt".
      */
     public Storage(String filePath) {
         this.filePath = filePath;
@@ -55,10 +43,10 @@ public class Storage {
     /**
      * Checks that a save file line holds exactly the fields its type needs.
      *
-     * @param fields   the line already split on the field separator
-     * @param expected how many fields this task type is written with
-     * @param line     the original line, quoted back in the error message
-     * @throws ThomasException if the count does not match
+     * @param fields Line already split on the field separator.
+     * @param expected Number of fields this task type is written with.
+     * @param line Original line, quoted back in the error message.
+     * @throws ThomasException If the count does not match.
      */
     private static void requireFieldCount(String[] fields, int expected, String line)
             throws ThomasException {
@@ -69,15 +57,14 @@ public class Storage {
     }
 
     /**
-     * Turns one line of the save file back into a task.
-     * <p>
-     * The line is split on the field separator rather than parsed out of the
-     * display text, so the shape is fixed and known: type letter, done flag,
-     * description, then whatever extra fields that type carries.
+     * Returns the task described by one line of the save file.
+     * The line is split on the field separator, so its shape is fixed and known:
+     * type letter, done flag, description, then any extra fields that type
+     * carries.
      *
-     * @param line one line of the save file, without its line separator
-     * @return the task the line describes
-     * @throws ThomasException if the type is unknown or fields are missing
+     * @param line One line of the save file, without its line separator.
+     * @return Task the line describes.
+     * @throws ThomasException If the type is unknown or fields are missing.
      */
     private static Task parseSavedTask(String line) throws ThomasException {
         // -1 keeps trailing empty fields, so a line ending in a separator is
@@ -121,28 +108,25 @@ public class Storage {
     }
 
     /**
-     * Returns the complaints about lines the last {@link #load()} had to skip.
-     * <p>
+     * Returns the complaints about lines the last load had to skip.
      * Empty when the file was read cleanly, which is the usual case. The caller
-     * shows these through {@link Ui}, so that this class stays free of any
-     * knowledge of how the user is talked to.
+     * shows these, so that this class stays free of any knowledge of how the
+     * user is talked to.
      *
-     * @return one message per skipped line, in the order the lines appeared
+     * @return One message per skipped line, in the order the lines appeared.
      */
     public ArrayList<String> getSkippedLines() {
         return skippedLines;
     }
 
     /**
-     * Reads the saved tasks.
-     * <p>
-     * A missing file is the normal first run, not an error, so it gives back an
-     * empty list. Individual unreadable lines are skipped and recorded in
-     * {@link #getSkippedLines()} rather than abandoning the whole file: one
-     * damaged line should not cost the user every other task.
+     * Returns the saved tasks.
+     * If the file does not exist the list is empty, since that is the normal
+     * first run. If a single line cannot be read it is skipped and recorded
+     * rather than abandoning the whole file.
      *
-     * @return the tasks the file holds, in the order they were written
-     * @throws IOException if the file exists but cannot be read
+     * @return Tasks the file holds, in the order they were written.
+     * @throws IOException If the file exists but cannot be read.
      */
     public ArrayList<Task> load() throws IOException {
         // Cleared rather than appended to, so a second load reports only what
@@ -177,13 +161,11 @@ public class Storage {
 
     /**
      * Writes every task to the save file, replacing what was there before.
-     * <p>
-     * The list is only read, never emptied: this runs after every change to the
-     * task list, so mutating it here would delete the tasks it is meant to be
-     * saving.
+     * The list is only read, never emptied, since this runs after every change
+     * to the task list.
      *
-     * @param tasks the tasks to write, left unchanged
-     * @throws IOException if the folder or file cannot be written
+     * @param tasks Tasks to write, left unchanged.
+     * @throws IOException If the folder or file cannot be written.
      */
     public void save(TaskList tasks) throws IOException {
         File file = new File(filePath);

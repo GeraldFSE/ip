@@ -7,16 +7,16 @@ import thomas.TaskList;
 import thomas.Ui;
 
 /**
- * Shows the tasks falling on one day: the {@code on <day>} command.
+ * Shows the tasks falling on one day, serving the on command.
  */
 public class OnCommand extends Command {
-    /** The day being asked about, already read from the typed line. */
+    /** Day being asked about, already read from the typed line */
     private final LocalDate day;
 
     /**
      * Creates the command for one day.
      *
-     * @param day the day to report on
+     * @param day Day to report on.
      */
     public OnCommand(LocalDate day) {
         this.day = day;
@@ -24,12 +24,11 @@ public class OnCommand extends Command {
 
     /**
      * Prints the tasks that fall on this command's day.
-     * <p>
-     * Nothing is saved, because nothing changed.
+     * Nothing is saved, since nothing changed.
      *
-     * @param tasks   the tasks to search
-     * @param ui      used to print the matches
-     * @param storage unused
+     * @param tasks Tasks to search.
+     * @param ui Used to print the matches.
+     * @param storage Unused.
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
