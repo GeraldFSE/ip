@@ -18,7 +18,7 @@ Unless the user says otherwise, assume that you are assisting a student working 
 * Keep explanations brief but instructive, supporting learning through responsible use of AI. For example:
 
   * When suggesting a Git command, briefly explain what it does.
-  * Add explanatory Javadoc comments to all classes and to nontrivial methods and fields when their purpose or behavior is not obvious.
+  * Add explanatory Javadoc comments as "Comments and Javadoc" below requires, and in the format it sets out.
   * Make generated code as self-explanatory as possible, and include explanatory comments where they improve understanding.
   * When faced with a design choice, choose the simplest option that is sufficient for the requirements, while briefly explaining relevant more advanced alternatives.
 
@@ -27,6 +27,50 @@ Unless the user says otherwise, assume that you are assisting a student working 
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
+
+## Comments and Javadoc
+
+All comments are written in English, in American spelling, and without local slang — the code is meant for an international audience. Indent a comment to the level of the code it describes; a trailing comment on the same line as a statement is fine.
+
+### Where header comments are required
+
+Write one for every class, and for every public method. They may be omitted only for getters and setters, for an overridden method whose parent Javadoc applies exactly as it stands, and in test classes. All non-trivial private methods carry one too: if a method is hard to describe in a sentence, that is a sign the method is doing too much, and the comment is what surfaces it.
+
+### The format
+
+```java
+/**
+ * Returns lateral location of the specified position.
+ * If the position is unset, NaN is returned.
+ *
+ * @param x X coordinate of position.
+ * @param y Y coordinate of position.
+ * @param zone Zone of position.
+ * @return Lateral location.
+ * @throws IllegalArgumentException If zone is <= 0.
+ */
+public double computeLocation(double x, double y, int zone)
+        throws IllegalArgumentException {
+```
+
+Follow it exactly:
+
+* `/**` on its own line, subsequent `*` aligned under the first, a space after each `*`, and no blank line between the block and what it documents.
+* The first sentence is a short summary, since Javadoc lifts it into the summary table and index. A method's starts in the third person — `Returns …`, `Sends …`, `Adds …` — never `Return` or `Returning`.
+* Any further explanation follows as plain sentences, usually in the form `If …, then …`. Keep it short and targeted: a few sentences, not an essay.
+* One blank `*` line between the description and the tag block.
+* Every `@param`, `@return` and `@throws` description starts with a capital letter and ends with a period.
+* `@return` may be omitted when the method returns nothing, or when the return value is already obvious from the description.
+* `@param` is all-or-nothing: document every parameter, or none. Omit them only when every name is self-explanatory or already covered in the description.
+* Use `{@inheritDoc}` when an overridden method needs the parent's comment plus a note about how it differs.
+* A field's Javadoc goes on one line, with no closing period: `/** Number of connections to this database */`.
+
+### Two project conventions, stricter than the above
+
+* **No inline tags.** Do not write `{@link …}`, `{@code …}`, `<p>`, or any other HTML or inline Javadoc markup. Refer to types and methods in plain prose. This keeps the comments readable as source and avoids links that silently fail to resolve across packages, which had happened more than once before the rule.
+* **Explain the decision, not the mechanism.** Where a design choice would otherwise look arbitrary — why a check lives in one class rather than another, why two classes are separate — state the reason in one sentence. Do not restate what the signature already says.
+
+When removing an inline tag from a comment, check whether it was the only use of an import; `checkstyleMain` and `checkstyleTest` fail on the unused import that is left behind.
 
 ## Testing
 
