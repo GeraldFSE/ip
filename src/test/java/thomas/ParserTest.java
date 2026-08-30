@@ -272,6 +272,54 @@ public class ParserTest {
                 "event project meeting /from 2019-12-02 1400 /to 2019-12-02 1400"));
     }
 
+    // ---- descriptions holding the save file's field separator ----
+
+    /**
+     * A description containing " | " is refused as it is typed, because it could
+     * not survive being saved: the task would be accepted and listed, then lost
+     * on the next run. All three add commands are checked, since the rule is one
+     * helper called from three places rather than one inherited check.
+     */
+    @Test
+    public void parse_todoDescriptionWithSeparator_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("todo read book | and return it"));
+        assertEquals("HEYY!! A description can't contain ' | ' -- "
+                + "that's how I keep your tasks in the save file.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deadlineDescriptionWithSeparator_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline read book | and return it /by 2019-12-02 1800"));
+        assertEquals("HEYY!! A description can't contain ' | ' -- "
+                + "that's how I keep your tasks in the save file.", e.getMessage());
+    }
+
+    @Test
+    public void parse_eventDescriptionWithSeparator_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("event talk | and lunch /from 2019-12-02 1400 /to 2019-12-02 1600"));
+        assertEquals("HEYY!! A description can't contain ' | ' -- "
+                + "that's how I keep your tasks in the save file.", e.getMessage());
+    }
+
+    /**
+     * Only the separator as the save file writes it is refused. A bare pipe
+     * saves and loads back correctly, so refusing it too would take away a
+     * character the format has no trouble with.
+     */
+    @Test
+    public void parse_todoDescriptionWithBarePipe_returnsAddCommand() throws ThomasException {
+        assertInstanceOf(AddCommand.class, Parser.parse("todo read book|and return it"));
+    }
+
+    /** A pipe with a space on one side only is likewise not the separator. */
+    @Test
+    public void parse_todoDescriptionWithHalfSpacedPipe_returnsAddCommand() throws ThomasException {
+        assertInstanceOf(AddCommand.class, Parser.parse("todo read book |and return it"));
+    }
+
     // ---- mark, unmark and delete ----
 
     @Test

@@ -64,6 +64,17 @@ public class Task {
             DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
 
     /**
+     * What separates one field from the next in the save file.
+     * <p>
+     * Named here, beside the {@link #toSaveFormat()} that writes it, so that the
+     * parser can refuse a description containing it without holding a second
+     * copy of the same literal. {@link thomas.Storage} splits on it as a regular
+     * expression, where the {@code |} must be escaped, so it keeps its own
+     * spelling of it rather than using this one.
+     */
+    public static final String FIELD_SEPARATOR = " | ";
+
+    /**
      * Turns a date written in {@link #DATE_INPUT_FORMAT} into a
      * {@link LocalDateTime}.
      * <p>
@@ -177,6 +188,6 @@ public class Task {
      * @return for example {@code "1 | read book"}
      */
     public String toSaveFormat() {
-        return (isDone ? "1" : "0") + " | " + this.description;
+        return (isDone ? "1" : "0") + FIELD_SEPARATOR + this.description;
     }
 }

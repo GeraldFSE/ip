@@ -1735,17 +1735,32 @@ bye
 {{FAREWELL}}
 ```
 
-### TC43: A save file line that cannot be read is skipped, not fatal
+### TC43: A description containing the save file's field separator is rejected
 
-**Aim:** One unreadable line costs only that task: it is reported and skipped,
-and the remaining lines still load. A description containing the field separator
-`" | "` is the way to produce such a line without editing the file by hand -- it
-saves as an extra field, which is the known limitation noted below.
+**Aim:** A description holding `" | "` is refused as it is typed, by all three
+add commands. Such a description cannot survive being saved -- it writes a line
+with an extra field, which the loader refuses -- so accepting it would mean
+confirming the task, listing it, and then losing it on the next start-up, with a
+complaint about a save file line the user never knew existed. Refusing it while
+the user is still looking at it turns a silent loss into something they can act
+on.
+
+The second run is what shows the loss is really prevented: the tasks that were
+accepted all come back, and no skipped-line complaint appears, so nothing
+unreadable was written.
+
+Previously this case pinned down the opposite behaviour -- `todo a | b` was
+accepted and skipped on reload -- and it was the only way to produce an
+unreadable save file line through the UI. That path is now closed, so the
+loader's skip-and-report behaviour is no longer reachable from the UI; it is
+covered by `StorageTest` instead, and noted under "Not yet covered" below.
 
 **Input:**
 
 ```text
 todo a | b
+deadline a | b /by 2019-12-02 1800
+event a | b /from 2019-12-02 1400 /to 2019-12-04 1600
 todo read book
 bye
 ```
@@ -1762,23 +1777,78 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
-        [T][ ] a | b
-     Now you have 1 task(s) in the list.
+     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
+    ____________________________________________________________
+    ____________________________________________________________
+     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
+    ____________________________________________________________
+    ____________________________________________________________
+     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
     ____________________________________________________________
     ____________________________________________________________
      Got it. I've added this task:
         [T][ ] read book
-     Now you have 2 task(s) in the list.
+     Now you have 1 task(s) in the list.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Skipping a line I could not read: expected 3 fields but found 4: T | 0 | a | b
-    ____________________________________________________________
-    ____________________________________________________________
      Here are the tasks in your list:
      1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC43a: A pipe that is not the separator is still allowed
+
+**Aim:** The boundary of TC43. Only `" | "` exactly, spaces and all, breaks the
+save format; a bare pipe or one spaced on a single side splits into no extra
+field and survives a restart unharmed. Guards the check being `contains(" | ")`
+rather than something looser that would take away a character the format handles
+perfectly well.
+
+**Input:**
+
+```text
+todo a|b
+todo c |d
+todo e| f
+bye
+```
+
+**Input:**
+
+```text
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] a|b
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] c |d
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] e| f
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] a|b
+     2. [T][ ] c |d
+     3. [T][ ] e| f
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2177,13 +2247,22 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.
-* **A description containing the save file's field separator.** `todo a | b` is
-  accepted and shown correctly, but saves as a line with an extra field, so the
-  task is skipped on the next start-up rather than coming back. TC43 pins that
-  behaviour down as a reported skip rather than silent truncation, but the task
-  is still lost. Fixing it properly means escaping the separator when writing, or
-  putting the description last so the rest of the line can be split off before
-  it; both are more machinery than this increment needs.
+* **A save file line that cannot be read.** No longer reachable through the UI.
+  A description containing `" | "` used to produce one, and TC43 used to test it
+  that way; that description is now refused as it is typed, and every other line
+  the chatbot writes it wrote itself, in the format it reads. So the loader's
+  skip-and-report path -- one damaged line costing only its own task, the rest
+  still loading -- has no UI case any more. It is covered by `StorageTest`
+  instead, which writes damaged files directly and checks both halves: the
+  complaint each kind of damage earns, and that the surrounding lines still
+  loaded.
+* **Keeping a description that contains the separator.** Refusing it is the
+  simple option, and it costs the user a character sequence they will rarely
+  want. Accepting it would mean escaping the separator when writing and
+  unescaping when reading, or putting the description last so the rest of the
+  line can be split off before it -- either puts an encoder and a decoder into
+  the one class where a bug costs data, for a case that is close to never. Worth
+  revisiting only if descriptions with pipes turn out to matter.
 * **Losing the save file mid-session.** The save is written after every change,
   so a chatbot killed outright should lose nothing. Confirming that needs the
   process to be killed rather than fed end-of-input, which the test script has no
