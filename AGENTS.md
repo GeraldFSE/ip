@@ -78,6 +78,17 @@ A change is not finished until both suites have been run and reported. If a chan
 
 ## Git
 
-Use lightweight tags unless the user requests an annotated tag.
-When proposing or creating a commit message, include enough detail to explain the rationale for the change.
-Do not commit or push unless explicitly asked.
+All commits and branches in this project follow the SE-EDU Git conventions: <https://se-education.org/guides/conventions/git.html>.
+
+**Invoke the `seedu-git-standard` skill before writing or proposing any commit message, and before naming a branch.** It carries the full rule set. The parts most easily got wrong:
+
+* The subject is imperative, capitalized, has no closing period, and stays within 72 characters — aim for 50.
+* The body is wrapped at **72 characters**, separated from the subject by a blank line.
+* The body explains **what** changed and **why**, never **how**. The diff shows how. It should let a reader judge whether the change was a good idea without opening the diff.
+* Do not write "currently" or "originally" — the present tense implies both.
+* A body that keeps growing is a sign the commit should be split, not that the message needs more paragraphs.
+
+Also:
+
+* Use lightweight tags unless the user requests an annotated tag.
+* Do not commit or push unless explicitly asked. Proposing a message is not permission to commit it.
