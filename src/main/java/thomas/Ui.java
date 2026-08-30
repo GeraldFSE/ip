@@ -191,6 +191,28 @@ public class Ui {
     }
 
     /**
+     * Prints the tasks whose description contains a keyword.
+     * <p>
+     * Numbered by list position, exactly as {@link #showTasksOnDay} is, so a
+     * number shown here is the number {@code mark} and {@code delete} take.
+     * The header is printed whether or not anything matched, so an empty search
+     * says so rather than printing nothing at all.
+     *
+     * @param tasks   the whole task list
+     * @param keyword the text that was searched for
+     */
+    public void showMatchingTasks(TaskList tasks, String keyword) {
+        // As in showTasksOnDay: how many tasks match is not known until they
+        // have been tested, so the entries are collected rather than sized.
+        ArrayList<String> entries = new ArrayList<>();
+        entries.add("Here are the matching tasks in your list:");
+        for (int position : tasks.positionsMatching(keyword)) {
+            entries.add((position + 1) + ". " + tasks.get(position));
+        }
+        showBlock(entries.toArray(new String[0]));
+    }
+
+    /**
      * Prints the tasks that fall on one day.
      * <p>
      * Which tasks match is {@link TaskList}'s question, and it answers with

@@ -10,6 +10,7 @@ import thomas.command.AddCommand;
 import thomas.command.Command;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
+import thomas.command.FindCommand;
 import thomas.command.ListCommand;
 import thomas.command.MarkCommand;
 import thomas.command.OnCommand;
@@ -369,6 +370,36 @@ public class ParserTest {
     public void parse_markDecimalNumber_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark 1.5"));
         assertEquals("WHAT? Why are you passing a non integer?! Give me an INTEGER!!", e.getMessage());
+    }
+
+    // ---- find ----
+
+    @Test
+    public void parse_findWithKeyword_returnsFindCommand() throws ThomasException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find book"));
+    }
+
+    /**
+     * The whole argument is the keyword, so a search of several words looks for
+     * the phrase rather than for any one of them. Splitting on spaces here would
+     * quietly change what the user asked for.
+     */
+    @Test
+    public void parse_findWithSeveralWords_returnsFindCommand() throws ThomasException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find read book"));
+    }
+
+    @Test
+    public void parse_findWithoutKeyword_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("find"));
+        assertEquals("HEYY!! What am I looking for? Give me a keyword!", e.getMessage());
+    }
+
+    /** A keyword of spaces alone is as missing as no keyword at all. */
+    @Test
+    public void parse_findBlankKeyword_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("find    "));
+        assertEquals("HEYY!! What am I looking for? Give me a keyword!", e.getMessage());
     }
 
     // ---- on ----

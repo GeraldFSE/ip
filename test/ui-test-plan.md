@@ -2228,6 +2228,238 @@ bye
 {{FAREWELL}}
 ```
 
+### TC54: `find` shows the tasks whose description contains the keyword
+
+**Aim:** `find <keyword>` lists the tasks whose description contains that text
+and leaves out the ones that do not. Every task type is searched, so a matching
+deadline and event appear beside a matching todo.
+
+The numbers shown are the tasks' positions in the whole list, not their
+positions among the matches, as for `on`: TC56 is what pins that down.
+
+**Input:**
+
+```text
+todo read book
+todo buy milk
+deadline return book /by 2019-12-02 1800
+event book club /from 2019-12-03 1400 /to 2019-12-03 1600
+find book
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy milk
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [E][ ] book club (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
+     Now you have 4 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+     1. [T][ ] read book
+     3. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     4. [E][ ] book club (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC55: `find` with no match, and with no keyword
+
+**Aim:** A search that matches nothing prints the header and nothing else,
+rather than failing or staying silent, the same boundary TC49 guards for `on`.
+A search with no keyword at all is a different thing and is rejected.
+
+**Input:**
+
+```text
+todo read book
+find homework
+find
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+    ____________________________________________________________
+    ____________________________________________________________
+     HEYY!! What am I looking for? Give me a keyword!
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC56: The number `find` shows is the number `mark` takes
+
+**Aim:** The numbers beside the matches are list positions, so marking the
+number `find` printed marks the task that was shown. The matches here are tasks
+2 and 4, so numbering them 1 and 2 would send `mark 2` to the wrong task -- the
+closing `list` is what shows which task was really marked.
+
+This is the `find` counterpart of TC47, which pins the same rule for `on`.
+
+**Input:**
+
+```text
+todo buy milk
+todo read book
+todo call mum
+todo return book
+find book
+mark 2
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy milk
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] call mum
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] return book
+     Now you have 4 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+     2. [T][ ] read book
+     4. [T][ ] return book
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] buy milk
+     2. [T][X] read book
+     3. [T][ ] call mum
+     4. [T][ ] return book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC57: `find` matches on the description only, and is case sensitive
+
+**Aim:** The search reads the description, never the displayed line, so the
+type tag and the formatted date are not searchable: `find [T]` matches nothing
+even though every todo shows `[T]`. Matching is case sensitive, as command
+keywords are, so `find Book` does not find "read book".
+
+**Input:**
+
+```text
+todo read book
+deadline pay fine /by 2019-12-02 1800
+find [T]
+find Dec
+find Book
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [D][ ] pay fine (by: Dec 02 2019, 6:00 PM)
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC58: `find` searches for the whole argument, spaces included
+
+**Aim:** The keyword is the whole argument, so `find read book` looks for that
+phrase rather than for either word. Guards against splitting the argument on
+spaces, which would silently widen the search: "buy book" would match a search
+for "read book" if either word were enough.
+
+**Input:**
+
+```text
+todo read book
+todo buy book
+find read book
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy book
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
@@ -2274,6 +2506,14 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   the UI: every date the chatbot writes it wrote from a `LocalDateTime`, in the
   same format it reads, so it can always read it back. Reaching this needs the
   file edited by hand, which the test script does not do.
+* **A case-insensitive `find`.** `find Book` does not match "read book", since
+  the search is a plain substring test and case sensitive, as keyword matching
+  is everywhere else in the chatbot. TC57 pins that behavior down rather than
+  leaving it unstated. Ignoring case would be friendlier and is the obvious next
+  change, but it is a change in behavior rather than an oversight.
+* **Searching for several keywords at once.** `find read book` looks for the
+  phrase, not for either word, which TC58 pins down. Matching any of several
+  words needs a rule for how they combine, and that rule is not asked for yet.
 * **The order `on` lists its matches in.** They come out in list order, not in
   order of the time they happen at, so a 6 PM deadline can be shown above a
   2 PM event. Sorting them would read better but would break the numbering

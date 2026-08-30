@@ -405,4 +405,87 @@ public class TaskListTest {
         assertEquals(List.of("[T][ ] read book",
                 "[D][ ] return book (by: Dec 02 2019, 6:00 PM)"), contentsOf(list));
     }
+
+    // ---- positionsMatching ----
+
+    @Test
+    public void positionsMatching_emptyList_returnsNoPositions() {
+        assertTrue(new TaskList().positionsMatching("book").isEmpty());
+    }
+
+    @Test
+    public void positionsMatching_noTaskContainsKeyword_returnsNoPositions() {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("buy milk"));
+
+        assertTrue(list.positionsMatching("homework").isEmpty());
+    }
+
+    @Test
+    public void positionsMatching_oneTaskContainsKeyword_returnsItsPosition() {
+        TaskList list = listOf(new TodoTask("buy milk"), new TodoTask("read book"));
+
+        assertEquals(List.of(1), list.positionsMatching("book"));
+    }
+
+    /**
+     * The positions returned are positions in the whole list, not the count of
+     * matches so far, as for positionsOn. Non-matching tasks are placed first
+     * and in between, so numbering the matches 1, 2, 3 would give [0, 1] and be
+     * caught here.
+     */
+    @Test
+    public void positionsMatching_severalMatches_returnsWholeListPositions() {
+        TaskList list = listOf(
+                new TodoTask("buy milk"),
+                new TodoTask("read book"),
+                new TodoTask("call mum"),
+                deadlineOn("return book", DEC_02));
+
+        assertEquals(List.of(1, 3), list.positionsMatching("book"));
+    }
+
+    /** Every task type is searched, not only to-dos. */
+    @Test
+    public void positionsMatching_everyTaskType_allSearched() throws ThomasException {
+        TaskList list = listOf(
+                new TodoTask("book a room"),
+                deadlineOn("return book", DEC_02),
+                eventFrom("book club", DEC_02, DEC_03));
+
+        assertEquals(List.of(0, 1, 2), list.positionsMatching("book"));
+    }
+
+    /** A keyword inside a word still matches, since the test is on substrings. */
+    @Test
+    public void positionsMatching_keywordInsideWord_matches() {
+        TaskList list = listOf(new TodoTask("read bookmark"));
+
+        assertEquals(List.of(0), list.positionsMatching("book"));
+    }
+
+    /** Matching is case sensitive, as command keywords are. */
+    @Test
+    public void positionsMatching_differentCase_doesNotMatch() {
+        TaskList list = listOf(new TodoTask("read Book"));
+
+        assertTrue(list.positionsMatching("book").isEmpty());
+    }
+
+    /** Matches come back in list order, whatever order they were added in. */
+    @Test
+    public void positionsMatching_severalMatches_returnsPositionsInListOrder() {
+        TaskList list = listOf(new TodoTask("book two"), new TodoTask("book one"));
+
+        assertEquals(List.of(0, 1), list.positionsMatching("book"));
+    }
+
+    /** Searching must not change the list. */
+    @Test
+    public void positionsMatching_anyKeyword_listUnchanged() {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("buy milk"));
+
+        list.positionsMatching("book");
+
+        assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk"), contentsOf(list));
+    }
 }

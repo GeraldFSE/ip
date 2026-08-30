@@ -174,6 +174,28 @@ public class Task {
     }
 
     /**
+     * Returns whether this task's description contains a keyword.
+     * <p>
+     * Asking the task rather than reading its description keeps
+     * {@code description} to itself, exactly as {@link #occursOn(LocalDate)}
+     * does for the dates: {@link thomas.TaskList} can filter without any task
+     * type having to expose what it holds.
+     * <p>
+     * The match is on the description alone, not on {@link #toString()}, so a
+     * search never hits the type tag or a formatted date. Searching for
+     * {@code "D"} finds the tasks with a D in their text, not every deadline.
+     * <p>
+     * Matching is case sensitive, as command keywords are. A search that
+     * ignored case would be friendlier, and is the obvious next change here.
+     *
+     * @param keyword the text to look for, as the user typed it
+     * @return true if the description contains that text
+     */
+    public boolean matches(String keyword) {
+        return description.contains(keyword);
+    }
+
+    /**
      * Returns this task encoded for the save file.
      * <p>
      * This is deliberately separate from {@link #toString()}: that one is for

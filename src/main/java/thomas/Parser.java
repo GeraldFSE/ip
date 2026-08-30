@@ -9,6 +9,7 @@ import thomas.command.Command;
 import thomas.command.CommandType;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
+import thomas.command.FindCommand;
 import thomas.command.ListCommand;
 import thomas.command.MarkCommand;
 import thomas.command.OnCommand;
@@ -88,6 +89,7 @@ public class Parser {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
             case ON -> new OnCommand(parser.parseDay());
+            case FIND -> new FindCommand(parser.parseKeyword());
             case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
             case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
             case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
@@ -197,6 +199,24 @@ public class Parser {
             throw new ThomasException("I can't read '" + text + "' as a day! "
                     + "Write it as 2019-12-02.");
         }
+    }
+
+    /**
+     * Reads the keyword given to {@code find}.
+     * <p>
+     * The whole argument is the keyword, spaces and all, so
+     * {@code find read book} searches for the phrase rather than for either
+     * word: splitting it would make a search of several words mean something
+     * the user did not ask for.
+     * <p>
+     * Only that a keyword was given is settled here. Whether any task contains
+     * it is {@link TaskList}'s to answer, since a parser never sees the list.
+     *
+     * @return the text to search for, with surrounding spaces removed
+     * @throws ThomasException if no keyword was given
+     */
+    private String parseKeyword() throws ThomasException {
+        return requireArgument("HEYY!! What am I looking for? Give me a keyword!");
     }
 
     /**

@@ -151,4 +151,29 @@ public class TaskList {
         }
         return positions;
     }
+
+    /**
+     * Returns the positions of the tasks whose description contains a keyword.
+     * <p>
+     * Positions rather than the tasks themselves, for the same reason as
+     * {@link #positionsOn(LocalDate)}: the caller numbers each match by where it
+     * sits in the whole list, so a number shown is the number {@code mark} and
+     * {@code delete} take. Numbering the matches 1, 2, 3 would read more tidily
+     * and send the user to the wrong task.
+     * <p>
+     * Which tasks match is {@link Task#matches(String)}'s to decide, so this
+     * never reads a description itself.
+     *
+     * @param keyword the text to look for, as the user typed it
+     * @return the positions of the matching tasks, counting from 0, in list order
+     */
+    public ArrayList<Integer> positionsMatching(String keyword) {
+        ArrayList<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).matches(keyword)) {
+                positions.add(i);
+            }
+        }
+        return positions;
+    }
 }
