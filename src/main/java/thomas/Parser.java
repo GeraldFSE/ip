@@ -85,15 +85,15 @@ public class Parser {
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
         return switch (parser.commandType) {
-        case BYE -> new ExitCommand();
-        case LIST -> new ListCommand();
-        case ON -> new OnCommand(parser.parseDay());
-        case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
-        case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
-        case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
-        // The three add commands differ only in the task they build, which
-        // parseNewTask settles, so one AddCommand serves all three.
-        case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
+            case BYE -> new ExitCommand();
+            case LIST -> new ListCommand();
+            case ON -> new OnCommand(parser.parseDay());
+            case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
+            case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
+            case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
+            // The three add commands differ only in the task they build, which
+            // parseNewTask settles, so one AddCommand serves all three.
+            case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
         };
     }
 
@@ -184,12 +184,12 @@ public class Parser {
      */
     private Task parseNewTask() throws ThomasException {
         return switch (commandType) {
-        case TODO -> parseTodo();
-        case DEADLINE -> parseDeadline();
-        case EVENT -> parseEvent();
-        // Reached only by calling this for a command that adds no task, which
-        // is a mistake in the caller rather than anything the user did.
-        default -> throw new AssertionError("Not an add command: " + commandType);
+            case TODO -> parseTodo();
+            case DEADLINE -> parseDeadline();
+            case EVENT -> parseEvent();
+            // Reached only by calling this for a command that adds no task, which
+            // is a mistake in the caller rather than anything the user did.
+            default -> throw new AssertionError("Not an add command: " + commandType);
         };
     }
 
