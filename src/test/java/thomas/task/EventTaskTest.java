@@ -12,20 +12,15 @@ import org.junit.jupiter.api.Test;
 import thomas.ThomasException;
 
 /**
- * Tests {@link EventTask}.
- * <p>
+ * Tests EventTask.
  * This is the task type with real logic in it, in two places. The constructor
  * refuses an event that ends before it starts, and refuses it there rather than
  * in the command that reads one, so that loading the save file is held to the
- * same rule -- a line edited by hand cannot bring back an event no command could
- * have created. The cases below therefore check the rule at the constructor, and
- * {@link thomas.StorageTest} checks that loading is really held to it.
- * <p>
- * {@code occursOn} is a range test with both ends included, and both ends are
- * tested. The reading that first suggests itself,
- * {@code day.isAfter(start) && day.isBefore(end)}, drops the first and last day
- * of every event while still passing any test that only asks about the middle,
- * so the middle alone would not be evidence of anything.
+ * same rule. The cases below check the rule at the constructor, and StorageTest
+ * checks that loading is really held to it.
+ * The occursOn method is a range test with both ends included, and both ends
+ * are tested. Testing the middle alone would still pass if the first and last
+ * day of every event were dropped.
  */
 public class EventTaskTest {
 

@@ -13,21 +13,16 @@ import org.junit.jupiter.api.Test;
 import thomas.ThomasException;
 
 /**
- * Tests {@link Task} itself: the date reading and formats every task type
- * shares, and the completion state they all carry.
- * <p>
- * {@link Task#parseDate} is the piece worth testing hardest. It is static and
- * pure, both the command handling and the save file loader go through it, and it
- * is the one place that decides what counts as a date -- so a mistake in it is
- * felt at the keyboard and in the save file at once. Its failures are already
- * seen through the parser, but only its failures: the parser puts what comes
- * back into a private field, so nothing until now has checked that a date that
- * does parse parses to the right moment.
- * <p>
+ * Tests Task itself: the date reading and formats every task type shares, and
+ * the completion state they all carry.
+ * The parseDate method is tested hardest, since both the command handling and
+ * the save file loader go through it, so a mistake there is felt at the
+ * keyboard and in the save file at once. Its failures are already seen through
+ * the parser, but only its failures, since the parser puts what comes back into
+ * a private field.
  * The display formats are pinned for the same reason. They are what the user
- * reads, and a pattern is easy to get subtly wrong -- {@code mm} against
- * {@code MM}, {@code hh} against {@code HH} -- in a way that still compiles and
- * still produces something date-shaped.
+ * reads, and a pattern is easy to get subtly wrong in a way that still compiles
+ * and still produces something date-shaped.
  */
 public class TaskTest {
 
@@ -113,17 +108,13 @@ public class TaskTest {
     }
 
     /**
-     * A day that does not exist in its month is NOT refused: it is quietly moved
-     * to the last day of that month. {@code DateTimeFormatter.ofPattern} resolves
-     * in {@code ResolverStyle.SMART} unless told otherwise, and smart resolution
-     * adjusts an out-of-range day rather than rejecting it.
-     * <p>
-     * This is recorded rather than asserted away, because it is the behaviour the
+     * A day that does not exist in its month is NOT refused, but quietly moved
+     * to the last day of that month, since the date formatter resolves smartly
+     * unless told otherwise.
+     * This is recorded rather than asserted away, since it is the behavior the
      * user meets today: "deadline submit /by 2019-02-30 1800" is accepted and
-     * stored as the 28th, with nothing said. Adding
-     * {@code .withResolverStyle(ResolverStyle.STRICT)} to
-     * {@link Task#DATE_INPUT_FORMAT} would make this throw instead, and this case
-     * would then be the one that tells you the change worked.
+     * stored as the 28th, with nothing said. Resolving strictly instead would
+     * make this throw, and this case would then confirm the change worked.
      */
     @Test
     public void parseDate_dayOutsideItsMonth_clampedToLastDayOfMonth() throws ThomasException {
@@ -262,7 +253,7 @@ public class TaskTest {
     /**
      * The save format writes the completion state as a digit rather than as the
      * icon, so the loader never has to strip brackets, and stays separate from
-     * {@link Task#toString()} so that restyling the display cannot break loading.
+     * the display format so that restyling it cannot break loading.
      */
     @Test
     public void toSaveFormat_notDoneTask_writesZeroThenDescription() {
@@ -281,8 +272,8 @@ public class TaskTest {
 
     /**
      * A plain task carries no date, so it falls on no day. The dated subclasses
-     * override this, which is what lets the {@code on} command filter the list
-     * without asking any task what type it is.
+     * override this, which is what lets the on command filter the list without
+     * asking any task what type it is.
      */
     @Test
     public void occursOn_plainTask_isNeverOnAnyDay() {

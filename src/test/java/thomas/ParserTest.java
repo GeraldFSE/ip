@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import thomas.command.AddCommand;
-import thomas.command.Command;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
 import thomas.command.ListCommand;
@@ -16,20 +15,16 @@ import thomas.command.OnCommand;
 import thomas.command.UnmarkCommand;
 
 /**
- * Tests {@link Parser#parse(String)}.
- * <p>
- * {@code parse} is tested rather than any other method because it is a pure
- * function of one string: it reads no file, prints nothing and keeps no state
- * between calls, so a test can hand it a line and check what comes back without
- * any setting up or tearing down. It is also where every rule about the shape of
- * the input lives, which makes it the one place a typo in a separator or a
- * message can be caught.
- * <p>
+ * Tests the parse method.
+ * It is tested ahead of any other method because it is a pure function of one
+ * string: it reads no file, prints nothing and keeps no state between calls, so
+ * a test can hand it a line and check what comes back without any setting up or
+ * tearing down. It is also where every rule about the shape of the input lives,
+ * which makes it the one place a typo in a separator or a message is caught.
  * Two things are checked of each line. A line that is understood must produce
- * the right kind of {@link Command}; a line that is not must fail with the
- * message the user is meant to read, so these tests pin the wording as well as
- * the fact of the failure. The commands keep their parsed arguments private,
- * which is deliberate -- nothing but {@code execute} needs them -- so the tests
+ * the right kind of command, and a line that is not must fail with the message
+ * the user is meant to read, so these tests pin the wording as well as the fact
+ * of the failure. The commands keep their parsed arguments private, so the tests
  * assert the command's type and leave what it does with those arguments to the
  * text-UI tests.
  */
@@ -70,7 +65,7 @@ public class ParserTest {
         assertEquals("Erm sorry, what does that mean again?", e.getMessage());
     }
 
-    /** Matching is case sensitive, so {@code List} is not the {@code list} command. */
+    /** Matching is case sensitive, so "List" is not the list command. */
     @Test
     public void parse_wrongCaseKeyword_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("List"));
@@ -253,9 +248,9 @@ public class ParserTest {
     }
 
     /**
-     * An event running backwards is refused, though not by the parser: the
-     * check is {@link thomas.task.EventTask}'s constructor, so that loading the
-     * save file is held to it too, and the parser lets the exception through.
+     * An event running backwards is refused, though not by the parser. The
+     * check is the event constructor, so that loading the save file is held to
+     * it too, and the parser lets the exception through.
      */
     @Test
     public void parse_eventEndingBeforeItStarts_exceptionThrown() {
@@ -390,7 +385,7 @@ public class ParserTest {
         assertEquals("I can't read 'tomorrow' as a day! Write it as 2019-12-02.", e.getMessage());
     }
 
-    /** {@code on} asks about a whole day, so a time is refused rather than ignored. */
+    /** The on command asks about a whole day, so a time is refused. */
     @Test
     public void parse_onDayWithTime_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("on 2019-12-02 1800"));

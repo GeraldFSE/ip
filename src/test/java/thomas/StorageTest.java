@@ -21,49 +21,60 @@ import thomas.task.Task;
 import thomas.task.TodoTask;
 
 /**
- * Tests {@link Storage}.
- * <p>
- * This is the class where a bug costs the user something they cannot get back:
- * every other mistake in the program is visible on screen and survives until the
- * next command, while a save file written wrongly or read wrongly loses tasks
- * silently, between one run and the next. That is what makes it worth testing
- * ahead of the display code.
- * <p>
+ * Tests Storage.
+ * This is the class where a bug costs the user something they cannot get back.
+ * Every other mistake is visible on screen and survives until the next command,
+ * while a save file written or read wrongly loses tasks silently between one run
+ * and the next.
  * Decoding is the part with the decisions in it, and it is deliberately strict:
  * each task type is written with an exact number of fields, so a description
- * that happens to contain the field separator is refused rather than loaded back
- * truncated. A damaged line is skipped and complained about rather than
- * abandoning the file, so the cases below check both halves of that -- what was
- * skipped, and that everything else still loaded.
- * <p>
- * {@code parseSavedTask} is private, which is right: nothing outside needs to
- * turn a line into a task. It is reached here through {@link Storage#load()}
- * against a real file in a temporary folder, which is what {@code Storage}
- * taking its path as an argument is for. JUnit creates and removes that folder,
- * so no case can see another's file.
+ * holding the field separator is refused rather than loaded back truncated. A
+ * damaged line is skipped and complained about rather than abandoning the file,
+ * so the cases below check both halves of that.
+ * The decoder itself is private, and is reached here through load against a real
+ * file in a temporary folder that JUnit creates and removes, so no case can see
+ * another's file.
  */
 public class StorageTest {
 
-    /** A folder JUnit makes fresh for each test and deletes afterwards. */
+    /** Folder JUnit makes fresh for each test and deletes afterwards */
     @TempDir
     private Path folder;
 
-    /** The save file each case works on, inside that folder. */
+    /**
+     * Returns the save file each case works on, inside the temporary folder.
+     *
+     * @return Path to this case's save file.
+     */
     private Path saveFile() {
         return folder.resolve("tasklist.txt");
     }
 
-    /** Creates a storage over this case's save file. */
+    /**
+     * Returns a storage over this case's save file.
+     *
+     * @return New storage.
+     */
     private Storage storage() {
         return new Storage(saveFile().toString());
     }
 
-    /** Writes the given lines to the save file as the whole of its contents. */
+    /**
+     * Writes the given lines to the save file as the whole of its contents.
+     *
+     * @param lines Lines to write.
+     * @throws IOException If the file cannot be written.
+     */
     private void writeSaveFile(String... lines) throws IOException {
         Files.write(saveFile(), List.of(lines));
     }
 
-    /** Returns the save file's lines, ignoring how they were separated. */
+    /**
+     * Returns the save file's lines, ignoring how they were separated.
+     *
+     * @return Lines the file holds, in order.
+     * @throws IOException If the file cannot be read.
+     */
     private List<String> readSaveFile() throws IOException {
         return Files.readAllLines(saveFile());
     }
@@ -251,9 +262,9 @@ public class StorageTest {
     }
 
     /**
-     * Loading goes through {@link EventTask}'s constructor, so a line edited by
-     * hand to run backwards is refused here too rather than loading an event no
-     * command could have created.
+     * Loading goes through the event constructor, so a line edited by hand to
+     * run backwards is refused here too rather than loading an event no command
+     * could have created.
      */
     @Test
     public void load_eventEndingBeforeItStarts_lineSkipped() throws IOException {
@@ -391,9 +402,9 @@ public class StorageTest {
 
     /**
      * The point of the whole class: whatever is written can be read back as the
-     * same tasks. Encoding lives on the tasks and decoding lives in
-     * {@code Storage}, so only a test that runs both catches the two drifting
-     * apart -- each side on its own is self-consistent.
+     * same tasks. Encoding lives on the tasks and decoding lives in the storage,
+     * so only a test that runs both catches the two drifting apart, since each
+     * side on its own is self-consistent.
      */
     @Test
     public void saveThenLoad_everyTaskType_survivesTheRoundTrip() throws IOException, ThomasException {

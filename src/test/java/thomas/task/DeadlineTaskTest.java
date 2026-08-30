@@ -10,14 +10,11 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests {@link DeadlineTask}.
- * <p>
- * Two of its three methods are worth testing on their own. {@code occursOn}
+ * Tests DeadlineTask.
+ * Two of its three methods are worth testing on their own. The occursOn method
  * drops the time of day before comparing, so a deadline at any hour counts as
- * being on that day -- comparing the moments instead would make the {@code on}
- * command match almost nothing, and would still pass a test that happened to ask
- * about midnight. {@code toSaveFormat} writes the due date in the format it is
- * typed in, which is what keeps the save file readable by the same parser the
+ * being on that day. The toSaveFormat method writes the due date in the format
+ * it is typed in, which keeps the save file readable by the same parser the
  * user's typing goes through.
  */
 public class DeadlineTaskTest {

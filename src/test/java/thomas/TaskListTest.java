@@ -17,38 +17,34 @@ import thomas.task.Task;
 import thomas.task.TodoTask;
 
 /**
- * Tests {@link TaskList}.
- * <p>
- * Every method here is worth testing for the same reason: the class holds no
- * resources and talks to nothing, so a case is a list built by hand, one call
- * and one assertion. What makes it worth the trouble is that two numbering
- * schemes meet in this class -- the user counts from 1, the list from 0 -- and
- * the conversion between them happens here and nowhere else. An off-by-one
- * would show up as the wrong task being marked or deleted, which is exactly the
- * kind of mistake that survives a run-through where every number happens to be
- * in the middle of the list.
- * <p>
+ * Tests TaskList.
+ * The class holds no resources and talks to nothing, so a case is a list built
+ * by hand, one call and one assertion. What makes it worth testing is that two
+ * numbering schemes meet here, the user counting from 1 and the list from 0, and
+ * the conversion between them happens in this class and nowhere else. An
+ * off-by-one would mark or delete the wrong task, which is the kind of mistake
+ * that survives a run-through where every number falls in the middle.
  * The boundaries are therefore tested on both sides throughout: the first and
  * last task as well as one past each end, and the days an event starts and ends
  * as well as the days around them.
- * <p>
- * {@link TaskList#get(int)}, {@link TaskList#size()} and {@link TaskList#add}
- * are one-line delegations to {@code ArrayList} and are not tested for their own
- * sake; they appear here only as the way the other cases are set up and checked.
+ * The size, get and add methods are one-line delegations and are not tested for
+ * their own sake, appearing only as the way the other cases are set up.
  */
 public class TaskListTest {
 
-    /** A day used throughout, with the days either side of it for the range tests. */
+    /** Day used throughout, with the days either side of it for the range tests */
     private static final LocalDate DEC_02 = LocalDate.of(2019, 12, 2);
     private static final LocalDate DEC_03 = LocalDate.of(2019, 12, 3);
     private static final LocalDate DEC_04 = LocalDate.of(2019, 12, 4);
 
     /**
-     * Builds a list holding the given tasks, in the order given.
-     * <p>
-     * Takes the tasks as arguments rather than having each test add them one by
-     * one, so a case reads as the list it is about rather than as the steps that
-     * built it.
+     * Returns a list holding the given tasks, in the order given.
+     * The tasks are taken as arguments rather than added one by one in each
+     * test, so that a case reads as the list it is about rather than as the
+     * steps that built it.
+     *
+     * @param tasks Tasks to hold, in list order.
+     * @return List holding those tasks.
      */
     private static TaskList listOf(Task... tasks) {
         TaskList list = new TaskList();
@@ -58,7 +54,12 @@ public class TaskListTest {
         return list;
     }
 
-    /** Returns the descriptions of a list's tasks, in order, for comparing lists. */
+    /**
+     * Returns how a list's tasks show themselves, in order, for comparing lists.
+     *
+     * @param list List to read.
+     * @return One entry per task, in list order.
+     */
     private static List<String> contentsOf(TaskList list) {
         List<String> descriptions = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
@@ -67,12 +68,26 @@ public class TaskListTest {
         return descriptions;
     }
 
-    /** A deadline due at 6pm on the given day. */
+    /**
+     * Returns a deadline due at 6pm on the given day.
+     *
+     * @param description Task text.
+     * @param day Day the task is due.
+     * @return New deadline.
+     */
     private static Task deadlineOn(String description, LocalDate day) {
         return new DeadlineTask(description, day.atTime(18, 0));
     }
 
-    /** An event running from 2pm on one day to 4pm on another. */
+    /**
+     * Returns an event running from 2pm on one day to 4pm on another.
+     *
+     * @param description Task text.
+     * @param start Day the event starts.
+     * @param end Day the event ends.
+     * @return New event.
+     * @throws ThomasException If the end day falls before the start day.
+     */
     private static Task eventFrom(String description, LocalDate start, LocalDate end)
             throws ThomasException {
         return new EventTask(description, start.atTime(14, 0), end.atTime(16, 0));
@@ -182,7 +197,7 @@ public class TaskListTest {
 
     /**
      * The range is checked against the tasks that exist, so every number fails
-     * on an empty list rather than any of them reaching {@code ArrayList.get}.
+     * on an empty list rather than any of them reaching the underlying list.
      */
     @Test
     public void getByNumber_emptyList_exceptionThrown() {
