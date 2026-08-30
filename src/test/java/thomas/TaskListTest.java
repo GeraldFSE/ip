@@ -100,12 +100,10 @@ public class TaskListTest {
         assertEquals(0, new TaskList().size());
     }
 
-    /**
-     * The constructor taking tasks is how the save file is loaded, so the list
-     * must start out holding exactly what it was handed, in the same order.
-     */
     @Test
     public void constructor_existingTasks_holdsThemInOrder() {
+        // The constructor taking tasks is how the save file is loaded, so the list must start out holding exactly what
+        // it was handed, in the same order.
         ArrayList<Task> loaded = new ArrayList<>();
         loaded.add(new TodoTask("read book"));
         loaded.add(new TodoTask("return book"));
@@ -127,9 +125,9 @@ public class TaskListTest {
         assertSame(task, list.get(0));
     }
 
-    /** Tasks are kept in the order they were added, which is the order shown. */
     @Test
     public void add_toNonEmptyList_appendsToTheEnd() {
+        // Tasks are kept in the order they were added, which is the order shown.
         TaskList list = listOf(new TodoTask("read book"));
         Task second = new TodoTask("return book");
 
@@ -140,18 +138,18 @@ public class TaskListTest {
 
     // ---- getByNumber ----
 
-    /** Task 1 is position 0: the conversion this class exists to make. */
     @Test
     public void getByNumber_firstTask_returnsTaskAtPositionZero() throws ThomasException {
+        // Task 1 is position 0: the conversion this class exists to make.
         Task first = new TodoTask("read book");
         TaskList list = listOf(first, new TodoTask("return book"));
 
         assertSame(first, list.getByNumber(1));
     }
 
-    /** The last task is numbered size(), not size() - 1. */
     @Test
     public void getByNumber_lastTask_returnsTaskAtEnd() throws ThomasException {
+        // The last task is numbered size(), not size() - 1.
         Task last = new TodoTask("return book");
         TaskList list = listOf(new TodoTask("read book"), last);
 
@@ -166,12 +164,9 @@ public class TaskListTest {
         assertSame(middle, list.getByNumber(2));
     }
 
-    /**
-     * Zero is a position, not a task number, so it must be rejected rather than
-     * quietly reaching the first task.
-     */
     @Test
     public void getByNumber_zero_exceptionThrown() {
+        // Zero is a position, not a task number, so it must be rejected rather than quietly reaching the first task.
         TaskList list = listOf(new TodoTask("read book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(0));
@@ -186,30 +181,28 @@ public class TaskListTest {
         assertEquals("There is no task -1! You only have 1 task(s).", e.getMessage());
     }
 
-    /** One past the end: the number of tasks is the largest number that works. */
     @Test
     public void getByNumber_onePastEnd_exceptionThrown() {
+        // One past the end: the number of tasks is the largest number that works.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(3));
         assertEquals("There is no task 3! You only have 2 task(s).", e.getMessage());
     }
 
-    /**
-     * The range is checked against the tasks that exist, so every number fails
-     * on an empty list rather than any of them reaching the underlying list.
-     */
     @Test
     public void getByNumber_emptyList_exceptionThrown() {
+        // The range is checked against the tasks that exist, so every number fails on an empty list rather than any of
+        // them reaching the underlying list.
         TaskList list = new TaskList();
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(1));
         assertEquals("There is no task 1! You only have 0 task(s).", e.getMessage());
     }
 
-    /** Reading a task must not remove it, unlike deleteByNumber below. */
     @Test
     public void getByNumber_validNumber_listUnchanged() throws ThomasException {
+        // Reading a task must not remove it, unlike deleteByNumber below.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         list.getByNumber(1);
@@ -236,13 +229,10 @@ public class TaskListTest {
         assertEquals(1, list.size());
     }
 
-    /**
-     * Removing closes the gap, so the tasks after the deleted one shift down and
-     * the numbering never develops holes. Deleting the middle of three is what
-     * shows this: task 3 must become task 2, not stay at 3.
-     */
     @Test
     public void deleteByNumber_middleTask_laterTasksShiftDown() throws ThomasException {
+        // Removing closes the gap, so the tasks after the deleted one shift down and the numbering never develops
+        // holes. Deleting the middle of three is what shows this: task 3 must become task 2, not stay at 3.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"),
                 new TodoTask("buy book"));
 
@@ -262,9 +252,9 @@ public class TaskListTest {
         assertEquals("[T][ ] read book", list.getByNumber(1).toString());
     }
 
-    /** Deleting task 1 repeatedly empties the list, one task at a time. */
     @Test
     public void deleteByNumber_everyTask_leavesEmptyList() throws ThomasException {
+        // Deleting task 1 repeatedly empties the list, one task at a time.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         list.deleteByNumber(1);
@@ -297,9 +287,9 @@ public class TaskListTest {
         assertEquals("There is no task 1! You only have 0 task(s).", e.getMessage());
     }
 
-    /** A rejected delete must leave the list exactly as it was. */
     @Test
     public void deleteByNumber_numberOutOfRange_listUnchanged() {
+        // A rejected delete must leave the list exactly as it was.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         assertThrows(ThomasException.class, () -> list.deleteByNumber(5));
@@ -314,9 +304,9 @@ public class TaskListTest {
         assertTrue(new TaskList().positionsOn(DEC_02).isEmpty());
     }
 
-    /** A todo carries no date, so it falls on no day at all. */
     @Test
     public void positionsOn_todosOnly_returnsNoPositions() {
+        // A todo carries no date, so it falls on no day at all.
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         assertTrue(list.positionsOn(DEC_02).isEmpty());
@@ -336,9 +326,9 @@ public class TaskListTest {
         assertTrue(list.positionsOn(DEC_03).isEmpty());
     }
 
-    /** The time of day is dropped, so a deadline at any hour counts as on that day. */
     @Test
     public void positionsOn_deadlineAtMidnightAndLastMinute_bothMatch() {
+        // The time of day is dropped, so a deadline at any hour counts as on that day.
         TaskList list = listOf(
                 new DeadlineTask("first thing", DEC_02.atTime(0, 0)),
                 new DeadlineTask("last thing", DEC_02.atTime(23, 59)));
@@ -346,25 +336,25 @@ public class TaskListTest {
         assertEquals(List.of(0, 1), list.positionsOn(DEC_02));
     }
 
-    /** An event covers every day it spans, so the day it starts is one of them. */
     @Test
     public void positionsOn_eventFirstDay_returnsItsPosition() throws ThomasException {
+        // An event covers every day it spans, so the day it starts is one of them.
         TaskList list = listOf(eventFrom("project meeting", DEC_02, DEC_04));
 
         assertEquals(List.of(0), list.positionsOn(DEC_02));
     }
 
-    /** The middle of an event matches, which the wrong range test also gets right. */
     @Test
     public void positionsOn_eventMiddleDay_returnsItsPosition() throws ThomasException {
+        // The middle of an event matches, which the wrong range test also gets right.
         TaskList list = listOf(eventFrom("project meeting", DEC_02, DEC_04));
 
         assertEquals(List.of(0), list.positionsOn(DEC_03));
     }
 
-    /** Both ends count, so the last day matches too -- the case a strict range test drops. */
     @Test
     public void positionsOn_eventLastDay_returnsItsPosition() throws ThomasException {
+        // Both ends count, so the last day matches too -- the case a strict range test drops.
         TaskList list = listOf(eventFrom("project meeting", DEC_02, DEC_04));
 
         assertEquals(List.of(0), list.positionsOn(DEC_04));
@@ -384,13 +374,10 @@ public class TaskListTest {
         assertTrue(list.positionsOn(DEC_04).isEmpty());
     }
 
-    /**
-     * The positions returned are positions in the whole list, not the count of
-     * matches so far. Non-matching tasks are placed first and in between, so
-     * numbering the matches 1, 2, 3 would give [0, 1] and be caught here.
-     */
     @Test
     public void positionsOn_severalMatches_returnsWholeListPositions() throws ThomasException {
+        // The positions returned are positions in the whole list, not the count of matches so far. Non-matching tasks
+        // are placed first and in between, so numbering the matches 1, 2, 3 would give [0, 1] and be caught here.
         TaskList list = listOf(
                 new TodoTask("read book"),
                 deadlineOn("return book", DEC_02),
@@ -400,9 +387,9 @@ public class TaskListTest {
         assertEquals(List.of(1, 3), list.positionsOn(DEC_02));
     }
 
-    /** Matches come back in list order, whatever order the dates fall in. */
     @Test
     public void positionsOn_matchesOutOfDateOrder_returnsPositionsInListOrder() {
+        // Matches come back in list order, whatever order the dates fall in.
         TaskList list = listOf(
                 new DeadlineTask("evening", DEC_02.atTime(20, 0)),
                 new DeadlineTask("morning", DEC_02.atTime(8, 0)));
@@ -410,9 +397,9 @@ public class TaskListTest {
         assertEquals(List.of(0, 1), list.positionsOn(DEC_02));
     }
 
-    /** Asking which tasks fall on a day must not change the list. */
     @Test
     public void positionsOn_anyDay_listUnchanged() {
+        // Asking which tasks fall on a day must not change the list.
         TaskList list = listOf(new TodoTask("read book"), deadlineOn("return book", DEC_02));
 
         list.positionsOn(DEC_02);
