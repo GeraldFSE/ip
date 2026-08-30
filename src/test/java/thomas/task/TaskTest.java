@@ -297,6 +297,65 @@ public class TaskTest {
         assertFalse(new TodoTask("read book").occursOn(LocalDate.of(2019, 12, 2)));
     }
 
+    // ---- matches ----
+
+    @Test
+    public void matches_keywordInDescription_isTrue() {
+        assertTrue(new Task("read book").matches("book"));
+    }
+
+    @Test
+    public void matches_keywordNotInDescription_isFalse() {
+        assertFalse(new Task("read book").matches("homework"));
+    }
+
+    /** The whole description counts as a match, not just a word inside it. */
+    @Test
+    public void matches_wholeDescription_isTrue() {
+        assertTrue(new Task("read book").matches("read book"));
+    }
+
+    /** Substring, so a keyword need not sit on a word boundary. */
+    @Test
+    public void matches_keywordInsideWord_isTrue() {
+        assertTrue(new Task("read bookmark").matches("book"));
+    }
+
+    @Test
+    public void matches_differentCase_isFalse() {
+        assertFalse(new Task("read Book").matches("book"));
+    }
+
+    /**
+     * The match is on the description alone, never on how the task is displayed,
+     * so a search cannot hit the type tag or the done marker. Searching a todo
+     * for "T" would otherwise match every todo through its [T] tag.
+     */
+    @Test
+    public void matches_typeTagOfDisplayedForm_isFalse() {
+        Task todo = new TodoTask("read book");
+        todo.markAsDone();
+
+        assertTrue(todo.toString().contains("[T]"));
+        assertFalse(todo.matches("[T]"));
+        assertFalse(todo.matches("[X]"));
+    }
+
+    /** Likewise a deadline's formatted date is not searchable text. */
+    @Test
+    public void matches_formattedDateOfDeadline_isFalse() {
+        Task deadline = new DeadlineTask("return book", LocalDateTime.of(2019, 12, 2, 18, 0));
+
+        assertTrue(deadline.toString().contains("Dec 02 2019"));
+        assertFalse(deadline.matches("Dec 02 2019"));
+    }
+
+    /** Every task matches the empty string, as every string contains it. */
+    @Test
+    public void matches_emptyKeyword_isTrue() {
+        assertTrue(new Task("read book").matches(""));
+    }
+
     // ---- TodoTask ----
 
     @Test
