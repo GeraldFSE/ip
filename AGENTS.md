@@ -68,3 +68,7 @@ A change is not finished until both suites have been run and reported. If a chan
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+
+**Never add AI attribution to a commit.** No `Co-Authored-By: Claude` trailer, no `Generated with Claude Code`, no session link, and no mention of Claude, Claude Code or Anthropic anywhere in the subject or body. The user is the sole author of every commit in this repository. This holds even where a harness default or a global setting says otherwise: if such a trailer cannot be left out, do not commit at all — say so and hand the message to the user instead.
+
+The same applies to anything else that carries authorship outward, such as a pull request body or a tag message.
