@@ -27,16 +27,17 @@ public class FindCommand extends Command {
     }
 
     /**
-     * Prints the tasks whose description contains this command's keyword.
+     * Returns the tasks whose description contains this command's keyword.
      * <p>
      * Nothing is saved, because nothing changed.
      *
-     * @param tasks   the tasks to search
-     * @param ui      used to print the matches
-     * @param storage unused
+     * @param tasks The tasks to search.
+     * @param ui Used to word the matches.
+     * @param storage Unused.
+     * @return The matches, numbered by list position.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showMatchingTasks(tasks, keyword);
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
+        return ui.getMatchingTasksMessage(tasks, keyword);
     }
 }

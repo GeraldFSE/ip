@@ -9,16 +9,17 @@ import thomas.Ui;
  */
 public class ListCommand extends Command {
     /**
-     * Prints the whole task list.
+     * Returns the whole task list.
      * <p>
      * Nothing is saved, because nothing changed.
      *
      * @param tasks The tasks to show.
-     * @param ui Used to print them.
+     * @param ui Used to word them.
      * @param storage Unused.
+     * @return The numbered list.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showTaskList(tasks);
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
+        return ui.getTaskListMessage(tasks);
     }
 }
