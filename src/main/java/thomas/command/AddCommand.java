@@ -38,13 +38,14 @@ public class AddCommand extends Command {
      * Appends the task, saves, and reports the new size of the list.
      *
      * @param tasks The list to append to.
-     * @param ui Used to confirm the addition.
+     * @param ui Used to word the confirmation.
      * @param storage Where the longer list is written.
+     * @return The confirmation, behind a warning if the save failed.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
         tasks.add(task);
-        save(tasks, ui, storage);
-        ui.showAdded(task, tasks.size());
+        String saveWarning = save(tasks, ui, storage);
+        return saveWarning + ui.getAddedMessage(task, tasks.size());
     }
 }

@@ -36,14 +36,15 @@ public class DeleteCommand extends Command {
      * size after the removal.
      *
      * @param tasks The list to remove from.
-     * @param ui Used to confirm the removal.
+     * @param ui Used to word the confirmation.
      * @param storage Where the shortened list is written.
+     * @return The confirmation, behind a warning if the save failed.
      * @throws ThomasException If no task carries that number.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
         Task removedTask = tasks.deleteByNumber(taskNumber);
-        save(tasks, ui, storage);
-        ui.showRemoved(removedTask, tasks.size());
+        String saveWarning = save(tasks, ui, storage);
+        return saveWarning + ui.getRemovedMessage(removedTask, tasks.size());
     }
 }

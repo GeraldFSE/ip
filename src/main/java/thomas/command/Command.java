@@ -28,16 +28,24 @@ import thomas.Ui;
  */
 public abstract class Command {
     /**
-     * Carries out this command.
+     * Carries out this command and says what happened.
+     * <p>
+     * The message is returned rather than printed, because the same words have
+     * to reach a console session and a dialog bubble and a command has no
+     * business knowing which it is talking to. Wording them is still
+     * {@link Ui}'s, which is what {@code ui} is for; showing them belongs to
+     * whoever asked for the command to be run.
      *
      * @param tasks The task list to read or change.
-     * @param ui How to tell the user what happened.
+     * @param ui How to word what happened.
      * @param storage Where to write the tasks when they change.
+     * @return What to tell the user, or the empty string for a command with
+     *         nothing to say.
      * @throws ThomasException If the command cannot be carried out, for example
      *                         because it names a task that does not exist --
      *                         which cannot be known until the list is in hand.
      */
-    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
+    public abstract String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
 
     /**
      * Returns whether the chatbot should stop after this command.
@@ -53,23 +61,30 @@ public abstract class Command {
     }
 
     /**
-     * Saves the task list, reporting a failure instead of crashing.
+     * Saves the task list, warning about a failure instead of crashing.
      * <p>
      * Inherited by the commands that change the list, which is what makes the
      * save automatic and keeps it worded once. {@link Storage#save} throws
      * rather than printing, because it has no business talking to the user;
      * catching the {@link IOException} here means a save failure costs the user
      * a warning rather than the session.
+     * <p>
+     * The warning already ends in a newline, so a caller can put it in front of
+     * its own message unconditionally: a successful save contributes nothing and
+     * a failed one leaves its warning on the line above.
      *
      * @param tasks The tasks to write.
-     * @param ui Used to report a failed save.
+     * @param ui Used to word a failed save.
      * @param storage Where to write them.
+     * @return The empty string if the tasks were written, or the warning to
+     *         show the user if they were not.
      */
-    protected void save(TaskList tasks, Ui ui, Storage storage) {
+    protected String save(TaskList tasks, Ui ui, Storage storage) {
         try {
             storage.save(tasks);
+            return "";
         } catch (IOException e) {
-            ui.showSavingError(e.getMessage());
+            return ui.getSavingErrorMessage(e.getMessage()) + "\n";
         }
     }
 }

@@ -23,16 +23,17 @@ public class OnCommand extends Command {
     }
 
     /**
-     * Prints the tasks that fall on this command's day.
+     * Returns the tasks that fall on this command's day.
      * <p>
      * Nothing is saved, because nothing changed.
      *
      * @param tasks The tasks to search.
-     * @param ui Used to print the matches.
+     * @param ui Used to word the matches.
      * @param storage Unused.
+     * @return The matches, numbered by list position.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showTasksOnDay(tasks, day);
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
+        return ui.getTasksOnDayMessage(tasks, day);
     }
 }

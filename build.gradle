@@ -20,6 +20,22 @@ repositories {
 
 dependencies {
     String jUnitVersion = '5.14.4'
+    String javaFxVersion = '17.0.7'
+
+    // All three platforms' artifacts, not just this machine's, so that the JAR
+    // built here runs on Windows, Mac and Linux alike.
+    implementation "org.openjfx:javafx-base:${javaFxVersion}:win"
+    implementation "org.openjfx:javafx-base:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-base:${javaFxVersion}:linux"
+    implementation "org.openjfx:javafx-controls:${javaFxVersion}:win"
+    implementation "org.openjfx:javafx-controls:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-controls:${javaFxVersion}:linux"
+    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:win"
+    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-fxml:${javaFxVersion}:linux"
+    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:win"
+    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:mac"
+    implementation "org.openjfx:javafx-graphics:${javaFxVersion}:linux"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
@@ -41,7 +57,11 @@ test {
 }
 
 application {
-    mainClass = 'thomas.Thomas'
+    // Launcher rather than Main: a JavaFX Application subclass cannot be the
+    // main class of a shaded JAR, since the JavaFX runtime is then on the
+    // classpath rather than the module path. Thomas.main still runs the console
+    // session, which is what the text-UI tests drive.
+    mainClass = 'thomas.Launcher'
 }
 
 jar {

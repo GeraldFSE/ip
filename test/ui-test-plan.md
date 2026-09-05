@@ -2465,6 +2465,14 @@ bye
 Behaviour that is out of scope for the current increment, listed so it is not
 mistaken for an oversight. Add cases here as the chatbot grows:
 
+* **The GUI window.** The plan drives `thomas.Thomas`, the console entry point,
+  and says nothing about what the window looks like or does. The window types a
+  line into `Thomas.getResponse` and paints whatever comes back, so the wording
+  every case here pins down is the same wording a dialog bubble shows;
+  `ThomasTest` covers that method, including the reply an error earns and the
+  command type each bubble is colored by. What is left uncovered is the JavaFX
+  layer itself -- the layout, the styling, and closing the window after `bye` --
+  which needs a running window rather than typed input.
 * **A keyword typed in the wrong case.** `Bye`, `TODO x` and `List` are all
   reported as unknown commands, because the match is made with `equals`. That is
   deliberate rather than accidental, and noted in `Command.fromKeyword`, but no

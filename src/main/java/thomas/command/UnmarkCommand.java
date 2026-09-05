@@ -39,15 +39,16 @@ public class UnmarkCommand extends Command {
      * Marks the named task not done, saves, and says so.
      *
      * @param tasks The list holding the task.
-     * @param ui Used to confirm the change.
+     * @param ui Used to word the confirmation.
      * @param storage Where the changed list is written.
+     * @return The confirmation, behind a warning if the save failed.
      * @throws ThomasException If no task carries that number.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
         Task task = tasks.getByNumber(taskNumber);
         task.unmarkAsDone();
-        save(tasks, ui, storage);
-        ui.showUnmarked(task);
+        String saveWarning = save(tasks, ui, storage);
+        return saveWarning + ui.getUnmarkedMessage(task);
     }
 }
