@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -41,6 +42,19 @@ public class ThomasTest {
         return new Thomas(folder.resolve("tasklist.txt").toString());
     }
 
+    /**
+     * Writes a save file for this case to load, one line per argument.
+     * The lines are taken as separate arguments rather than as one string with
+     * newlines in it, so a case shows the file as the loader sees it -- a line
+     * at a time -- and cannot say "two lines" while writing one. The same
+     * helper, for the same reason, is in {@code StorageTest}.
+     *
+     * @param lines Save file lines, in order, without line separators.
+     */
+    private void writeSaveFile(String... lines) throws IOException {
+        Files.write(folder.resolve("tasklist.txt"), List.of(lines));
+    }
+
     @Test
     public void getStartupMessage_readableSaveFile_isGreetingAlone() {
         // The banner the console prints above this is deliberately not here: it
@@ -52,8 +66,7 @@ public class ThomasTest {
 
     @Test
     public void getStartupMessage_damagedSaveFileLine_warnsAfterGreeting() throws IOException {
-        Files.writeString(folder.resolve("tasklist.txt"),
-                "T | 0 | read book\nX | 0 | mystery\n");
+        writeSaveFile("T | 0 | read book", "X | 0 | mystery");
 
         // The damaged line costs only itself: the greeting still arrives, the
         // warning follows it, and the readable task above it still loaded.
