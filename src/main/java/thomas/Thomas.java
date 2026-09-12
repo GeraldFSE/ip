@@ -78,7 +78,7 @@ public class Thomas {
      * console session ends by falling out of a loop, a window by being closed,
      * so what stopping means is left to whoever asked for the command to run.
      */
-    private boolean isDone = false;
+    private boolean hasExited = false;
 
     /**
      * Starts a chatbot over the usual save file.
@@ -228,7 +228,7 @@ public class Thomas {
             // dialog box matches its style classes against, not
             // "thomas.command.AddCommand".
             commandType = command.getClass().getSimpleName();
-            isDone = command.isExit();
+            hasExited = command.isExit();
             return response;
         } catch (ThomasException e) {
             // No command ran, so there is no kind of command to color by.
@@ -252,8 +252,8 @@ public class Thomas {
      *
      * @return True if the user has said {@code bye}.
      */
-    public boolean isDone() {
-        return isDone;
+    public boolean hasExited() {
+        return hasExited;
     }
 
     /**
