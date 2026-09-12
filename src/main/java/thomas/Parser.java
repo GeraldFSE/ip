@@ -6,10 +6,10 @@ import java.time.format.DateTimeParseException;
 
 import thomas.command.AddCommand;
 import thomas.command.Command;
-import thomas.command.CommandType;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
 import thomas.command.FindCommand;
+import thomas.command.Keyword;
 import thomas.command.ListCommand;
 import thomas.command.MarkCommand;
 import thomas.command.OnCommand;
@@ -63,7 +63,7 @@ public class Parser {
             "Erm when does it end? You need a /to after your /from!";
 
     /** The kind of command the line names. */
-    private final CommandType commandType;
+    private final Keyword keyword;
 
     /**
      * The line split into keyword and argument.
@@ -85,7 +85,7 @@ public class Parser {
      */
     private Parser(String line) throws ThomasException {
         this.parts = line.split(" ", 2);
-        this.commandType = CommandType.fromKeyword(parts[0]);
+        this.keyword = Keyword.of(parts[0]);
     }
 
     /**
@@ -97,7 +97,7 @@ public class Parser {
      * halfway through doing something.
      * <p>
      * The {@code switch} is an expression over an enum, so the compiler checks
-     * that every {@link CommandType} is covered: adding a keyword without giving
+     * that every {@link Keyword} is covered: adding a keyword without giving
      * it a command stops the build rather than silently doing nothing at run
      * time. That is what makes a {@code default} branch unnecessary here, where
      * the read loop this replaced needed one.
@@ -109,7 +109,7 @@ public class Parser {
      */
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
-        return switch (parser.commandType) {
+        return switch (parser.keyword) {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
             case ON -> new OnCommand(parser.parseDay());
@@ -259,13 +259,13 @@ public class Parser {
      * @throws ThomasException If a description, marker or date is missing or unreadable.
      */
     private Task parseNewTask() throws ThomasException {
-        return switch (commandType) {
+        return switch (keyword) {
             case TODO -> parseTodo();
             case DEADLINE -> parseDeadline();
             case EVENT -> parseEvent();
             // Reached only by calling this for a command that adds no task, which
             // is a mistake in the caller rather than anything the user did.
-            default -> throw new AssertionError("Not an add command: " + commandType);
+            default -> throw new AssertionError("Not an add command: " + keyword);
         };
     }
 
