@@ -2,6 +2,8 @@ package thomas;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import thomas.task.Task;
 
@@ -165,14 +167,13 @@ public class TaskList {
      * @param day The day being asked about.
      * @return The positions of the matching tasks, counting from 0, in list order.
      */
-    public ArrayList<Integer> positionsOn(LocalDate day) {
-        ArrayList<Integer> positions = new ArrayList<>();
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).occursOn(day)) {
-                positions.add(i);
-            }
-        }
-        return positions;
+    public List<Integer> positionsOn(LocalDate day) {
+        // A stream over the positions rather than over the tasks: it is the
+        // position that is wanted, and streaming the tasks would lose it.
+        return IntStream.range(0, tasks.size())
+                .filter(position -> tasks.get(position).occursOn(day))
+                .boxed()
+                .toList();
     }
 
     /**
@@ -190,13 +191,10 @@ public class TaskList {
      * @param keyword the text to look for, as the user typed it
      * @return the positions of the matching tasks, counting from 0, in list order
      */
-    public ArrayList<Integer> positionsMatching(String keyword) {
-        ArrayList<Integer> positions = new ArrayList<>();
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).matches(keyword)) {
-                positions.add(i);
-            }
-        }
-        return positions;
+    public List<Integer> positionsMatching(String keyword) {
+        return IntStream.range(0, tasks.size())
+                .filter(position -> tasks.get(position).matches(keyword))
+                .boxed()
+                .toList();
     }
 }

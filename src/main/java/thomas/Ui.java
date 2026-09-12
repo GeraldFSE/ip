@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 import thomas.task.Task;
 
@@ -295,12 +296,12 @@ public class Ui {
      */
     private static String getNumberedTasksMessage(TaskList tasks, String header,
             List<Integer> positions) {
-        ArrayList<String> entries = new ArrayList<>();
-        entries.add(header);
-        for (int position : positions) {
-            entries.add((position + 1) + ". " + tasks.get(position));
-        }
-        return joinLines(entries.toArray(new String[0]));
+        String[] entries = Stream.concat(
+                        Stream.of("Here are the tasks in your list:"),
+                        positions.stream()
+                                .map(position -> (position + 1) + ". " + tasks.get(position)))
+                .toArray(String[]::new);
+        return joinLines(entries);
     }
 
     /**

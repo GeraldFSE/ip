@@ -1,5 +1,7 @@
 package thomas.command;
 
+import java.util.Arrays;
+
 import thomas.ThomasException;
 
 /**
@@ -45,19 +47,17 @@ public enum Keyword {
      * <p>
      * This is the one place that decides whether a word is a command, so by the
      * time a caller has a {@code Keyword} in hand it is known to be valid
-     * and only real commands need handling. Matching is case sensitive, as it
+     * and only real commands need handling. Matching is case-sensitive, as it
      * was when each keyword was compared with {@code equals}.
      *
-     * @param word The first word of the line the user typed.
+     * @param keyword The first word of the line the user typed.
      * @return The matching keyword.
      * @throws ThomasException If no command has that keyword.
      */
-    public static Keyword of(String word) throws ThomasException {
-        for (Keyword candidate : values()) {
-            if (candidate.keyword.equals(word)) {
-                return candidate;
-            }
-        }
-        throw new ThomasException("Erm sorry, what does that mean again?");
+    public static Keyword of(String keyword) throws ThomasException {
+        return Arrays.stream(values())
+                .filter(type -> type.keyword.equals(keyword))
+                .findFirst()
+                .orElseThrow(() -> new ThomasException("Erm sorry, what does that mean again?"));
     }
 }

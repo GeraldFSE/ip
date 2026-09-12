@@ -228,7 +228,7 @@ public class Storage {
      * A missing file is the normal first run, not an error, so it gives back an
      * empty list. What becomes of any one line is {@link #addTaskFrom}'s to
      * settle, leaving this method with the file: whether it is there, reading
-     * it a line at a time, and closing it afterwards.
+     * it a line at a time, and closing it afterward.
      *
      * @return The tasks the file holds, in the order they were written.
      * @throws IOException If the file exists but cannot be read.

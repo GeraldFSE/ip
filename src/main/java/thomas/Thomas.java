@@ -1,7 +1,6 @@
 package thomas;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import thomas.command.Command;
@@ -226,11 +225,9 @@ public class Thomas {
         }
         // Storage records the lines it could not read instead of printing them,
         // so they are worded here, where the Ui is.
-        List<String> complaints = new ArrayList<>();
-        for (String complaint : storage.getSkipComplaints()) {
-            complaints.add(ui.getSkippedLineMessage(complaint));
-        }
-        return complaints;
+        return storage.getSkipComplaints().stream()
+                .map(ui::getSkippedLineMessage)
+                .toList();
     }
 
     /**
