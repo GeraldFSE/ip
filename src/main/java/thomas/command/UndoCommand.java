@@ -1,10 +1,9 @@
 package thomas.command;
 
-import thomas.History;
-import thomas.Storage;
-import thomas.TaskList;
 import thomas.ThomasException;
-import thomas.Ui;
+import thomas.storage.Storage;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Takes back the most recent change to the task list: the {@code undo} command.

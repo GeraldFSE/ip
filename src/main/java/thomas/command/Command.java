@@ -2,25 +2,25 @@ package thomas.command;
 
 import java.io.IOException;
 
-import thomas.History;
-import thomas.Storage;
-import thomas.TaskList;
 import thomas.ThomasException;
-import thomas.Ui;
+import thomas.storage.Storage;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * One command, understood and ready to be carried out.
  * <p>
- * A {@code Command} is built by {@link Parser} from a line the user typed, with
- * whatever arguments that command takes already read and checked. Carrying it
- * out is then {@link #execute} -- so the work of understanding a line and the
- * work of doing what it asks are separated, and neither has to be read to
- * follow the other.
+ * A {@code Command} is built by {@link thomas.parser.Parser} from a line the
+ * user typed, with whatever arguments that command takes already read and
+ * checked. Carrying it out is then {@link #execute} -- so the work of
+ * understanding a line and the work of doing what it asks are separated, and
+ * neither has to be read to follow the other.
  * <p>
  * Each command is its own subclass rather than a branch of a switch. What that
- * buys is that everything about a command sits in one file: {@link Thomas} asks
- * for a command and runs it without knowing which one it got, and adding a new
- * one means writing a class rather than editing the loop that runs them all.
+ * buys is that everything about a command sits in one file:
+ * {@link thomas.Thomas} asks for a command and runs it without knowing which
+ * one it got, and adding a new one means writing a class rather than editing
+ * the loop that runs them all.
  * <p>
  * The collaborators are handed to {@link #execute} rather than held as fields,
  * because a command is built fresh for every line and would otherwise carry

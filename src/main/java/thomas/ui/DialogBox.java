@@ -1,4 +1,4 @@
-package thomas;
+package thomas.ui;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class DialogBox extends HBox {
      * Colours the bubble by the kind of command that produced the reply.
      * <p>
      * The names are Thomas's own command classes, as
-     * {@link Thomas#getCommandType()} reports them. Anything unlisted keeps the
+     * {@link thomas.Thomas#getCommandType()} reports them. Anything unlisted keeps the
      * plain reply bubble, so a new command needs a case here only if it earns a
      * colour of its own.
      *

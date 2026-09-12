@@ -1,6 +1,7 @@
 package thomas;
 
 import javafx.application.Application;
+import thomas.ui.Main;
 
 /**
  * A launcher class to workaround classpath issues.

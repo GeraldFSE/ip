@@ -1,9 +1,10 @@
-package thomas;
+package thomas.parser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import thomas.ThomasException;
 import thomas.command.AddCommand;
 import thomas.command.Command;
 import thomas.command.DeleteCommand;
@@ -169,7 +170,7 @@ public class Parser {
      * separator.
      * <p>
      * A description containing {@code " | "} cannot survive being saved: it
-     * splits into an extra field, which {@link Storage} refuses on the way back
+     * splits into an extra field, which {@link thomas.storage.Storage} refuses on the way back
      * in rather than loading the description back truncated. Without this check
      * the task is accepted, listed, and then gone on the next run, with a
      * complaint about a save file line the user never knew existed -- a loss
@@ -201,7 +202,7 @@ public class Parser {
      * {@code delete}.
      * <p>
      * Only that the argument is a whole number is settled here. Whether a task
-     * actually carries that number is {@link TaskList}'s to answer, since only
+     * actually carries that number is {@link thomas.task.TaskList}'s to answer, since only
      * the list knows how many tasks there are; a parser never sees the list.
      *
      * @param action The command being run, used to word the missing-argument
@@ -252,7 +253,7 @@ public class Parser {
      * the user did not ask for.
      * <p>
      * Only that a keyword was given is settled here. Whether any task contains
-     * it is {@link TaskList}'s to answer, since a parser never sees the list.
+     * it is {@link thomas.task.TaskList}'s to answer, since a parser never sees the list.
      *
      * @return the text to search for, with surrounding spaces removed
      * @throws ThomasException if no keyword was given

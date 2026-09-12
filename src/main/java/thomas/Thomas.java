@@ -4,6 +4,11 @@ import java.io.IOException;
 import java.util.List;
 
 import thomas.command.Command;
+import thomas.command.History;
+import thomas.parser.Parser;
+import thomas.storage.Storage;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Entry point for the Thomas chatbot.
@@ -75,7 +80,7 @@ public class Thomas {
     /**
      * The kind of the last command {@link #getResponse} ran, as a class name.
      * <p>
-     * Only the GUI has any use for this: it is what {@link DialogBox} colors
+     * Only the GUI has any use for this: it is what {@link thomas.ui.DialogBox} colors
      * the reply bubble by. The console never asks, which is why {@link #run()}
      * does not set it.
      */

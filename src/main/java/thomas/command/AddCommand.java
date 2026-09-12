@@ -1,11 +1,10 @@
 package thomas.command;
 
-import thomas.History;
-import thomas.Parser;
-import thomas.Storage;
-import thomas.TaskList;
-import thomas.Ui;
+import thomas.parser.Parser;
+import thomas.storage.Storage;
 import thomas.task.Task;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Stores a new task: the {@code todo}, {@code deadline} and {@code event}

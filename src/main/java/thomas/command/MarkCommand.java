@@ -1,11 +1,10 @@
 package thomas.command;
 
-import thomas.History;
-import thomas.Storage;
-import thomas.TaskList;
 import thomas.ThomasException;
-import thomas.Ui;
+import thomas.storage.Storage;
 import thomas.task.Task;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Marks a task done: the {@code mark <number>} command.

@@ -1,11 +1,11 @@
-package thomas;
+package thomas.task;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import thomas.task.Task;
+import thomas.ThomasException;
 
 /**
  * The tasks the chatbot is keeping, and the operations over them.

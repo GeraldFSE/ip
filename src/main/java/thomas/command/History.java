@@ -1,8 +1,10 @@
-package thomas;
+package thomas.command;
 
 import java.util.ArrayList;
 
+import thomas.ThomasException;
 import thomas.task.Task;
+import thomas.task.TaskList;
 
 /**
  * What it would take to reverse each change made to the task list this session.
@@ -89,7 +91,7 @@ public class History {
          * <p>
          * The {@code default} branch is unreachable as the three kinds stand, and
          * is here so that a fourth added later fails loudly the first time it is
-         * undone rather than being quietly left un-undoable. {@link thomas.Parser}
+         * undone rather than being quietly left un-undoable. {@link thomas.parser.Parser}
          * guards its own enum switch the same way.
          *
          * @param tasks The list to put back as it was.

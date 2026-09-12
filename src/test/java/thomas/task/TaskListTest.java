@@ -1,4 +1,4 @@
-package thomas;
+package thomas.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -11,10 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import thomas.task.DeadlineTask;
-import thomas.task.EventTask;
-import thomas.task.Task;
-import thomas.task.TodoTask;
+import thomas.ThomasException;
 
 /**
  * Tests TaskList.

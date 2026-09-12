@@ -68,7 +68,7 @@ public class Task {
      * <p>
      * Named here, beside the {@link #toSaveFormat()} that writes it, so that the
      * parser can refuse a description containing it without holding a second
-     * copy of the same literal. {@link thomas.Storage} splits on it as a regular
+     * copy of the same literal. {@link thomas.storage.Storage} splits on it as a regular
      * expression, where the {@code |} must be escaped, so it keeps its own
      * spelling of it rather than using this one.
      */
@@ -198,7 +198,7 @@ public class Task {
      * <p>
      * Asking the task rather than reading its description keeps
      * {@code description} to itself, exactly as {@link #occursOn(LocalDate)}
-     * does for the dates: {@link thomas.TaskList} can filter without any task
+     * does for the dates: {@link thomas.task.TaskList} can filter without any task
      * type having to expose what it holds.
      * <p>
      * The match is on the description alone, not on {@link #toString()}, so a

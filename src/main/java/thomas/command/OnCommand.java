@@ -2,10 +2,9 @@ package thomas.command;
 
 import java.time.LocalDate;
 
-import thomas.History;
-import thomas.Storage;
-import thomas.TaskList;
-import thomas.Ui;
+import thomas.storage.Storage;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Shows the tasks falling on one day: the {@code on <day>} command.

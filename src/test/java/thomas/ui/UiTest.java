@@ -1,4 +1,4 @@
-package thomas;
+package thomas.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import thomas.task.DeadlineTask;
 import thomas.task.Task;
+import thomas.task.TaskList;
 import thomas.task.TodoTask;
 
 /**

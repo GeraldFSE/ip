@@ -1,4 +1,4 @@
-package thomas;
+package thomas.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import thomas.ThomasException;
 import thomas.command.AddCommand;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;

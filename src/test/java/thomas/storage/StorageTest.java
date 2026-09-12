@@ -1,4 +1,4 @@
-package thomas;
+package thomas.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,9 +16,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import thomas.ThomasException;
 import thomas.task.DeadlineTask;
 import thomas.task.EventTask;
 import thomas.task.Task;
+import thomas.task.TaskList;
 import thomas.task.TodoTask;
 
 /**

@@ -1,11 +1,10 @@
 package thomas.command;
 
-import thomas.History;
-import thomas.Storage;
-import thomas.TaskList;
 import thomas.ThomasException;
-import thomas.Ui;
+import thomas.storage.Storage;
 import thomas.task.Task;
+import thomas.task.TaskList;
+import thomas.ui.Ui;
 
 /**
  * Removes a task from the list: the {@code delete <number>} command.

@@ -1,4 +1,4 @@
-package thomas;
+package thomas.ui;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import thomas.Thomas;
 
 /**
  * Controller for the main GUI.

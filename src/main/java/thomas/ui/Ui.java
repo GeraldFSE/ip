@@ -1,4 +1,4 @@
-package thomas;
+package thomas.ui;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 
 import thomas.task.Task;
+import thomas.task.TaskList;
 
 /**
  * Deals with everything the user sees and types.

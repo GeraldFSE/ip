@@ -1,4 +1,4 @@
-package thomas;
+package thomas.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,7 +11,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import thomas.ThomasException;
 import thomas.task.Task;
+import thomas.task.TaskList;
 import thomas.task.TodoTask;
 
 /**

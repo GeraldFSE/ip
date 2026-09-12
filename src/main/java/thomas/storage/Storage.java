@@ -1,4 +1,4 @@
-package thomas;
+package thomas.storage;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -7,9 +7,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import thomas.ThomasException;
 import thomas.task.DeadlineTask;
 import thomas.task.EventTask;
 import thomas.task.Task;
+import thomas.task.TaskList;
 import thomas.task.TodoTask;
 
 /**
@@ -70,7 +72,7 @@ public class Storage {
      * The complaints themselves, not the lines they are about: each says what
      * was wrong and quotes the line back inside it.
      * <p>
-     * Collected rather than printed, because printing is {@link Ui}'s job and
+     * Collected rather than printed, because printing is {@link thomas.ui.Ui}'s job and
      * this class does not know about the screen. The caller shows them after
      * loading, which is when they were noticed, so the user still sees them
      * before the first command runs.
@@ -190,7 +192,7 @@ public class Storage {
      * Returns the complaints about lines the last {@link #load()} had to skip.
      * <p>
      * Empty when the file was read cleanly, which is the usual case. The caller
-     * shows these through {@link Ui}, so that this class stays free of any
+     * shows these through {@link thomas.ui.Ui}, so that this class stays free of any
      * knowledge of how the user is talked to.
      *
      * @return One message per skipped line, in the order the lines appeared.
