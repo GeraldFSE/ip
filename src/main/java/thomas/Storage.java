@@ -25,18 +25,57 @@ import thomas.task.TodoTask;
  * lets a test point one at a throwaway file.
  */
 public class Storage {
+    /** Where the type letter sits in a save file line. */
+    private static final int INDEX_TYPE = 0;
+
+    /** Where the done flag sits. */
+    private static final int INDEX_DONE = 1;
+
+    /** Where the description sits. */
+    private static final int INDEX_DESCRIPTION = 2;
+
+    /** Where a deadline's date sits, and an event's start. */
+    private static final int INDEX_FIRST_DATE = 3;
+
+    /** Where an event's end sits. */
+    private static final int INDEX_SECOND_DATE = 4;
+
+    /**
+     * Fewest fields any line can hold and still name a task.
+     * <p>
+     * The same number as {@link #FIELDS_TODO} but a different rule: this one
+     * says the line is readable at all, that one says a todo is written with
+     * exactly three fields and no more.
+     */
+    private static final int FIELDS_MINIMUM = 3;
+
+    /** How many fields a todo is written with. */
+    private static final int FIELDS_TODO = 3;
+
+    /** How many fields a deadline is written with. */
+    private static final int FIELDS_DEADLINE = 4;
+
+    /** How many fields an event is written with. */
+    private static final int FIELDS_EVENT = 5;
+
+    /** The done flag as written for a completed task. */
+    private static final String FLAG_DONE = "1";
+
     /** Where the task list is read from and written to. */
     private final String filePath;
 
     /**
-     * Save file lines from the last {@link #load()} that could not be read.
+     * What went wrong with each line the last {@link #load()} had to skip.
+     * <p>
+     * The complaints themselves, not the lines they are about: each says what
+     * was wrong and quotes the line back inside it.
      * <p>
      * Collected rather than printed, because printing is {@link Ui}'s job and
      * this class does not know about the screen. The caller shows them after
      * loading, which is when they were noticed, so the user still sees them
      * before the first command runs.
      */
-    private final ArrayList<String> skippedLines = new ArrayList<>();
+    private final ArrayList<String> skipComplaints = new ArrayList<>();
 
     /**
      * Creates a storage over one file.
@@ -62,15 +101,55 @@ public class Storage {
      *
      * @param fields The line already split on the field separator.
      * @param expected How many fields this task type is written with.
-     * @param line The original line, quoted back in the error message.
+     * @param savedLine The line those fields came from, quoted back in the message.
      * @throws ThomasException If the count does not match.
      */
-    private static void requireFieldCount(String[] fields, int expected, String line)
+    private static void requireFieldCount(String[] fields, int expected, String savedLine)
             throws ThomasException {
         if (fields.length != expected) {
             throw new ThomasException("expected " + expected + " fields but found "
-                    + fields.length + ": " + line);
+                    + fields.length + ": " + savedLine);
         }
+    }
+
+    /**
+     * Builds the task a line describes, from the fields it has been split into.
+     * <p>
+     * Each type has an exact field count. Checking for exactly the right
+     * number, rather than at least it, is what catches a description that
+     * itself contains {@code " | "}: that splits into an extra field and
+     * would otherwise be loaded back silently truncated.
+     *
+     * @param fields The line already split on the field separator.
+     * @param savedLine The line those fields came from, quoted back in any message.
+     * @return The task those fields describe, not yet marked done.
+     * @throws ThomasException If the type is unknown, the field count is wrong
+     *                         or a date cannot be read.
+     */
+    private static Task buildTask(String[] fields, String savedLine) throws ThomasException {
+        String description = fields[INDEX_DESCRIPTION];
+        return switch (fields[INDEX_TYPE]) {
+            case "T" -> {
+                requireFieldCount(fields, FIELDS_TODO, savedLine);
+                yield new TodoTask(description);
+            }
+            case "D" -> {
+                requireFieldCount(fields, FIELDS_DEADLINE, savedLine);
+                LocalDateTime byDate =
+                        Task.parseDate(fields[INDEX_FIRST_DATE], "a deadline date");
+                yield new DeadlineTask(description, byDate);
+            }
+            case "E" -> {
+                requireFieldCount(fields, FIELDS_EVENT, savedLine);
+                LocalDateTime fromDate =
+                        Task.parseDate(fields[INDEX_FIRST_DATE], "a start date");
+                LocalDateTime toDate =
+                        Task.parseDate(fields[INDEX_SECOND_DATE], "an end date");
+                yield new EventTask(description, fromDate, toDate);
+            }
+            default -> throw new ThomasException("unknown task type '"
+                    + fields[INDEX_TYPE] + "': " + savedLine);
+        };
     }
 
     /**
@@ -78,53 +157,30 @@ public class Storage {
      * <p>
      * The line is split on the field separator rather than parsed out of the
      * display text, so the shape is fixed and known: type letter, done flag,
-     * description, then whatever extra fields that type carries.
+     * description, then whatever extra fields that type carries. Which task
+     * those fields make is {@link #buildTask}'s to settle, leaving this method
+     * with the shape of the line and the one field every type shares.
      *
-     * @param line One line of the save file, without its line separator.
+     * @param savedLine One line of the save file, without its line separator.
      * @return The task the line describes.
      * @throws ThomasException If the type is unknown or fields are missing.
      */
-    private static Task parseSavedTask(String line) throws ThomasException {
+    private static Task parseSavedTask(String savedLine) throws ThomasException {
         // -1 keeps trailing empty fields, so a line ending in a separator is
         // reported as corrupt below rather than silently shortening the array.
         // The separator is a regex here, so its | must be escaped.
-        String[] fields = line.split(" \\| ", -1);
-        if (fields.length < 3) {
-            throw new ThomasException("too few fields: " + line);
+        String[] fields = savedLine.split(" \\| ", -1);
+        if (fields.length < FIELDS_MINIMUM) {
+            throw new ThomasException("too few fields: " + savedLine);
         }
 
-        // Each type has an exact field count. Checking for exactly the right
-        // number, rather than at least it, is what catches a description that
-        // itself contains " | ": that splits into an extra field and would
-        // otherwise be loaded back silently truncated.
-        String description = fields[2];
-        Task task = switch (fields[0]) {
-            case "T" -> {
-                requireFieldCount(fields, 3, line);
-                yield new TodoTask(description);
-            }
-            case "D" -> {
-                requireFieldCount(fields, 4, line);
-                LocalDateTime byDate = Task.parseDate(fields[3], "a deadline date");
-                yield new DeadlineTask(description, byDate);
-            }
-            case "E" -> {
-                requireFieldCount(fields, 5, line);
-                LocalDateTime fromDate = Task.parseDate(fields[3], "a start date");
-                LocalDateTime toDate = Task.parseDate(fields[4], "an end date");
-                yield new EventTask(description, fromDate, toDate);
-            }
-            default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
-        };
-        // Every branch of the switch either yields a task or throws, so this
-        // says out loud that there is no path producing a null. The next
-        // statement dereferences it, and a task type added with a branch that
-        // forgets to yield would fail here rather than there.
-        assert task != null : "Parsing a save file line yielded no task: " + line;
+        Task task = buildTask(fields, savedLine);
 
-        // "1" means done; anything else is treated as not done, so a damaged
+        assert task != null : "Parsing a save file line yielded no task: " + savedLine;
+
+        // Anything but the done flag is treated as not done, so a damaged
         // flag costs the tick rather than the whole task.
-        if (fields[1].equals("1")) {
+        if (fields[INDEX_DONE].equals(FLAG_DONE)) {
             task.markAsDone();
         }
         return task;
@@ -139,17 +195,40 @@ public class Storage {
      *
      * @return One message per skipped line, in the order the lines appeared.
      */
-    public ArrayList<String> getSkippedLines() {
-        return skippedLines;
+    public ArrayList<String> getSkipComplaints() {
+        return skipComplaints;
+    }
+
+    /**
+     * Adds the task one save file line describes, or records why it could not
+     * be read.
+     * <p>
+     * A blank line is passed over quietly: it is not damage worth reporting.
+     * Anything else that cannot be read costs that line alone, because the
+     * complaint is collected rather than thrown on -- one damaged line should
+     * not cost the user every other task in the file.
+     *
+     * @param savedLine One line of the save file, without its line separator.
+     * @param tasks The tasks read so far, appended to when the line decodes.
+     */
+    private void addTaskFrom(String savedLine, ArrayList<Task> tasks) {
+        if (savedLine.isBlank()) {
+            return;
+        }
+        try {
+            tasks.add(parseSavedTask(savedLine));
+        } catch (ThomasException e) {
+            skipComplaints.add(e.getMessage());
+        }
     }
 
     /**
      * Reads the saved tasks.
      * <p>
      * A missing file is the normal first run, not an error, so it gives back an
-     * empty list. Individual unreadable lines are skipped and recorded in
-     * {@link #getSkippedLines()} rather than abandoning the whole file: one
-     * damaged line should not cost the user every other task.
+     * empty list. What becomes of any one line is {@link #addTaskFrom}'s to
+     * settle, leaving this method with the file: whether it is there, reading
+     * it a line at a time, and closing it afterward.
      *
      * @return The tasks the file holds, in the order they were written.
      * @throws IOException If the file exists but cannot be read.
@@ -157,7 +236,7 @@ public class Storage {
     public ArrayList<Task> load() throws IOException {
         // Cleared rather than appended to, so a second load reports only what
         // that load skipped instead of everything ever skipped.
-        skippedLines.clear();
+        skipComplaints.clear();
 
         ArrayList<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
@@ -171,15 +250,7 @@ public class Storage {
             while (scan.hasNextLine()) {
                 // nextLine(), not next(): descriptions contain spaces, and
                 // next() would hand back one word at a time.
-                String current = scan.nextLine();
-                if (current.isBlank()) {
-                    continue;
-                }
-                try {
-                    tasks.add(parseSavedTask(current));
-                } catch (ThomasException e) {
-                    skippedLines.add(e.getMessage());
-                }
+                addTaskFrom(scan.nextLine(), tasks);
             }
         }
         return tasks;

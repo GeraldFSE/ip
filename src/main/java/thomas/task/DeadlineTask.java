@@ -61,6 +61,7 @@ public class DeadlineTask extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return "D | " + super.toSaveFormat() + " | " + by.format(DATE_INPUT_FORMAT);
+        return "D" + FIELD_SEPARATOR + super.toSaveFormat()
+                + FIELD_SEPARATOR + by.format(DATE_INPUT_FORMAT);
     }
 }

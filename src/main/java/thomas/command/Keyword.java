@@ -5,7 +5,7 @@ import java.util.Arrays;
 import thomas.ThomasException;
 
 /**
- * The kind of command a typed keyword names.
+ * The word a user types to name a command.
  * <p>
  * The set of commands is closed, so a word the user typed either maps to one of
  * these constants or is not a command at all. Naming them here means the
@@ -13,10 +13,12 @@ import thomas.ThomasException;
  * where a misspelled {@code keyword.equals("dedline")} used to compile into a
  * branch that could never run.
  * <p>
- * This is the vocabulary of the language the user types, not a command that can
- * be carried out. It answers "which command is this?" and nothing else.
+ * These do not stand one to one against the {@link Command} classes, and are
+ * deliberately not named as though they did: {@code todo}, {@code deadline} and
+ * {@code event} are three keywords all carried out by one {@link AddCommand}.
+ * This is the vocabulary of the language the user types.
  */
-public enum CommandType {
+public enum Keyword {
     BYE("bye"),
     LIST("list"),
     ON("on"),
@@ -36,23 +38,23 @@ public enum CommandType {
      */
     private final String keyword;
 
-    CommandType(String keyword) {
+    Keyword(String keyword) {
         this.keyword = keyword;
     }
 
     /**
-     * Returns the kind of command a typed keyword names.
+     * Returns the keyword a typed word names.
      * <p>
      * This is the one place that decides whether a word is a command, so by the
-     * time a caller has a {@code CommandType} in hand it is known to be valid
-     * and only real commands need handling. Matching is case sensitive, as it
+     * time a caller has a {@code Keyword} in hand it is known to be valid
+     * and only real commands need handling. Matching is case-sensitive, as it
      * was when each keyword was compared with {@code equals}.
      *
      * @param keyword The first word of the line the user typed.
-     * @return The matching kind of command.
+     * @return The matching keyword.
      * @throws ThomasException If no command has that keyword.
      */
-    public static CommandType fromKeyword(String keyword) throws ThomasException {
+    public static Keyword of(String keyword) throws ThomasException {
         return Arrays.stream(values())
                 .filter(type -> type.keyword.equals(keyword))
                 .findFirst()

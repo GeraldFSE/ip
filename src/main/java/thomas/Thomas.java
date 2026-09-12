@@ -77,7 +77,7 @@ public class Thomas {
      * console session ends by falling out of a loop, a window by being closed,
      * so what stopping means is left to whoever asked for the command to run.
      */
-    private boolean isDone = false;
+    private boolean hasExited = false;
 
     /**
      * Starts a chatbot over the usual save file.
@@ -122,10 +122,9 @@ public class Thomas {
      * Reads and carries out commands until the user says {@code bye} or the
      * input ends.
      * <p>
-     * The loop no longer knows what any command does. It reads a line, asks
-     * {@link Parser} for the command it names, runs it, and asks whether that
-     * was the last one -- so a new command is a new class, and this method never
-     * changes again.
+     * A session is an opening, a run of commands, and a farewell, which is all
+     * this method settles. What the first two of those involve belongs to the
+     * two methods below it.
      * <p>
      * Both ways of ending are handled: {@code bye} answers true to
      * {@link Command#isExit()}, and input that simply runs out fails
@@ -134,14 +133,46 @@ public class Thomas {
      * so only the second case is left to say it here.
      */
     public void run() {
-        // The greeting comes before the complaints about the save file, so that
-        // any of them arrive after Thomas has introduced itself.
+        showStartup();
+        boolean isExit = readAndRunCommands();
+
+        // No save here: every command that changes the list has already saved,
+        // so the file is current even if the program never reaches this point.
+        if (!isExit) {
+            // The input ran out rather than saying bye, so the farewell that
+            // ExitCommand would have given is still owed.
+            ui.showGoodbye();
+        }
+    }
+
+    /**
+     * Shows the greeting, with any complaint about the save file after it.
+     * <p>
+     * The console's counterpart to {@link #getStartupMessage()}, which words
+     * the same things for the GUI. The greeting goes first so that a complaint
+     * arrives after Thomas has introduced itself rather than before.
+     */
+    private void showStartup() {
         ui.showWelcome();
         for (String complaint : getLoadingComplaints()) {
-            // One block each, as they were when this method worded them itself.
+            // One block each, so a complaint reads as its own message rather
+            // than as more of the greeting.
             ui.showMessage(complaint);
         }
+    }
 
+    /**
+     * Reads and carries out commands until {@code bye} or the end of the input.
+     * <p>
+     * This loop does not know what any command does. It reads a line, asks
+     * {@link Parser} for the command it names, runs it, and asks whether that
+     * was the last one -- so a new command is a new class, and this method
+     * never changes again.
+     *
+     * @return True if a command ended the session, false if the input ran out
+     *         before one did.
+     */
+    private boolean readAndRunCommands() {
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
             try {
@@ -156,14 +187,7 @@ public class Thomas {
                 ui.showError(e.getMessage());
             }
         }
-
-        // No save here: every command that changes the list has already saved,
-        // so the file is current even if the program never reaches this point.
-        if (!isExit) {
-            // The input ran out rather than saying bye, so the farewell that
-            // ExitCommand would have given is still owed.
-            ui.showGoodbye();
-        }
+        return isExit;
     }
 
     /**
@@ -201,7 +225,7 @@ public class Thomas {
         }
         // Storage records the lines it could not read instead of printing them,
         // so they are worded here, where the Ui is.
-        return storage.getSkippedLines().stream()
+        return storage.getSkipComplaints().stream()
                 .map(ui::getSkippedLineMessage)
                 .toList();
     }
@@ -230,7 +254,7 @@ public class Thomas {
             // dialog box matches its style classes against, not
             // "thomas.command.AddCommand".
             commandType = command.getClass().getSimpleName();
-            isDone = command.isExit();
+            hasExited = command.isExit();
             return response;
         } catch (ThomasException e) {
             // No command ran, so there is no kind of command to color by.
@@ -254,8 +278,8 @@ public class Thomas {
      *
      * @return True if the user has said {@code bye}.
      */
-    public boolean isDone() {
-        return isDone;
+    public boolean hasExited() {
+        return hasExited;
     }
 
     /**
