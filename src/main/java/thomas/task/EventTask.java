@@ -93,7 +93,8 @@ public class EventTask extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return "E | " + super.toSaveFormat() + " | " + from.format(DATE_INPUT_FORMAT)
-                + " | " + to.format(DATE_INPUT_FORMAT);
+        return "E" + FIELD_SEPARATOR + super.toSaveFormat()
+                + FIELD_SEPARATOR + from.format(DATE_INPUT_FORMAT)
+                + FIELD_SEPARATOR + to.format(DATE_INPUT_FORMAT);
     }
 }
