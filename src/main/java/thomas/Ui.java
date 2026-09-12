@@ -297,7 +297,7 @@ public class Ui {
     private static String getNumberedTasksMessage(TaskList tasks, String header,
             List<Integer> positions) {
         String[] entries = Stream.concat(
-                        Stream.of("Here are the tasks in your list:"),
+                        Stream.of(header),
                         positions.stream()
                                 .map(position -> (position + 1) + ". " + tasks.get(position)))
                 .toArray(String[]::new);
