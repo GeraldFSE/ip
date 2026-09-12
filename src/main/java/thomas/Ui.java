@@ -290,6 +290,13 @@ public class Ui {
         for (int i = 1; i <= tasks.size(); i++) {
             entries[i] = i + ". " + tasks.get(i - 1);
         }
+        // The header plus one entry per task, and the shift above fills every
+        // slot up to the last. Checking the last one catches a sizing or
+        // bound mistake at the only end where the two can disagree: a null
+        // left there is printed by joinLines as the word "null" on its own
+        // line, which reads as a task rather than as the fault it is.
+        assert entries[entries.length - 1] != null
+                : "The last line of a " + tasks.size() + " task list was never filled";
         return joinLines(entries);
     }
 

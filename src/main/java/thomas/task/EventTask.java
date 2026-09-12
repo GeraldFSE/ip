@@ -79,6 +79,11 @@ public class EventTask extends Task {
     public boolean occursOn(LocalDate day) {
         LocalDate start = from.toLocalDate();
         LocalDate end = to.toLocalDate();
+        // The range test below reads as a range only because the constructor
+        // refuses an event that ends before it starts. Were that to change,
+        // this would quietly answer no for every day rather than failing:
+        // an event that never matches is far harder to notice than a crash.
+        assert !end.isBefore(start) : "Event ends on " + end + ", before it starts on " + start;
         return !day.isBefore(start) && !day.isAfter(end);
     }
 

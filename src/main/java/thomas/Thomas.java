@@ -224,6 +224,11 @@ public class Thomas {
         try {
             Command command = Parser.parse(input);
             String response = command.execute(tasks, ui, storage);
+            // Every command owes the user an answer. A null one is not
+            // caught anywhere downstream: it reaches the window as the
+            // four characters "null" in a dialog box, which reads as a
+            // reply rather than as the fault it is.
+            assert response != null : "Command gave no reply: " + command.getClass().getSimpleName();
             // The simple name, not the full one: "AddCommand" is what the
             // dialog box matches its style classes against, not
             // "thomas.command.AddCommand".

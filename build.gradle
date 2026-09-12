@@ -62,6 +62,11 @@ application {
     // classpath rather than the module path. Thomas.main still runs the console
     // session, which is what the text-UI tests drive.
     mainClass = 'thomas.Launcher'
+
+    // Assertions are off by default in the JVM, which would make every assert
+    // in this project dead code outside the Gradle test task. -ea turns them
+    // on for `gradlew run` and the generated start scripts.
+    applicationDefaultJvmArgs = ['-ea']
 }
 
 jar {
