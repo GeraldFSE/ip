@@ -310,6 +310,26 @@ public class Parser {
     }
 
     /**
+     * Returns a field of a command, rejecting one the user left blank.
+     * <p>
+     * A marker can be there with nothing after it, as in {@code "... /by  "},
+     * and the text in front of one can be missing just as easily. Splitting on
+     * the marker finds neither, so each piece is checked once it has been
+     * trimmed, and returned so the check sits on the line that reads it.
+     *
+     * @param field The piece of the line, already trimmed.
+     * @param message What to tell the user when it is blank.
+     * @return That same field.
+     * @throws ThomasException If it is empty.
+     */
+    private static String requireNonEmpty(String field, String message) throws ThomasException {
+        if (field.isEmpty()) {
+            throw new ThomasException(message);
+        }
+        return field;
+    }
+
+    /**
      * Builds the task {@code deadline <description> /by <date>} describes.
      *
      * @return The new deadline.
@@ -325,15 +345,9 @@ public class Parser {
         String[] details = splitAtMarker(arguments, "/by",
                 MESSAGE_EMPTY_DEADLINE, MESSAGE_MISSING_BY);
 
-        String description = details[0].trim();
-        String by = details[1].trim();
-        if (description.isEmpty()) {
-            throw new ThomasException(MESSAGE_EMPTY_DEADLINE);
-        }
+        String description = requireNonEmpty(details[0].trim(), MESSAGE_EMPTY_DEADLINE);
         // The marker can be present with nothing after it: "... /by  ".
-        if (by.isEmpty()) {
-            throw new ThomasException(MESSAGE_MISSING_BY);
-        }
+        String by = requireNonEmpty(details[1].trim(), MESSAGE_MISSING_BY);
 
         LocalDateTime byDate = Task.parseDate(by, "a deadline date");
         return new DeadlineTask(requireSeparatorFree(description), byDate);
@@ -368,18 +382,9 @@ public class Parser {
             throw new ThomasException(MESSAGE_MISSING_TO);
         }
 
-        String description = afterFrom[0].trim();
-        String from = afterTo[0].trim();
-        String to = afterTo[1].trim();
-        if (description.isEmpty()) {
-            throw new ThomasException(MESSAGE_EMPTY_EVENT);
-        }
-        if (from.isEmpty()) {
-            throw new ThomasException(MESSAGE_MISSING_FROM);
-        }
-        if (to.isEmpty()) {
-            throw new ThomasException(MESSAGE_MISSING_TO);
-        }
+        String description = requireNonEmpty(afterFrom[0].trim(), MESSAGE_EMPTY_EVENT);
+        String from = requireNonEmpty(afterTo[0].trim(), MESSAGE_MISSING_FROM);
+        String to = requireNonEmpty(afterTo[1].trim(), MESSAGE_MISSING_TO);
 
         LocalDateTime fromDate = Task.parseDate(from, "a start date");
         LocalDateTime toDate = Task.parseDate(to, "an end date");
