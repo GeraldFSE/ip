@@ -193,12 +193,35 @@ public class Storage {
     }
 
     /**
+     * Adds the task one save file line describes, or records why it could not
+     * be read.
+     * <p>
+     * A blank line is passed over quietly: it is not damage worth reporting.
+     * Anything else that cannot be read costs that line alone, because the
+     * complaint is collected rather than thrown on -- one damaged line should
+     * not cost the user every other task in the file.
+     *
+     * @param savedLine One line of the save file, without its line separator.
+     * @param tasks The tasks read so far, appended to when the line decodes.
+     */
+    private void addTaskFrom(String savedLine, ArrayList<Task> tasks) {
+        if (savedLine.isBlank()) {
+            return;
+        }
+        try {
+            tasks.add(parseSavedTask(savedLine));
+        } catch (ThomasException e) {
+            skipComplaints.add(e.getMessage());
+        }
+    }
+
+    /**
      * Reads the saved tasks.
      * <p>
      * A missing file is the normal first run, not an error, so it gives back an
-     * empty list. Individual unreadable lines are skipped and recorded in
-     * {@link #getSkipComplaints()} rather than abandoning the whole file: one
-     * damaged line should not cost the user every other task.
+     * empty list. What becomes of any one line is {@link #addTaskFrom}'s to
+     * settle, leaving this method with the file: whether it is there, reading
+     * it a line at a time, and closing it afterwards.
      *
      * @return The tasks the file holds, in the order they were written.
      * @throws IOException If the file exists but cannot be read.
@@ -220,15 +243,7 @@ public class Storage {
             while (scan.hasNextLine()) {
                 // nextLine(), not next(): descriptions contain spaces, and
                 // next() would hand back one word at a time.
-                String savedLine = scan.nextLine();
-                if (savedLine.isBlank()) {
-                    continue;
-                }
-                try {
-                    tasks.add(parseSavedTask(savedLine));
-                } catch (ThomasException e) {
-                    skipComplaints.add(e.getMessage());
-                }
+                addTaskFrom(scan.nextLine(), tasks);
             }
         }
         return tasks;
