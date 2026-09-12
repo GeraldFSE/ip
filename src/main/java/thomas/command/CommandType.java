@@ -1,5 +1,7 @@
 package thomas.command;
 
+import java.util.Arrays;
+
 import thomas.ThomasException;
 
 /**
@@ -51,11 +53,9 @@ public enum CommandType {
      * @throws ThomasException If no command has that keyword.
      */
     public static CommandType fromKeyword(String keyword) throws ThomasException {
-        for (CommandType type : values()) {
-            if (type.keyword.equals(keyword)) {
-                return type;
-            }
-        }
-        throw new ThomasException("Erm sorry, what does that mean again?");
+        return Arrays.stream(values())
+                .filter(type -> type.keyword.equals(keyword))
+                .findFirst()
+                .orElseThrow(() -> new ThomasException("Erm sorry, what does that mean again?"));
     }
 }

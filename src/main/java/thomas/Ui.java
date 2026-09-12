@@ -3,6 +3,8 @@ package thomas;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import thomas.task.Task;
 
@@ -281,15 +283,16 @@ public class Ui {
      * @return The numbered list to show the user.
      */
     public String getTaskListMessage(TaskList tasks) {
-        // Number the tasks for display; tasks itself stays unnumbered.
-        // One slot longer than the list to hold the header line, which then
-        // shifts every task one place along: entry i shows task i - 1,
-        // numbered i.
-        String[] entries = new String[tasks.size() + 1];
-        entries[0] = "Here are the tasks in your list:";
-        for (int i = 1; i <= tasks.size(); i++) {
-            entries[i] = i + ". " + tasks.get(i - 1);
-        }
+        // Number the tasks for display; tasks itself stays unnumbered. The
+        // header is put in front of the numbered lines rather than into a
+        // slot of its own, so no line has to be shifted along to make room
+        // for it and the position a task is at stays the position it is read
+        // from.
+        String[] entries = Stream.concat(
+                        Stream.of("Here are the tasks in your list:"),
+                        IntStream.range(0, tasks.size())
+                                .mapToObj(position -> (position + 1) + ". " + tasks.get(position)))
+                .toArray(String[]::new);
         return joinLines(entries);
     }
 
