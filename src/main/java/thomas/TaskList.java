@@ -151,6 +151,33 @@ public class TaskList {
     }
 
     /**
+     * Puts a task back at the number it used to carry.
+     * <p>
+     * The counterpart to {@link #deleteByNumber(int)}, for undoing one: the task
+     * goes back where it was rather than on the end, and everything from that
+     * number on shifts up one, so the numbering closes around it exactly as
+     * deleting opened it.
+     * <p>
+     * Deliberately not routed through {@link #requirePosition(int)}, which stops
+     * at the last task that exists. Putting back the task that used to be last
+     * means reaching one past the end, so the range here is one wider. That is
+     * also why nothing is thrown: this is reached only from an undo replaying a
+     * delete that really happened, so a number outside the range is a mistake in
+     * the code rather than anything the user did.
+     *
+     * @param taskNumber The number the task is to carry again, counting from 1,
+     *                   at most one past the last task.
+     * @param task The task to put back.
+     */
+    public void insertByNumber(int taskNumber, Task task) {
+        assert task != null : "Cannot put a null task back into the list";
+        assert taskNumber >= 1 && taskNumber <= tasks.size() + 1
+                : "Task number " + taskNumber + " is outside a list of "
+                        + tasks.size() + " task(s) to put a task back into";
+        tasks.add(taskNumber - 1, task);
+    }
+
+    /**
      * Returns the positions of the tasks that fall on a given day.
      * <p>
      * Positions rather than the tasks themselves, because the caller shows each

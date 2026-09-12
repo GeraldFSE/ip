@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.ThomasException;
@@ -35,12 +36,17 @@ public class MarkCommand extends Command {
      * @param tasks The list holding the task.
      * @param ui Used to word the confirmation.
      * @param storage Where the changed list is written.
+     * @param history Told what the task's completion was before this.
      * @return The confirmation, behind a warning if the save failed.
      * @throws ThomasException If no task carries that number.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) throws ThomasException {
         Task task = tasks.getByNumber(taskNumber);
+        // Recorded before the change, not after. Marking a task that is already
+        // done changes nothing, and an undo that simply unmarked it would take
+        // away a tick this command never put there.
+        history.pushSetDone(task, task.isDone());
         task.markAsDone();
         String saveWarning = save(tasks, ui, storage);
         return saveWarning + ui.getMarkedMessage(task);

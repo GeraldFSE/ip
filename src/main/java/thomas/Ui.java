@@ -277,6 +277,28 @@ public class Ui {
     }
 
     /**
+     * Confirms that the most recent change has been taken back.
+     * <p>
+     * The line the user typed is quoted back rather than the change described,
+     * because undo can be asked for many times in a row and the user has to be
+     * able to tell how far back they have got. Quoting is also what lets one
+     * wording serve every command: describing the change would need one sentence
+     * for a task put back and another for a tick restored.
+     * <p>
+     * The count is reported even when undoing a {@code mark}, which does not
+     * change it, so that the message reads the same way whatever was undone.
+     *
+     * @param typedLine The line that had asked for the change now reversed,
+     *                  exactly as it was typed.
+     * @param taskCount How many tasks are stored now that it has been reversed.
+     * @return The confirmation to show the user.
+     */
+    public String getUndoneMessage(String typedLine, int taskCount) {
+        return joinLines("Choo Choo! I've undone '" + typedLine + "'.",
+                "Now you have " + taskCount + " task(s) in the list.");
+    }
+
+    /**
      * Words a header and the tasks at the given positions, numbered.
      * <p>
      * Every listing the chatbot shows takes this shape, and each numbers its
@@ -297,7 +319,7 @@ public class Ui {
     private static String getNumberedTasksMessage(TaskList tasks, String header,
             List<Integer> positions) {
         String[] entries = Stream.concat(
-                        Stream.of("Here are the tasks in your list:"),
+                        Stream.of(header),
                         positions.stream()
                                 .map(position -> (position + 1) + ". " + tasks.get(position)))
                 .toArray(String[]::new);

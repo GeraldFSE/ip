@@ -26,6 +26,7 @@ public enum Keyword {
     MARK("mark"),
     UNMARK("unmark"),
     DELETE("delete"),
+    UNDO("undo"),
     TODO("todo"),
     DEADLINE("deadline"),
     EVENT("event");

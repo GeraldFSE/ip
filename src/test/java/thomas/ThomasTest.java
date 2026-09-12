@@ -156,4 +156,128 @@ public class ThomasTest {
                 thomas.getResponse("delete 5"));
         assertEquals("", thomas.getCommandType());
     }
+
+    @Test
+    public void getResponse_undoBeforeAnyChange_returnsErrorMessage() {
+        // A fresh chatbot has nothing to undo whatever the save file held: the
+        // history is built with the session, not loaded with the tasks.
+        assertEquals("Erm, there's nothing to undo!", chatbot().getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoAfterLoadingTasks_returnsErrorMessage() throws IOException {
+        writeSaveFile("T | 0 | read book");
+
+        // Loading is not a change the user made, so it is not one to take back.
+        assertEquals("Erm, there's nothing to undo!", chatbot().getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoAfterTodo_quotesTheLineAndReportsTheCount() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+
+        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
+                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoAfterTodo_taskIsGoneFromTheList() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+
+        thomas.getResponse("undo");
+
+        assertEquals("Here are the tasks in your list:", thomas.getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_undo_recordsCommandType() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+
+        thomas.getResponse("undo");
+
+        // UndoCommand earns no colour of its own in DialogBox, which reaches its
+        // default branch on this name rather than on an empty string.
+        assertEquals("UndoCommand", thomas.getCommandType());
+    }
+
+    @Test
+    public void getResponse_undoWithNothingToUndo_clearsCommandType() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+
+        thomas.getResponse("undo");
+        thomas.getResponse("undo");
+
+        // The second undo failed, so no command ran and there is nothing to
+        // colour by, exactly as for any other rejected command.
+        assertEquals("", thomas.getCommandType());
+    }
+
+    @Test
+    public void getResponse_undoTwice_walksBackTwoChanges() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+        thomas.getResponse("todo buy milk");
+
+        assertEquals("Choo Choo! I've undone 'todo buy milk'.\n"
+                + "Now you have 1 task(s) in the list.", thomas.getResponse("undo"));
+        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
+                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoAfterARejectedCommand_reachesTheChangeBeforeIt() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+        thomas.getResponse("delete 99");
+
+        // The rejected command changed nothing, so it recorded nothing and did
+        // not become the change that the next undo takes back.
+        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
+                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoAfterReadOnlyCommands_reachesTheLastChange() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+        thomas.getResponse("list");
+        thomas.getResponse("find read");
+
+        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
+                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+    }
+
+    @Test
+    public void getResponse_undoOfANoOpMark_leavesTheTaskDone() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+        thomas.getResponse("mark 1");
+
+        thomas.getResponse("mark 1");
+        thomas.getResponse("undo");
+
+        // The second mark changed nothing, so undoing it must not clear the tick
+        // the first one set.
+        assertEquals("Here are the tasks in your list:\n1. [T][X] read book",
+                thomas.getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_undo_writesTheRestoredListToTheSaveFile() throws IOException {
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+        thomas.getResponse("todo buy milk");
+
+        thomas.getResponse("undo");
+
+        // Saved, not only put back in memory: every command that changed the list
+        // wrote as it went, so a list restored in memory alone would be the old
+        // one again on the next run.
+        assertEquals(List.of("T | 0 | read book"),
+                Files.readAllLines(folder.resolve("tasklist.txt")));
+    }
 }

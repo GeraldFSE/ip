@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.ThomasException;
@@ -38,12 +39,16 @@ public class DeleteCommand extends Command {
      * @param tasks The list to remove from.
      * @param ui Used to word the confirmation.
      * @param storage Where the shortened list is written.
+     * @param history Told how to put the removed task back again.
      * @return The confirmation, behind a warning if the save failed.
      * @throws ThomasException If no task carries that number.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) throws ThomasException {
         Task removedTask = tasks.deleteByNumber(taskNumber);
+        // The task itself has to be kept: nothing else holds it once the list
+        // has let go, so without it the removal could not be reversed.
+        history.pushInsert(taskNumber, removedTask);
         String saveWarning = save(tasks, ui, storage);
         return saveWarning + ui.getRemovedMessage(removedTask, tasks.size());
     }

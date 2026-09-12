@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.Ui;
@@ -21,10 +22,11 @@ public class ExitCommand extends Command {
      * @param tasks Unused.
      * @param ui Used to word the farewell.
      * @param storage Unused.
+     * @param history Unused.
      * @return The farewell.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) {
         return ui.getGoodbyeMessage();
     }
 
