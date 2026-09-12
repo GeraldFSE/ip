@@ -87,7 +87,7 @@ public class StorageTest {
         Storage storage = storage();
 
         assertTrue(storage.load().isEmpty());
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class StorageTest {
         Storage storage = storage();
 
         assertTrue(storage.load().isEmpty());
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class StorageTest {
         ArrayList<Task> tasks = storage.load();
 
         assertEquals(1, tasks.size());
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     // ---- load: lines that decode ----
@@ -160,7 +160,7 @@ public class StorageTest {
         ArrayList<Task> tasks = storage.load();
 
         assertEquals("[T][ ] read book", tasks.get(0).toString());
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     @Test
@@ -186,7 +186,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("unknown task type 'X': X | 0 | read book"),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class StorageTest {
         Storage storage = storage();
 
         assertTrue(storage.load().isEmpty());
-        assertEquals(List.of("too few fields: T | 0"), storage.getSkippedLines());
+        assertEquals(List.of("too few fields: T | 0"), storage.getSkipComplaints());
     }
 
     @Test
@@ -207,7 +207,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("expected 3 fields but found 4: T | 0 | read book | and return it"),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -219,7 +219,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("expected 3 fields but found 4: T | 0 | read book | "),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("expected 4 fields but found 3: D | 0 | return book"),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -239,7 +239,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("expected 5 fields but found 4: E | 0 | project meeting | 2019-12-02 1400"),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -251,7 +251,7 @@ public class StorageTest {
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("I can't read 'tomorrow' as a deadline date! "
                 + "Write it as a date and a 24-hour time, like 2019-12-02 1800."),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -263,7 +263,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("HUH?! Your event ends before it starts! Check your /from and /to."),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -279,7 +279,7 @@ public class StorageTest {
         assertEquals(2, tasks.size());
         assertEquals("[T][ ] read book", tasks.get(0).toString());
         assertEquals("[T][ ] buy book", tasks.get(1).toString());
-        assertEquals(1, storage.getSkippedLines().size());
+        assertEquals(1, storage.getSkipComplaints().size());
     }
 
     @Test
@@ -293,7 +293,7 @@ public class StorageTest {
         assertEquals(List.of("unknown task type 'X': X | 0 | first",
                 "too few fields: T | 0",
                 "unknown task type 'Y': Y | 0 | third"),
-                storage.getSkippedLines());
+                storage.getSkipComplaints());
     }
 
     @Test
@@ -307,7 +307,7 @@ public class StorageTest {
         writeSaveFile("T | 0 | read book");
         storage.load();
 
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     // ---- save ----
@@ -404,7 +404,7 @@ public class StorageTest {
         ArrayList<Task> loaded = storage.load();
 
         assertEquals(3, loaded.size());
-        assertTrue(storage.getSkippedLines().isEmpty());
+        assertTrue(storage.getSkipComplaints().isEmpty());
         for (int i = 0; i < original.size(); i++) {
             assertEquals(original.get(i).toString(), loaded.get(i).toString());
         }
@@ -436,6 +436,6 @@ public class StorageTest {
         ArrayList<Task> loaded = storage.load();
 
         assertTrue(loaded.isEmpty());
-        assertFalse(storage.getSkippedLines().isEmpty());
+        assertFalse(storage.getSkipComplaints().isEmpty());
     }
 }

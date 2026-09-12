@@ -203,8 +203,8 @@ public class Thomas {
         // Storage records the lines it could not read instead of printing them,
         // so they are worded here, where the Ui is.
         List<String> complaints = new ArrayList<>();
-        for (String skipped : storage.getSkippedLines()) {
-            complaints.add(ui.getSkippedLineMessage(skipped));
+        for (String complaint : storage.getSkipComplaints()) {
+            complaints.add(ui.getSkippedLineMessage(complaint));
         }
         return complaints;
     }

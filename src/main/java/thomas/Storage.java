@@ -65,14 +65,17 @@ public class Storage {
     private final String filePath;
 
     /**
-     * Save file lines from the last {@link #load()} that could not be read.
+     * What went wrong with each line the last {@link #load()} had to skip.
+     * <p>
+     * The complaints themselves, not the lines they are about: each says what
+     * was wrong and quotes the line back inside it.
      * <p>
      * Collected rather than printed, because printing is {@link Ui}'s job and
      * this class does not know about the screen. The caller shows them after
      * loading, which is when they were noticed, so the user still sees them
      * before the first command runs.
      */
-    private final ArrayList<String> skippedLines = new ArrayList<>();
+    private final ArrayList<String> skipComplaints = new ArrayList<>();
 
     /**
      * Creates a storage over one file.
@@ -185,8 +188,8 @@ public class Storage {
      *
      * @return One message per skipped line, in the order the lines appeared.
      */
-    public ArrayList<String> getSkippedLines() {
-        return skippedLines;
+    public ArrayList<String> getSkipComplaints() {
+        return skipComplaints;
     }
 
     /**
@@ -194,7 +197,7 @@ public class Storage {
      * <p>
      * A missing file is the normal first run, not an error, so it gives back an
      * empty list. Individual unreadable lines are skipped and recorded in
-     * {@link #getSkippedLines()} rather than abandoning the whole file: one
+     * {@link #getSkipComplaints()} rather than abandoning the whole file: one
      * damaged line should not cost the user every other task.
      *
      * @return The tasks the file holds, in the order they were written.
@@ -203,7 +206,7 @@ public class Storage {
     public ArrayList<Task> load() throws IOException {
         // Cleared rather than appended to, so a second load reports only what
         // that load skipped instead of everything ever skipped.
-        skippedLines.clear();
+        skipComplaints.clear();
 
         ArrayList<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
@@ -224,7 +227,7 @@ public class Storage {
                 try {
                     tasks.add(parseSavedTask(savedLine));
                 } catch (ThomasException e) {
-                    skippedLines.add(e.getMessage());
+                    skipComplaints.add(e.getMessage());
                 }
             }
         }
