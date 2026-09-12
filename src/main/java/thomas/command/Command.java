@@ -2,6 +2,7 @@ package thomas.command;
 
 import java.io.IOException;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.ThomasException;
@@ -21,10 +22,10 @@ import thomas.Ui;
  * for a command and runs it without knowing which one it got, and adding a new
  * one means writing a class rather than editing the loop that runs them all.
  * <p>
- * The three collaborators are handed to {@link #execute} rather than held as
- * fields, because a command is built fresh for every line and would otherwise
- * carry three references it uses once. It also keeps plain what each command is
- * allowed to touch: the tasks, the screen, and the save file.
+ * The collaborators are handed to {@link #execute} rather than held as fields,
+ * because a command is built fresh for every line and would otherwise carry
+ * references it uses once. It also keeps plain what each command is allowed to
+ * touch: the tasks, the screen, the save file, and the record of how to undo.
  */
 public abstract class Command {
     /**
@@ -36,16 +37,25 @@ public abstract class Command {
      * {@link Ui}'s, which is what {@code ui} is for; showing them belongs to
      * whoever asked for the command to be run.
      *
+     * A command that changes the list also records how to reverse it, so that
+     * {@code undo} can put the list back. The record is pushed after the change
+     * has happened, which is what leaves the history untouched by a command that
+     * throws. A command that changes nothing pushes nothing, and so is passed
+     * over by {@code undo} without having to say that it should be.
+     *
      * @param tasks The task list to read or change.
      * @param ui How to word what happened.
      * @param storage Where to write the tasks when they change.
+     * @param history Where a command that changes the list records how to
+     *                reverse it.
      * @return What to tell the user, or the empty string for a command with
      *         nothing to say.
      * @throws ThomasException If the command cannot be carried out, for example
      *                         because it names a task that does not exist --
      *                         which cannot be known until the list is in hand.
      */
-    public abstract String execute(TaskList tasks, Ui ui, Storage storage) throws ThomasException;
+    public abstract String execute(TaskList tasks, Ui ui, Storage storage, History history)
+            throws ThomasException;
 
     /**
      * Returns whether the chatbot should stop after this command.

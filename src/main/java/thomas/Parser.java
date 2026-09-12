@@ -13,6 +13,7 @@ import thomas.command.Keyword;
 import thomas.command.ListCommand;
 import thomas.command.MarkCommand;
 import thomas.command.OnCommand;
+import thomas.command.UndoCommand;
 import thomas.command.UnmarkCommand;
 import thomas.task.DeadlineTask;
 import thomas.task.EventTask;
@@ -121,6 +122,7 @@ public class Parser {
             case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
             case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
             case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
+            case UNDO -> new UndoCommand();
             // The three add commands differ only in the task they build, which
             // parseNewTask settles, so one AddCommand serves all three.
             case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());

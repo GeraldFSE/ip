@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.Ui;
@@ -16,10 +17,11 @@ public class ListCommand extends Command {
      * @param tasks The tasks to show.
      * @param ui Used to word them.
      * @param storage Unused.
+     * @param history Unused.
      * @return The numbered list.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) {
         return ui.getTaskListMessage(tasks);
     }
 }

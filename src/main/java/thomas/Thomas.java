@@ -13,8 +13,10 @@ import thomas.command.Command;
  * {@code todo}, {@code deadline ... /by ...} and
  * {@code event ... /from ... /to ...}. The stored tasks are printed on
  * {@code list} and on {@code on <day>}, can be marked done with {@code mark} and
- * not done again with {@code unmark}, and removed with {@code delete}. It stops
- * when the user types {@code bye} or the input ends.
+ * not done again with {@code unmark}, and removed with {@code delete}. The most
+ * recent change to the list can be taken back with {@code undo}, one at a time,
+ * back to the start of the session. It stops when the user types {@code bye} or
+ * the input ends.
  * <p>
  * The list survives between runs: it is loaded from {@value #DATA_PATH} at
  * start-up and written back after every command that changes it, so no task is
@@ -51,6 +53,15 @@ public class Thomas {
      * instead of the loaded one.
      */
     private TaskList tasks;
+
+    /**
+     * How to reverse each change made to the list this session.
+     * <p>
+     * One per chatbot rather than one per command, because {@code undo} has to
+     * reach what an earlier command did. It is deliberately not loaded from or
+     * written to the save file: a session starts with nothing to undo.
+     */
+    private final History history = new History();
 
     /**
      * Why the save file could not be read, or the empty string if it could.
@@ -176,8 +187,13 @@ public class Thomas {
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
             try {
-                Command command = Parser.parse(ui.readCommand());
-                ui.showMessage(command.execute(tasks, ui, storage));
+                String line = ui.readCommand();
+                Command command = Parser.parse(line);
+                // The line is noted rather than passed on, because a command knows
+                // what it did but not how it was asked for: "delete 2" reaches
+                // DeleteCommand as the number alone.
+                history.startCommand(line);
+                ui.showMessage(command.execute(tasks, ui, storage, history));
                 isExit = command.isExit();
             } catch (ThomasException e) {
                 // Every user mistake, whether noticed while reading the line or
@@ -244,7 +260,8 @@ public class Thomas {
     public String getResponse(String input) {
         try {
             Command command = Parser.parse(input);
-            String response = command.execute(tasks, ui, storage);
+            history.startCommand(input);
+            String response = command.execute(tasks, ui, storage, history);
             // Every command owes the user an answer. A null one is not
             // caught anywhere downstream: it reaches the window as the
             // four characters "null" in a dialog box, which reads as a

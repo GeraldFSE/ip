@@ -297,6 +297,85 @@ public class TaskListTest {
         assertEquals(List.of("[T][ ] read book", "[T][ ] return book"), contentsOf(list));
     }
 
+    // ---- insertByNumber ----
+
+    @Test
+    public void insertByNumber_middleNumber_taskTakesThatNumber() {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("pay fine"));
+        Task returning = new TodoTask("buy milk");
+
+        list.insertByNumber(2, returning);
+
+        assertSame(returning, list.get(1));
+    }
+
+    @Test
+    public void insertByNumber_middleNumber_laterTasksShiftUp() {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("pay fine"));
+
+        list.insertByNumber(2, new TodoTask("buy milk"));
+
+        // Shifted, not overwritten: the task that held number 2 is still there,
+        // now at 3, so undoing a delete costs nothing that was not deleted.
+        assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk", "[T][ ] pay fine"),
+                contentsOf(list));
+    }
+
+    @Test
+    public void insertByNumber_firstNumber_taskGoesToTheFront() {
+        TaskList list = listOf(new TodoTask("buy milk"));
+
+        list.insertByNumber(1, new TodoTask("read book"));
+
+        assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk"), contentsOf(list));
+    }
+
+    @Test
+    public void insertByNumber_onePastTheLastTask_taskGoesOnTheEnd() {
+        TaskList list = listOf(new TodoTask("read book"));
+
+        // One past the end is allowed here, where getByNumber and deleteByNumber
+        // refuse it, because putting back the task that used to be last means
+        // reaching a number the list no longer has.
+        list.insertByNumber(2, new TodoTask("buy milk"));
+
+        assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk"), contentsOf(list));
+    }
+
+    @Test
+    public void insertByNumber_intoEmptyList_holdsThatTaskAlone() {
+        TaskList list = listOf();
+
+        list.insertByNumber(1, new TodoTask("read book"));
+
+        assertEquals(List.of("[T][ ] read book"), contentsOf(list));
+    }
+
+    @Test
+    public void insertByNumber_doneTask_taskIsStillDone() {
+        TaskList list = listOf(new TodoTask("read book"));
+        Task returning = new TodoTask("buy milk");
+        returning.markAsDone();
+
+        list.insertByNumber(2, returning);
+
+        assertTrue(list.get(1).isDone());
+    }
+
+    @Test
+    public void insertByNumber_afterDeleteByNumber_listIsAsItWas() throws ThomasException {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("buy milk"),
+                new TodoTask("pay fine"));
+
+        Task removed = list.deleteByNumber(2);
+        list.insertByNumber(2, removed);
+
+        // The pair is what undo relies on, so it is tested as a pair: deleting a
+        // task and putting it back at the number it held leaves no trace.
+        assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk", "[T][ ] pay fine"),
+                contentsOf(list));
+    }
+
     // ---- positionsOn ----
 
     @Test

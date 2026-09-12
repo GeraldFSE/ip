@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Storage;
 import thomas.TaskList;
 import thomas.Ui;
@@ -34,10 +35,11 @@ public class FindCommand extends Command {
      * @param tasks The tasks to search.
      * @param ui Used to word the matches.
      * @param storage Unused.
+     * @param history Unused.
      * @return The matches, numbered by list position.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) {
         return ui.getMatchingTasksMessage(tasks, keyword);
     }
 }

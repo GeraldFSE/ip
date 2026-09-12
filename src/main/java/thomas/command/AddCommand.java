@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.History;
 import thomas.Parser;
 import thomas.Storage;
 import thomas.TaskList;
@@ -40,11 +41,14 @@ public class AddCommand extends Command {
      * @param tasks The list to append to.
      * @param ui Used to word the confirmation.
      * @param storage Where the longer list is written.
+     * @param history Told how to take the new task back out again.
      * @return The confirmation, behind a warning if the save failed.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history) {
         tasks.add(task);
+        // The new task is on the end, so its number is the new size of the list.
+        history.pushRemove(tasks.size());
         String saveWarning = save(tasks, ui, storage);
         return saveWarning + ui.getAddedMessage(task, tasks.size());
     }

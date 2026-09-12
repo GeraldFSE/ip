@@ -129,6 +129,19 @@ public class Task {
         }
     }
 
+    /**
+     * Returns whether this task has been completed.
+     * <p>
+     * Needed by the commands that change the flag: undoing a {@code mark} means
+     * putting the flag back to what it was, so the command has to read it before
+     * changing it. {@link #getStatusIcon()} is the only other window onto it, and
+     * matching its text against {@code "[X]"} to recover a boolean would be worse.
+     *
+     * @return True if the task is done.
+     */
+    public boolean isDone() {
+        return isDone;
+    }
 
     /**
      * Returns the icon showing whether this task is done.

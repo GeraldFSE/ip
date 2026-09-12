@@ -2460,11 +2460,459 @@ bye
 {{FAREWELL}}
 ```
 
+### TC59: Undo an add, with the read-only commands in between
+
+**Aim:** `undo` takes back the most recent change and says which line it is
+taking back. Every command that reads the list without changing it -- `list`,
+`find` and `on` -- must be transparent to undo: none consumes the step, and none
+is quoted back in its place.
+
+**Input:**
+
+```text
+todo read book
+list
+find read
+on 2019-12-02
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the matching tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks on Dec 02 2019:
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo read book'.
+     Now you have 0 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC60: Undo a delete: the task comes back at its own number
+
+**Aim:** Undoing a delete puts the task back where it was rather than on the
+end, so the numbering closes around it exactly as deleting it opened them.
+Guards against restoring by appending, which would renumber two tasks and send
+a later `mark` to the wrong one.
+
+**Input:**
+
+```text
+todo read book
+todo buy milk
+todo pay fine
+delete 2
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy milk
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] pay fine
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Noted. I've removed this task:
+        [T][ ] buy milk
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'delete 2'.
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+     2. [T][ ] buy milk
+     3. [T][ ] pay fine
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC61: Undoing a `mark` that changed nothing leaves the task done
+
+**Aim:** Marking a task that is already done changes nothing, so undoing that
+second `mark` must leave the tick alone. Guards against reversing a mark by
+simply unmarking, which would take away a tick the undone command never set.
+
+**Input:**
+
+```text
+todo read book
+mark 1
+mark 1
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'mark 1'.
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][X] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC62: A rejected command does not consume an undo
+
+**Aim:** A command that is refused changes nothing, so it records nothing and
+the next `undo` reaches past it to the last real change. Guards against noting
+the undo point before running the command, which would let a typo silently
+spend the user's one chance to take back what they did before it.
+
+**Input:**
+
+```text
+todo read book
+delete 99
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     There is no task 99! You only have 1 task(s).
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo read book'.
+     Now you have 0 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC63: `undo` with nothing to undo is refused
+
+**Aim:** A session that has changed nothing has nothing to take back, and says
+so rather than doing nothing quietly. The second `undo` here has already used
+up the one change there was.
+
+**Input:**
+
+```text
+undo
+todo read book
+undo
+undo
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Erm, there's nothing to undo!
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo read book'.
+     Now you have 0 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Erm, there's nothing to undo!
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC64: Undos are saved, but the history does not survive a restart
+
+**Aim:** Two undos walk back two changes, most recent first. The restored list
+is written to the save file, so the second run opens on it -- but the history
+itself is only ever in memory, so the `undo` in the second run is refused even
+though a task is there to see.
+
+**Input:**
+
+```text
+todo read book
+todo buy milk
+undo
+list
+bye
+```
+
+**Input:**
+
+```text
+list
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy milk
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo buy milk'.
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+{{GREETING}}
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Erm, there's nothing to undo!
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+### TC65: Repeated `undo` walks back one change at a time, most recent first
+
+**Aim:** Undo is not limited to the last change: asked twice it reverses two,
+in the reverse of the order they were made. Guards against a history that only
+remembers one change, and against replaying steps oldest first -- which would
+reverse the wrong task, since the number a step carries only describes the list
+as it stood when that step was recorded.
+
+**Input:**
+
+```text
+todo read book
+todo buy milk
+todo pay fine
+undo
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] buy milk
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] pay fine
+     Now you have 3 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo pay fine'.
+     Now you have 2 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'todo buy milk'.
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC66: Undoing a `mark` leaves the task not done again
+
+**Aim:** Undoing a `mark` puts the completion flag back to what it was before
+that command, which for a task that was not done is not done. The count is
+reported even though marking never changed it, so that the confirmation reads
+the same way whatever was undone.
+
+**Input:**
+
+```text
+todo read book
+mark 1
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'mark 1'.
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC67: Undoing an `unmark` leaves the task done again
+
+**Aim:** The mirror of TC66, and the case a blind inverse would get right by
+luck rather than by rule: undoing an `unmark` restores the flag the task
+carried before it, which here is done. Together with TC61 this covers all
+three ways the flag can stand when a mark or unmark is taken back.
+
+**Input:**
+
+```text
+todo read book
+mark 1
+unmark 1
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Got it. I've added this task:
+        [T][ ] read book
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Nice! I've marked this task as done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     OK, I've marked this task as not done yet:
+        [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Choo Choo! I've undone 'unmark 1'.
+     Now you have 1 task(s) in the list.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here are the tasks in your list:
+     1. [T][X] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
 mistaken for an oversight. Add cases here as the chatbot grows:
 
+* **`bye` leaving the undo history alone.** `bye` changes nothing and so
+  records nothing, exactly as `list`, `find` and `on` do in TC59. There is no
+  case for it because a session cannot be asked to undo anything after it has
+  ended, and the next run starts with an empty history whatever `bye` did.
+  `ExitCommand` never names the history at all, which is where that is visible.
+* **A redo.** `undo` records nothing itself, so undoing twice reaches two
+  earlier changes rather than putting the first one back. Adding a redo would
+  need a second stack and a rule for when reaching backwards discards what was
+  ahead, and neither is asked for yet.
+* **Undo surviving a restart.** The history is held in memory and dies with the
+  program, which TC64 pins down. Saving it would mean a second file format to
+  keep correct in the one class where a mistake silently loses tasks, for a
+  convenience only ever wanted inside the session that earned it.
+* **Undoing a save that failed.** A failed save leaves the change standing in
+  memory with a warning above the confirmation, and an undo of it behaves the
+  same way. Reaching it needs an unwritable `./data`, which the test script does
+  not set up -- the same reason the save failure itself has no case.
 * **The GUI window.** The plan drives `thomas.Thomas`, the console entry point,
   and says nothing about what the window looks like or does. The window types a
   line into `Thomas.getResponse` and paints whatever comes back, so the wording

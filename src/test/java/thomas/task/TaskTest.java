@@ -228,6 +228,41 @@ public class TaskTest {
         assertEquals("[ ]", task.getStatusIcon());
     }
 
+    @Test
+    public void isDone_newTask_isFalse() {
+        assertFalse(new Task("read book").isDone());
+    }
+
+    @Test
+    public void isDone_markedTask_isTrue() {
+        Task task = new Task("read book");
+
+        task.markAsDone();
+
+        assertTrue(task.isDone());
+    }
+
+    @Test
+    public void isDone_unmarkedTask_isFalse() {
+        Task task = new Task("read book");
+        task.markAsDone();
+
+        task.unmarkAsDone();
+
+        assertFalse(task.isDone());
+    }
+
+    @Test
+    public void isDone_doneTask_agreesWithStatusIcon() {
+        Task task = new Task("read book");
+        task.markAsDone();
+
+        // The two read the same flag, and the commands that record how to undo a
+        // mark rely on the boolean saying what the icon shows.
+        assertEquals("[X]", task.getStatusIcon());
+        assertTrue(task.isDone());
+    }
+
     // ---- display and save format ----
 
     @Test
