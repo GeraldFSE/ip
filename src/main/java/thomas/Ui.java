@@ -2,6 +2,7 @@ package thomas;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import thomas.task.Task;
@@ -275,74 +276,81 @@ public class Ui {
     }
 
     /**
-     * Prints the whole task list, numbered from 1.
+     * Words a header and the tasks at the given positions, numbered.
+     * <p>
+     * Every listing the chatbot shows takes this shape, and each numbers its
+     * tasks by where they sit in the whole list rather than by where they sit
+     * among those shown: a number on screen is the number {@code mark} and
+     * {@code delete} take. Numbering what is shown 1, 2, 3 would read more
+     * tidily and send the user to the wrong task, so the conversion from
+     * position to displayed number happens here alone.
+     * <p>
+     * The header is included whether or not any position is given, so a
+     * listing with no matches says so rather than saying nothing at all.
+     *
+     * @param tasks The whole task list.
+     * @param header The line to open with.
+     * @param positions The positions to show, counting from 0, in list order.
+     * @return The numbered listing to show the user.
+     */
+    private static String getNumberedTasksMessage(TaskList tasks, String header,
+            List<Integer> positions) {
+        ArrayList<String> entries = new ArrayList<>();
+        entries.add(header);
+        for (int position : positions) {
+            entries.add((position + 1) + ". " + tasks.get(position));
+        }
+        return joinLines(entries.toArray(new String[0]));
+    }
+
+    /**
+     * Words the whole task list, numbered from 1.
      *
      * @param tasks The tasks to show, in list order.
      * @return The numbered list to show the user.
      */
     public String getTaskListMessage(TaskList tasks) {
-        // Number the tasks for display; tasks itself stays unnumbered.
-        // One slot longer than the list to hold the header line, which then
-        // shifts every task one place along: entry i shows task i - 1,
-        // numbered i.
-        String[] entries = new String[tasks.size() + 1];
-        entries[0] = "Here are the tasks in your list:";
-        for (int i = 1; i <= tasks.size(); i++) {
-            entries[i] = i + ". " + tasks.get(i - 1);
+        // Every task is shown, so the positions are simply all of them. Built
+        // as a list rather than counted out here, so that this listing is
+        // numbered by the same code as the two filtered ones.
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            positions.add(i);
         }
-        // The header plus one entry per task, and the shift above fills every
-        // slot up to the last. Checking the last one catches a sizing or
-        // bound mistake at the only end where the two can disagree: a null
-        // left there is printed by joinLines as the word "null" on its own
-        // line, which reads as a task rather than as the fault it is.
-        assert entries[entries.length - 1] != null
-                : "The last line of a " + tasks.size() + " task list was never filled";
-        return joinLines(entries);
+        return getNumberedTasksMessage(tasks, "Here are the tasks in your list:", positions);
     }
 
     /**
      * Words the tasks whose description contains a keyword.
      * <p>
-     * Numbered by list position, exactly as {@link #getTasksOnDayMessage} is,
-     * so a number shown here is the number {@code mark} and {@code delete}
-     * take. The header is included whether or not anything matched, so an empty
-     * search says so rather than saying nothing at all.
+     * Which tasks match is {@link TaskList}'s question to answer, and how a
+     * listing is numbered is {@link #getNumberedTasksMessage}'s, so all this
+     * one settles is the wording of the header.
      *
      * @param tasks The whole task list.
      * @param keyword The text that was searched for.
      * @return The matches to show the user.
      */
     public String getMatchingTasksMessage(TaskList tasks, String keyword) {
-        // As in getTasksOnDayMessage: how many tasks match is not known until
-        // they have been tested, so the entries are collected rather than sized.
-        ArrayList<String> entries = new ArrayList<>();
-        entries.add("Here are the matching tasks in your list:");
-        for (int position : tasks.positionsMatching(keyword)) {
-            entries.add((position + 1) + ". " + tasks.get(position));
-        }
-        return joinLines(entries.toArray(new String[0]));
+        return getNumberedTasksMessage(tasks, "Here are the matching tasks in your list:",
+                tasks.positionsMatching(keyword));
     }
 
     /**
      * Words the tasks that fall on one day.
      * <p>
-     * Which tasks match is {@link TaskList}'s question, and it answers with
-     * their positions rather than the tasks alone. That is what lets each match
-     * keep the number it has in the whole list, so a number shown here is the
-     * number {@code mark} and {@code delete} take.
+     * As with {@link #getMatchingTasksMessage}, which tasks fall on the day is
+     * {@link TaskList}'s question and the numbering is
+     * {@link #getNumberedTasksMessage}'s, leaving only the header to settle
+     * here.
      *
      * @param tasks The whole task list.
      * @param day The day to report on.
      * @return The matches to show the user.
      */
     public String getTasksOnDayMessage(TaskList tasks, LocalDate day) {
-        // An ArrayList rather than a sized array as getTaskListMessage uses:
-        // how many tasks match is not known until they have been tested.
-        ArrayList<String> entries = new ArrayList<>();
-        entries.add("Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":");
-        for (int position : tasks.positionsOn(day)) {
-            entries.add((position + 1) + ". " + tasks.get(position));
-        }
-        return joinLines(entries.toArray(new String[0]));
+        return getNumberedTasksMessage(tasks,
+                "Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":",
+                tasks.positionsOn(day));
     }
 }

@@ -6,10 +6,10 @@ import java.time.format.DateTimeParseException;
 
 import thomas.command.AddCommand;
 import thomas.command.Command;
-import thomas.command.CommandType;
 import thomas.command.DeleteCommand;
 import thomas.command.ExitCommand;
 import thomas.command.FindCommand;
+import thomas.command.Keyword;
 import thomas.command.ListCommand;
 import thomas.command.MarkCommand;
 import thomas.command.OnCommand;
@@ -38,8 +38,32 @@ import thomas.task.TodoTask;
  * ever reaches the screen.
  */
 public class Parser {
+    /** Told to a {@code todo} given no description. */
+    private static final String MESSAGE_EMPTY_TODO =
+            "HEYY!! The description of a todo cannot be empty!";
+
+    /** Told to a {@code deadline} given no description. */
+    private static final String MESSAGE_EMPTY_DEADLINE =
+            "HEYY!! The description of a deadline cannot be empty!";
+
+    /** Told to an {@code event} given no description. */
+    private static final String MESSAGE_EMPTY_EVENT =
+            "HEYY!! The description of an event cannot be empty!";
+
+    /** Told to a {@code deadline} whose {@code /by} is missing or has no date. */
+    private static final String MESSAGE_MISSING_BY =
+            "Are you forgetting something!! When is the deadline!";
+
+    /** Told to an {@code event} whose {@code /from} is missing or has no date. */
+    private static final String MESSAGE_MISSING_FROM =
+            "Erm when does it start? You need a /from!";
+
+    /** Told to an {@code event} whose {@code /to} is missing or has no date. */
+    private static final String MESSAGE_MISSING_TO =
+            "Erm when does it end? You need a /to after your /from!";
+
     /** The kind of command the line names. */
-    private final CommandType commandType;
+    private final Keyword keyword;
 
     /**
      * The line split into keyword and argument.
@@ -65,7 +89,7 @@ public class Parser {
         // be read as the keyword. Stated because every method below indexes
         // into parts on that basis rather than checking it again.
         assert parts.length >= 1 : "Splitting a line produced no parts: " + line;
-        this.commandType = CommandType.fromKeyword(parts[0]);
+        this.keyword = Keyword.of(parts[0]);
     }
 
     /**
@@ -77,7 +101,7 @@ public class Parser {
      * halfway through doing something.
      * <p>
      * The {@code switch} is an expression over an enum, so the compiler checks
-     * that every {@link CommandType} is covered: adding a keyword without giving
+     * that every {@link Keyword} is covered: adding a keyword without giving
      * it a command stops the build rather than silently doing nothing at run
      * time. That is what makes a {@code default} branch unnecessary here, where
      * the read loop this replaced needed one.
@@ -89,7 +113,7 @@ public class Parser {
      */
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
-        Command command = switch (parser.commandType) {
+        Command command = switch (parser.keyword) {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
             case ON -> new OnCommand(parser.parseDay());
@@ -251,13 +275,13 @@ public class Parser {
      * @throws ThomasException If a description, marker or date is missing or unreadable.
      */
     private Task parseNewTask() throws ThomasException {
-        return switch (commandType) {
+        return switch (keyword) {
             case TODO -> parseTodo();
             case DEADLINE -> parseDeadline();
             case EVENT -> parseEvent();
             // Reached only by calling this for a command that adds no task, which
             // is a mistake in the caller rather than anything the user did.
-            default -> throw new AssertionError("Not an add command: " + commandType);
+            default -> throw new AssertionError("Not an add command: " + keyword);
         };
     }
 
@@ -269,8 +293,56 @@ public class Parser {
      *                         save file's field separator.
      */
     private Task parseTodo() throws ThomasException {
-        return new TodoTask(requireSeparatorFree(
-                requireArgument("HEYY!! The description of a todo cannot be empty!")));
+        return new TodoTask(requireSeparatorFree(requireArgument(MESSAGE_EMPTY_TODO)));
+    }
+
+    /**
+     * Splits an argument at a marker, naming whichever part is missing.
+     * <p>
+     * Two different mistakes arrive here, because the marker is matched with a
+     * leading space so that a word such as {@code standby} is not taken for
+     * one. {@link #requireArgument} has already trimmed the argument, so a
+     * line that is nothing but {@code /by ...} has no space in front of its
+     * marker for the split to match: the marker is there, and it is the
+     * description in front of it that is missing.
+     *
+     * @param arguments The argument to split, already trimmed.
+     * @param marker The marker to split at, for example {@code "/by"}.
+     * @param emptyDescriptionMessage What to say when the line opens with the marker.
+     * @param missingMarkerMessage What to say when the marker is absent.
+     * @return The text before the marker, then the text after it.
+     * @throws ThomasException If the marker is not there to split at.
+     */
+    private static String[] splitAtMarker(String arguments, String marker,
+            String emptyDescriptionMessage, String missingMarkerMessage) throws ThomasException {
+        String[] details = arguments.split(" " + marker + " ", 2);
+        if (details.length < 2) {
+            if (arguments.startsWith(marker)) {
+                throw new ThomasException(emptyDescriptionMessage);
+            }
+            throw new ThomasException(missingMarkerMessage);
+        }
+        return details;
+    }
+
+    /**
+     * Returns a field of a command, rejecting one the user left blank.
+     * <p>
+     * A marker can be there with nothing after it, as in {@code "... /by  "},
+     * and the text in front of one can be missing just as easily. Splitting on
+     * the marker finds neither, so each piece is checked once it has been
+     * trimmed, and returned so the check sits on the line that reads it.
+     *
+     * @param field The piece of the line, already trimmed.
+     * @param message What to tell the user when it is blank.
+     * @return That same field.
+     * @throws ThomasException If it is empty.
+     */
+    private static String requireNonEmpty(String field, String message) throws ThomasException {
+        if (field.isEmpty()) {
+            throw new ThomasException(message);
+        }
+        return field;
     }
 
     /**
@@ -282,33 +354,16 @@ public class Parser {
      *                         the save file's field separator.
      */
     private Task parseDeadline() throws ThomasException {
-        String arguments = requireArgument("HEYY!! The description of a deadline cannot be empty!");
+        String arguments = requireArgument(MESSAGE_EMPTY_DEADLINE);
 
         // "return book /by 2019-12-02 1800"
         //     -> ["return book", "2019-12-02 1800"]
-        String[] details = arguments.split(" /by ", 2);
-        if (details.length < 2) {
-            // Two different mistakes arrive here, because the separator carries
-            // a leading space so that a word such as "standby" is not mistaken
-            // for a marker. requireArgument has already trimmed the argument,
-            // so a line that is nothing but "/by ..." has no space in front of
-            // the marker for the separator to match: the marker is there, and
-            // it is the description in front of it that is missing.
-            if (arguments.startsWith("/by")) {
-                throw new ThomasException("HEYY!! The description of a deadline cannot be empty!");
-            }
-            throw new ThomasException("Are you forgetting something!! When is the deadline!");
-        }
+        String[] details = splitAtMarker(arguments, "/by",
+                MESSAGE_EMPTY_DEADLINE, MESSAGE_MISSING_BY);
 
-        String description = details[0].trim();
-        String by = details[1].trim();
-        if (description.isEmpty()) {
-            throw new ThomasException("HEYY!! The description of a deadline cannot be empty!");
-        }
+        String description = requireNonEmpty(details[0].trim(), MESSAGE_EMPTY_DEADLINE);
         // The marker can be present with nothing after it: "... /by  ".
-        if (by.isEmpty()) {
-            throw new ThomasException("Are you forgetting something!! When is the deadline!");
-        }
+        String by = requireNonEmpty(details[1].trim(), MESSAGE_MISSING_BY);
 
         LocalDateTime byDate = Task.parseDate(by, "a deadline date");
         return new DeadlineTask(requireSeparatorFree(description), byDate);
@@ -325,40 +380,27 @@ public class Parser {
      *                         event ends before it starts.
      */
     private Task parseEvent() throws ThomasException {
-        String arguments = requireArgument("HEYY!! The description of an event cannot be empty!");
+        String arguments = requireArgument(MESSAGE_EMPTY_EVENT);
 
         // Split the markers off one at a time rather than together. Splitting on
         // " /from | /to " at once matches them in any order, so
         // "/to 4pm /from 2pm" would silently swap the two.
         // "meeting /from Mon 2pm /to 4pm" -> ["meeting", "Mon 2pm /to 4pm"]
-        String[] afterFrom = arguments.split(" /from ", 2);
-        if (afterFrom.length < 2) {
-            // As in parseDeadline above: a line that begins with the marker has
-            // a /from, and it is the description in front of it that is missing.
-            if (arguments.startsWith("/from")) {
-                throw new ThomasException("HEYY!! The description of an event cannot be empty!");
-            }
-            throw new ThomasException("Erm when does it start? You need a /from!");
-        }
+        String[] afterFrom = splitAtMarker(arguments, "/from",
+                MESSAGE_EMPTY_EVENT, MESSAGE_MISSING_FROM);
 
         // "Mon 2pm /to 4pm" -> ["Mon 2pm", "4pm"]
+        // Not splitAtMarker: what sits in front of a missing /to is the start
+        // date rather than the description, so the description complaint that
+        // helper can raise would name the wrong part of the line.
         String[] afterTo = afterFrom[1].split(" /to ", 2);
         if (afterTo.length < 2) {
-            throw new ThomasException("Erm when does it end? You need a /to after your /from!");
+            throw new ThomasException(MESSAGE_MISSING_TO);
         }
 
-        String description = afterFrom[0].trim();
-        String from = afterTo[0].trim();
-        String to = afterTo[1].trim();
-        if (description.isEmpty()) {
-            throw new ThomasException("HEYY!! The description of an event cannot be empty!");
-        }
-        if (from.isEmpty()) {
-            throw new ThomasException("Erm when does it start? You need a /from!");
-        }
-        if (to.isEmpty()) {
-            throw new ThomasException("Erm when does it end? You need a /to after your /from!");
-        }
+        String description = requireNonEmpty(afterFrom[0].trim(), MESSAGE_EMPTY_EVENT);
+        String from = requireNonEmpty(afterTo[0].trim(), MESSAGE_MISSING_FROM);
+        String to = requireNonEmpty(afterTo[1].trim(), MESSAGE_MISSING_TO);
 
         LocalDateTime fromDate = Task.parseDate(from, "a start date");
         LocalDateTime toDate = Task.parseDate(to, "an end date");

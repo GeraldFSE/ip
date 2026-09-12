@@ -100,7 +100,7 @@ public class ThomasTest {
         // The simple name, since that is what DialogBox matches its style
         // classes against.
         assertEquals("AddCommand", thomas.getCommandType());
-        assertFalse(thomas.isDone());
+        assertFalse(thomas.hasExited());
     }
 
     @Test
@@ -129,12 +129,12 @@ public class ThomasTest {
         Thomas thomas = chatbot();
 
         assertEquals("Until next time! Choo Choo!", thomas.getResponse("bye"));
-        assertTrue(thomas.isDone());
+        assertTrue(thomas.hasExited());
     }
 
     @Test
-    public void isDone_beforeAnyCommand_isFalse() {
-        assertFalse(chatbot().isDone());
+    public void hasExited_beforeAnyCommand_isFalse() {
+        assertFalse(chatbot().hasExited());
     }
 
     @Test

@@ -71,7 +71,7 @@ public class MainWindow extends AnchorPane {
         );
         userInput.clear();
 
-        if (thomas.isDone()) {
+        if (thomas.hasExited()) {
             // Closing straight away would take the window down before the
             // farewell is ever painted, so it is given time to be read first.
             PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
