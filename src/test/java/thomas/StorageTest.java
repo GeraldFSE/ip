@@ -2,6 +2,7 @@ package thomas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -437,5 +438,34 @@ public class StorageTest {
 
         assertTrue(loaded.isEmpty());
         assertFalse(storage.getSkipComplaints().isEmpty());
+    }
+
+    /**
+     * A description holding a newline would write two lines for one task, so
+     * the next load reads one corrupt line and one task nobody added. Unlike
+     * the field separator above, nothing in the program handles this case: it
+     * cannot be typed, because commands are read a line at a time, so the
+     * save format's one-line-per-task rule is asserted rather than recovered
+     * from. Remove the assertion in Storage.save and this case would instead
+     * show the corruption, which is what makes it worth pinning here.
+     */
+    @Test
+    public void save_descriptionContainingNewline_assertionThrown() {
+        TaskList original = new TaskList();
+        original.add(new TodoTask("read book\nand return it"));
+        Storage storage = storage();
+
+        AssertionError error = assertThrows(AssertionError.class, () -> storage.save(original));
+
+        assertEquals("A task encodes to more than one line: T | 0 | read book\nand return it",
+                error.getMessage());
+    }
+
+    /** The save path is chosen by the program, so a blank one is a bug in it. */
+    @Test
+    public void constructor_blankFilePath_assertionThrown() {
+        AssertionError error = assertThrows(AssertionError.class, () -> new Storage("  "));
+
+        assertEquals("Save file path must be given", error.getMessage());
     }
 }
