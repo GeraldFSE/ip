@@ -86,6 +86,13 @@ public class Task {
      * @param description The task text as entered by the user.
      */
     public Task(String description) {
+        // Both routes in already refuse an empty description: Parser rejects
+        // one the user left out, and Storage rejects a save file line with
+        // too few fields. A blank one arriving here therefore means one of
+        // those checks has been bypassed, which would show up as a task that
+        // lists as its status icon and nothing else.
+        assert description != null && !description.isBlank()
+                : "A task needs a description";
         this.description = description;
         this.isDone = false;
     }

@@ -490,4 +490,64 @@ public class TaskListTest {
 
         assertEquals(List.of("[T][ ] read book", "[T][ ] buy milk"), contentsOf(list));
     }
+
+    // The cases below pin the assertions rather than the behavior. They pass
+    // only with assertions enabled, which the Gradle test task does by
+    // default; run without -ea they would fail, which is the point of having
+    // them -- an assertion nothing exercises is a comment that compiles.
+
+    /** A position below the first task is a caller's mistake, not the user's. */
+    @Test
+    public void get_positionBeforeTheFirstTask_assertionThrown() {
+        TaskList list = listOf(new TodoTask("read book"));
+
+        AssertionError error = assertThrows(AssertionError.class, () -> list.get(-1));
+
+        assertEquals("Position -1 is outside a list of 1 task(s)", error.getMessage());
+    }
+
+    /** The position one past the last task is the end the off-by-one lands on. */
+    @Test
+    public void get_positionPastTheLastTask_assertionThrown() {
+        TaskList list = listOf(new TodoTask("read book"));
+
+        AssertionError error = assertThrows(AssertionError.class, () -> list.get(1));
+
+        assertEquals("Position 1 is outside a list of 1 task(s)", error.getMessage());
+    }
+
+    /** Both ends of the valid range are accepted, so the assertion is not too tight. */
+    @Test
+    public void get_firstAndLastPosition_returnsTheTask() {
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("buy milk"));
+
+        assertEquals("[T][ ] read book", list.get(0).toString());
+        assertEquals("[T][ ] buy milk", list.get(list.size() - 1).toString());
+    }
+
+    /** An empty list has no valid position at all, not even 0. */
+    @Test
+    public void get_anyPositionInAnEmptyList_assertionThrown() {
+        TaskList list = new TaskList();
+
+        assertThrows(AssertionError.class, () -> list.get(0));
+    }
+
+    /** A null task would only surface later, when the list is printed. */
+    @Test
+    public void add_nullTask_assertionThrown() {
+        TaskList list = new TaskList();
+
+        AssertionError error = assertThrows(AssertionError.class, () -> list.add(null));
+
+        assertEquals("Cannot add a null task to the list", error.getMessage());
+    }
+
+    /** Loading hands its list straight to this constructor, so a null must not pass. */
+    @Test
+    public void constructor_nullArrayList_assertionThrown() {
+        AssertionError error = assertThrows(AssertionError.class, () -> new TaskList(null));
+
+        assertEquals("Cannot build a task list over a null ArrayList", error.getMessage());
+    }
 }
