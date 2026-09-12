@@ -2475,8 +2475,8 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   which needs a running window rather than typed input.
 * **A keyword typed in the wrong case.** `Bye`, `TODO x` and `List` are all
   reported as unknown commands, because the match is made with `equals`. That is
-  deliberate rather than accidental, and noted in `Command.fromKeyword`, but no
-  case pins it down, so nothing would notice if the matching were loosened.
+  deliberate rather than accidental, and noted in `Keyword.of`, but no case pins
+  it down, so nothing would notice if the matching were loosened.
 * **Arguments given to `bye` and `list`.** Matching on the keyword means
   `bye now` and `list all` are accepted, with the extra text ignored. That is
   consistent with the other commands, which also ignore what they do not read,
