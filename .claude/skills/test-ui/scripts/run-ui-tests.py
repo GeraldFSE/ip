@@ -268,7 +268,10 @@ def run_case(case_inputs):
             )
             try:
                 result = subprocess.run(
-                    ["java", "-cp", str(BIN_DIR), MAIN_CLASS],
+                    # -ea: the assertions in the source are off by default, so
+                    # without it these cases exercise the code with every
+                    # stated assumption unchecked.
+                    ["java", "-ea", "-cp", str(BIN_DIR), MAIN_CLASS],
                     input=stdin_text,
                     capture_output=True,
                     text=True,

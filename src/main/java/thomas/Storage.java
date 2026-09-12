@@ -49,6 +49,11 @@ public class Storage {
      *                 {@code "./data/tasklist.txt"}.
      */
     public Storage(String filePath) {
+        // The path is chosen by the program, never typed by the user, so a
+        // blank one is a mistake in the code. Without this a blank path
+        // becomes a File("") that never exists, so every run loads nothing
+        // and every save fails -- the tasks look lost rather than misfiled.
+        assert filePath != null && !filePath.isBlank() : "Save file path must be given";
         this.filePath = filePath;
     }
 
@@ -111,6 +116,11 @@ public class Storage {
             }
             default -> throw new ThomasException("unknown task type '" + fields[0] + "': " + line);
         };
+        // Every branch of the switch either yields a task or throws, so this
+        // says out loud that there is no path producing a null. The next
+        // statement dereferences it, and a task type added with a branch that
+        // forgets to yield would fail here rather than there.
+        assert task != null : "Parsing a save file line yielded no task: " + line;
 
         // "1" means done; anything else is treated as not done, so a damaged
         // flag costs the tick rather than the whole task.
@@ -200,7 +210,15 @@ public class Storage {
         // skipping it on an exception would lose the tasks.
         try (FileWriter fw = new FileWriter(file)) {
             for (int i = 0; i < tasks.size(); i++) {
-                fw.write(tasks.get(i).toSaveFormat() + System.lineSeparator());
+                String encoded = tasks.get(i).toSaveFormat();
+                // One task per line is the whole shape of this file, and
+                // load() splits it back on exactly that. A description
+                // carrying a newline would write two lines for one task, so
+                // the next run reads one corrupt line plus one task that was
+                // never added -- a silent loss noticed runs later, if at all.
+                assert !encoded.contains("\n") && !encoded.contains("\r")
+                        : "A task encodes to more than one line: " + encoded;
+                fw.write(encoded + System.lineSeparator());
             }
         }
     }

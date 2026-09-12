@@ -45,6 +45,10 @@ public class TaskList {
      * @param tasks The tasks to start with, in list order; taken over as-is.
      */
     public TaskList(ArrayList<Task> tasks) {
+        // The list is taken over as-is and every method below reads it, so a
+        // null here is a mistake in the caller that would surface much later,
+        // as a NullPointerException from whichever operation ran first.
+        assert tasks != null : "Cannot build a task list over a null ArrayList";
         this.tasks = tasks;
     }
 
@@ -68,6 +72,11 @@ public class TaskList {
      * @return The task at that position.
      */
     public Task get(int index) {
+        // This method trusts its caller, so the range it documents is stated
+        // here rather than checked: a position out of range is a mistake in
+        // the calling loop, not something the user did.
+        assert index >= 0 && index < tasks.size()
+                : "Position " + index + " is outside a list of " + tasks.size() + " task(s)";
         return tasks.get(index);
     }
 
@@ -77,6 +86,11 @@ public class TaskList {
      * @param task The task to store.
      */
     public void add(Task task) {
+        // Only Parser builds tasks, and it either returns one or throws, so a
+        // null arriving here means that contract has been broken. Caught now
+        // rather than as a NullPointerException the next time the list is
+        // printed, by which point what added it is no longer on the stack.
+        assert task != null : "Cannot add a null task to the list";
         tasks.add(task);
     }
 
@@ -98,7 +112,16 @@ public class TaskList {
             throw new ThomasException("There is no task " + taskNumber + "! You only have "
                     + tasks.size() + " task(s).");
         }
-        return taskNumber - 1;
+        int position = taskNumber - 1;
+        // The guard above already forces this, so it cannot fail as the two
+        // stand today. It is here as a check on that guard: this is the only
+        // place the two numbering schemes meet, and loosening the range test
+        // by one would otherwise show up as an IndexOutOfBoundsException from
+        // inside ArrayList rather than here, where the conversion is.
+        assert position >= 0 && position < tasks.size()
+                : "Task number " + taskNumber + " converted to position " + position
+                        + " in a list of " + tasks.size() + " task(s)";
+        return position;
     }
 
     /**

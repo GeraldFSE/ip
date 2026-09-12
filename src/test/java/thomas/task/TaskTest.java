@@ -361,4 +361,18 @@ public class TaskTest {
 
         assertTrue(todo.toSaveFormat().startsWith("T | 1 | "));
     }
+
+    /**
+     * Both routes into a task refuse an empty description already, so a blank
+     * one reaching the constructor means one of those checks was bypassed.
+     * Asserted rather than thrown because it is a bug in the program, not a
+     * mistake the user can make. Passes only with assertions enabled, which
+     * the Gradle test task does by default.
+     */
+    @Test
+    public void constructor_blankDescription_assertionThrown() {
+        AssertionError error = assertThrows(AssertionError.class, () -> new TodoTask("   "));
+
+        assertEquals("A task needs a description", error.getMessage());
+    }
 }

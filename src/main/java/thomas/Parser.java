@@ -61,6 +61,10 @@ public class Parser {
      */
     private Parser(String line) throws ThomasException {
         this.parts = line.split(" ", 2);
+        // split never returns an empty array, so parts[0] is always there to
+        // be read as the keyword. Stated because every method below indexes
+        // into parts on that basis rather than checking it again.
+        assert parts.length >= 1 : "Splitting a line produced no parts: " + line;
         this.commandType = CommandType.fromKeyword(parts[0]);
     }
 
@@ -85,7 +89,7 @@ public class Parser {
      */
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
-        return switch (parser.commandType) {
+        Command command = switch (parser.commandType) {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
             case ON -> new OnCommand(parser.parseDay());
@@ -97,6 +101,12 @@ public class Parser {
             // parseNewTask settles, so one AddCommand serves all three.
             case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
         };
+        // This method either returns a command or throws, never both and
+        // never neither. Both callers run what comes back without testing it,
+        // so a null would reach them as a NullPointerException from inside
+        // the run loop rather than from the parsing that produced it.
+        assert command != null : "Parsing produced no command for: " + fullCommand;
+        return command;
     }
 
     /**
@@ -119,7 +129,13 @@ public class Parser {
         if (parts.length < 2 || parts[1].isBlank()) {
             throw new ThomasException(message);
         }
-        return parts[1].trim();
+        String argument = parts[1].trim();
+        // Every caller treats what comes back as real content -- a task
+        // description, a date, a keyword -- and none tests it for emptiness
+        // again. That holds only because the blank case threw above, so the
+        // trim below cannot leave nothing behind.
+        assert !argument.isEmpty() : "A non-blank argument trimmed to nothing";
+        return argument;
     }
 
     /**
