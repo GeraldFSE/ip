@@ -68,7 +68,7 @@ public class HistoryTest {
         History history = new History();
 
         ThomasException e = assertThrows(ThomasException.class, () -> history.undo(listOf()));
-        assertEquals("Erm, there's nothing to undo!", e.getMessage());
+        assertEquals("I can't reverse any further! There's nothing to undo.", e.getMessage());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class HistoryTest {
         // The one step has been used up, so the history is empty again rather
         // than holding a step that could be applied twice.
         ThomasException e = assertThrows(ThomasException.class, () -> history.undo(list));
-        assertEquals("Erm, there's nothing to undo!", e.getMessage());
+        assertEquals("I can't reverse any further! There's nothing to undo.", e.getMessage());
     }
 
     @Test

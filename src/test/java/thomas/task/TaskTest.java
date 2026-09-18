@@ -135,7 +135,7 @@ public class TaskTest {
                 Task.parseDate("Mon 2pm", "a start date"));
 
         assertEquals("I can't read 'Mon 2pm' as a start date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     @Test
@@ -144,7 +144,7 @@ public class TaskTest {
                 Task.parseDate("4pm", "an end date"));
 
         assertEquals("I can't read '4pm' as an end date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     // ---- the formats ----

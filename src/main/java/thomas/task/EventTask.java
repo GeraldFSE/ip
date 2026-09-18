@@ -40,8 +40,8 @@ public class EventTask extends Task {
             throws ThomasException {
         super(description);
         if (from.isAfter(to)) {
-            throw new ThomasException("HUH?! Your event ends before it starts! "
-                    + "Check your /from and /to.");
+            throw new ThomasException("Bust my buffers! Your event arrives before it sets off! "
+                    + "Check its /from and /to.");
         }
         this.from = from;
         this.to = to;

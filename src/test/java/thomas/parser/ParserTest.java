@@ -56,20 +56,20 @@ public class ParserTest {
     @Test
     public void parse_unknownKeyword_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("blah"));
-        assertEquals("Erm sorry, what does that mean again?", e.getMessage());
+        assertEquals("Cinders and ashes! I don't know that signal. What does it mean?", e.getMessage());
     }
 
     @Test
     public void parse_emptyInput_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse(""));
-        assertEquals("Erm sorry, what does that mean again?", e.getMessage());
+        assertEquals("Cinders and ashes! I don't know that signal. What does it mean?", e.getMessage());
     }
 
     @Test
     public void parse_wrongCaseKeyword_exceptionThrown() {
         // Matching is case sensitive, so "List" is not the list command.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("List"));
-        assertEquals("Erm sorry, what does that mean again?", e.getMessage());
+        assertEquals("Cinders and ashes! I don't know that signal. What does it mean?", e.getMessage());
     }
 
     // ---- to-do ----
@@ -82,7 +82,7 @@ public class ParserTest {
     @Test
     public void parse_todoWithoutDescription_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("todo"));
-        assertEquals("HEYY!! The description of a todo cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! A todo needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ParserTest {
         // A keyword followed by spaces only splits into two parts, so the blank check rather than the length check is
         // what has to catch this.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("todo    "));
-        assertEquals("HEYY!! The description of a todo cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! A todo needs a description before I can couple it up.", e.getMessage());
     }
 
     // ---- deadline ----
@@ -103,14 +103,14 @@ public class ParserTest {
     @Test
     public void parse_deadlineWithoutArguments_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("deadline"));
-        assertEquals("HEYY!! The description of a deadline cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! A deadline needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
     public void parse_deadlineWithoutByMarker_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline return book 2019-12-02 1800"));
-        assertEquals("Are you forgetting something!! When is the deadline!", e.getMessage());
+        assertEquals("When is it due? A deadline needs a /by before I can pull it.", e.getMessage());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ParserTest {
         // The separator carries a leading space so that a word merely ending in "by" is not mistaken for the marker.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline put it on standby 2019-12-02 1800"));
-        assertEquals("Are you forgetting something!! When is the deadline!", e.getMessage());
+        assertEquals("When is it due? A deadline needs a /by before I can pull it.", e.getMessage());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ParserTest {
         // though the marker is there: the missing part is the description.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline /by 2019-12-02 1800"));
-        assertEquals("HEYY!! The description of a deadline cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! A deadline needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
@@ -135,14 +135,14 @@ public class ParserTest {
         // Here the split does succeed, and the empty description is caught afterwards.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline    /by 2019-12-02 1800"));
-        assertEquals("HEYY!! The description of a deadline cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! A deadline needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
     public void parse_deadlineBlankDate_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline return book /by   "));
-        assertEquals("Are you forgetting something!! When is the deadline!", e.getMessage());
+        assertEquals("When is it due? A deadline needs a /by before I can pull it.", e.getMessage());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class ParserTest {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline return book /by tomorrow"));
         assertEquals("I can't read 'tomorrow' as a deadline date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ParserTest {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline return book /by 2019-12-02"));
         assertEquals("I can't read '2019-12-02' as a deadline date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     // ---- event ----
@@ -173,21 +173,21 @@ public class ParserTest {
     @Test
     public void parse_eventWithoutArguments_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("event"));
-        assertEquals("HEYY!! The description of an event cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! An event needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
     public void parse_eventWithoutFromMarker_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /to 2019-12-02 1600"));
-        assertEquals("Erm when does it start? You need a /from!", e.getMessage());
+        assertEquals("When does it set off? An event needs a /from.", e.getMessage());
     }
 
     @Test
     public void parse_eventWithoutToMarker_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from 2019-12-02 1400"));
-        assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
+        assertEquals("When does it arrive? An event needs a /to after its /from.", e.getMessage());
     }
 
     @Test
@@ -196,28 +196,28 @@ public class ParserTest {
         // silently swapped.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /to 2019-12-02 1600 /from 2019-12-02 1400"));
-        assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
+        assertEquals("When does it arrive? An event needs a /to after its /from.", e.getMessage());
     }
 
     @Test
     public void parse_eventMarkerOnly_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event /from 2019-12-02 1400 /to 2019-12-02 1600"));
-        assertEquals("HEYY!! The description of an event cannot be empty!", e.getMessage());
+        assertEquals("Bust my buffers! An event needs a description before I can couple it up.", e.getMessage());
     }
 
     @Test
     public void parse_eventBlankStartDate_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from   /to 2019-12-02 1600"));
-        assertEquals("Erm when does it start? You need a /from!", e.getMessage());
+        assertEquals("When does it set off? An event needs a /from.", e.getMessage());
     }
 
     @Test
     public void parse_eventBlankEndDate_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from 2019-12-02 1400 /to   "));
-        assertEquals("Erm when does it end? You need a /to after your /from!", e.getMessage());
+        assertEquals("When does it arrive? An event needs a /to after its /from.", e.getMessage());
     }
 
     @Test
@@ -226,7 +226,7 @@ public class ParserTest {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from Mon 2pm /to 2019-12-02 1600"));
         assertEquals("I can't read 'Mon 2pm' as a start date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     @Test
@@ -234,7 +234,7 @@ public class ParserTest {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from 2019-12-02 1400 /to 4pm"));
         assertEquals("I can't read '4pm' as an end date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     @Test
@@ -243,7 +243,7 @@ public class ParserTest {
         // loading the save file is held to it too, and the parser lets the exception through.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /from 2019-12-02 1600 /to 2019-12-02 1400"));
-        assertEquals("HUH?! Your event ends before it starts! Check your /from and /to.",
+        assertEquals("Bust my buffers! Your event arrives before it sets off! Check its /from and /to.",
                 e.getMessage());
     }
 
@@ -263,24 +263,24 @@ public class ParserTest {
         // is one helper called from three places rather than one inherited check.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("todo read book | and return it"));
-        assertEquals("HEYY!! A description can't contain ' | ' -- "
-                + "that's how I keep your tasks in the save file.", e.getMessage());
+        assertEquals("Bust my buffers! A description can't contain ' | ' -- "
+                + "that's how I keep my wagons apart in the save file.", e.getMessage());
     }
 
     @Test
     public void parse_deadlineDescriptionWithSeparator_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("deadline read book | and return it /by 2019-12-02 1800"));
-        assertEquals("HEYY!! A description can't contain ' | ' -- "
-                + "that's how I keep your tasks in the save file.", e.getMessage());
+        assertEquals("Bust my buffers! A description can't contain ' | ' -- "
+                + "that's how I keep my wagons apart in the save file.", e.getMessage());
     }
 
     @Test
     public void parse_eventDescriptionWithSeparator_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event talk | and lunch /from 2019-12-02 1400 /to 2019-12-02 1600"));
-        assertEquals("HEYY!! A description can't contain ' | ' -- "
-                + "that's how I keep your tasks in the save file.", e.getMessage());
+        assertEquals("Bust my buffers! A description can't contain ' | ' -- "
+                + "that's how I keep my wagons apart in the save file.", e.getMessage());
     }
 
     @Test
@@ -323,26 +323,26 @@ public class ParserTest {
     @Test
     public void parse_markWithoutNumber_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark"));
-        assertEquals("HEYY!! You need a valid number to mark", e.getMessage());
+        assertEquals("Which wagon do you want me to mark? Give me its number.", e.getMessage());
     }
 
     @Test
     public void parse_deleteWithoutNumber_exceptionThrown() {
         // Each of the three names itself in the missing-argument message.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("delete"));
-        assertEquals("HEYY!! You need a valid number to delete", e.getMessage());
+        assertEquals("Which wagon do you want me to delete? Give me its number.", e.getMessage());
     }
 
     @Test
     public void parse_markNonInteger_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark two"));
-        assertEquals("WHAT? Why are you passing a non integer?! Give me an INTEGER!!", e.getMessage());
+        assertEquals("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...", e.getMessage());
     }
 
     @Test
     public void parse_markDecimalNumber_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark 1.5"));
-        assertEquals("WHAT? Why are you passing a non integer?! Give me an INTEGER!!", e.getMessage());
+        assertEquals("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...", e.getMessage());
     }
 
     // ---- find ----
@@ -365,14 +365,14 @@ public class ParserTest {
     @Test
     public void parse_findWithoutKeyword_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("find"));
-        assertEquals("HEYY!! What am I looking for? Give me a keyword!", e.getMessage());
+        assertEquals("What am I looking for? Give me a word to search the yard for.", e.getMessage());
     }
 
     /** A keyword of spaces alone is as missing as no keyword at all. */
     @Test
     public void parse_findBlankKeyword_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("find    "));
-        assertEquals("HEYY!! What am I looking for? Give me a keyword!", e.getMessage());
+        assertEquals("What am I looking for? Give me a word to search the yard for.", e.getMessage());
     }
 
     // ---- on ----
@@ -385,19 +385,19 @@ public class ParserTest {
     @Test
     public void parse_onWithoutDay_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("on"));
-        assertEquals("HEYY!! Which day do you want to see?", e.getMessage());
+        assertEquals("Which day's timetable do you want to see?", e.getMessage());
     }
 
     @Test
     public void parse_onUnreadableDay_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("on tomorrow"));
-        assertEquals("I can't read 'tomorrow' as a day! Write it as 2019-12-02.", e.getMessage());
+        assertEquals("I can't find 'tomorrow' on my timetable! Write the day as 2019-12-02.", e.getMessage());
     }
 
     @Test
     public void parse_onDayWithTime_exceptionThrown() {
         // The on command asks about a whole day, so a time is refused.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("on 2019-12-02 1800"));
-        assertEquals("I can't read '2019-12-02 1800' as a day! Write it as 2019-12-02.", e.getMessage());
+        assertEquals("I can't find '2019-12-02 1800' on my timetable! Write the day as 2019-12-02.", e.getMessage());
     }
 }

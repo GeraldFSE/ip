@@ -167,7 +167,7 @@ public class TaskListTest {
         TaskList list = listOf(new TodoTask("read book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(0));
-        assertEquals("There is no task 0! You only have 1 task(s).", e.getMessage());
+        assertEquals("There's no wagon 0 on my train! I'm only pulling 1 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class TaskListTest {
         TaskList list = listOf(new TodoTask("read book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(-1));
-        assertEquals("There is no task -1! You only have 1 task(s).", e.getMessage());
+        assertEquals("There's no wagon -1 on my train! I'm only pulling 1 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -184,7 +184,7 @@ public class TaskListTest {
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(3));
-        assertEquals("There is no task 3! You only have 2 task(s).", e.getMessage());
+        assertEquals("There's no wagon 3 on my train! I'm only pulling 2 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -194,7 +194,7 @@ public class TaskListTest {
         TaskList list = new TaskList();
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.getByNumber(1));
-        assertEquals("There is no task 1! You only have 0 task(s).", e.getMessage());
+        assertEquals("There's no wagon 1 on my train! I'm only pulling 0 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -265,7 +265,7 @@ public class TaskListTest {
         TaskList list = listOf(new TodoTask("read book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.deleteByNumber(2));
-        assertEquals("There is no task 2! You only have 1 task(s).", e.getMessage());
+        assertEquals("There's no wagon 2 on my train! I'm only pulling 1 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -273,7 +273,7 @@ public class TaskListTest {
         TaskList list = listOf(new TodoTask("read book"));
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.deleteByNumber(0));
-        assertEquals("There is no task 0! You only have 1 task(s).", e.getMessage());
+        assertEquals("There's no wagon 0 on my train! I'm only pulling 1 wagon(s).", e.getMessage());
     }
 
     @Test
@@ -281,7 +281,7 @@ public class TaskListTest {
         TaskList list = new TaskList();
 
         ThomasException e = assertThrows(ThomasException.class, () -> list.deleteByNumber(1));
-        assertEquals("There is no task 1! You only have 0 task(s).", e.getMessage());
+        assertEquals("There's no wagon 1 on my train! I'm only pulling 0 wagon(s).", e.getMessage());
     }
 
     @Test

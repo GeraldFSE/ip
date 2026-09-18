@@ -65,7 +65,7 @@ public class UiTest {
     public void getTaskListMessage_severalTasks_opensWithTheListHeader() {
         TaskList list = listOf(new TodoTask("read book"), new TodoTask("buy milk"));
 
-        assertEquals("Here are the tasks in your list:\n1. [T][ ] read book\n2. [T][ ] buy milk",
+        assertEquals("Here is every wagon on my train:\n1. [T][ ] read book\n2. [T][ ] buy milk",
                 new Ui().getTaskListMessage(list));
     }
 
@@ -75,7 +75,7 @@ public class UiTest {
 
         // Not the list header: a search that said "here are the tasks in your
         // list" would read as though nothing had been filtered at all.
-        assertEquals("Here are the matching tasks in your list:\n1. [T][ ] read book",
+        assertEquals("I searched the yard and found these wagons:\n1. [T][ ] read book",
                 new Ui().getMatchingTasksMessage(list, "read"));
     }
 
@@ -83,7 +83,7 @@ public class UiTest {
     public void getTasksOnDayMessage_matches_opensWithTheDayInTheHeader() {
         TaskList list = listOf(deadlineOn("return book", DEC_02));
 
-        assertEquals("Here are the tasks on Dec 02 2019:\n"
+        assertEquals("Here is my timetable for Dec 02 2019:\n"
                         + "1. [D][ ] return book (by: Dec 02 2019, 6:00 PM)",
                 new Ui().getTasksOnDayMessage(list, DEC_02));
     }
@@ -93,7 +93,7 @@ public class UiTest {
         TaskList list = listOf(deadlineOn("return book", DEC_03));
 
         // The day is part of the header, so two days must not word alike.
-        assertEquals("Here are the tasks on Dec 03 2019:\n"
+        assertEquals("Here is my timetable for Dec 03 2019:\n"
                         + "1. [D][ ] return book (by: Dec 03 2019, 6:00 PM)",
                 new Ui().getTasksOnDayMessage(list, DEC_03));
     }
@@ -102,7 +102,7 @@ public class UiTest {
 
     @Test
     public void getTaskListMessage_emptyList_isTheHeaderAlone() {
-        assertEquals("Here are the tasks in your list:", new Ui().getTaskListMessage(listOf()));
+        assertEquals("Here is every wagon on my train:", new Ui().getTaskListMessage(listOf()));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class UiTest {
         TaskList list = listOf(new TodoTask("read book"));
 
         // Saying so beats saying nothing: an empty block would read as a fault.
-        assertEquals("Here are the matching tasks in your list:",
+        assertEquals("I searched the yard and found these wagons:",
                 new Ui().getMatchingTasksMessage(list, "swim"));
     }
 
@@ -118,7 +118,7 @@ public class UiTest {
     public void getTasksOnDayMessage_noTasksThatDay_isTheHeaderAlone() {
         TaskList list = listOf(deadlineOn("return book", DEC_03));
 
-        assertEquals("Here are the tasks on Dec 02 2019:",
+        assertEquals("Here is my timetable for Dec 02 2019:",
                 new Ui().getTasksOnDayMessage(list, DEC_02));
     }
 
@@ -131,7 +131,7 @@ public class UiTest {
 
         // 1 and 3, not 1 and 2: the number on screen is the number mark and
         // delete take, so the task in between has to leave a gap.
-        assertEquals("Here are the matching tasks in your list:\n"
+        assertEquals("I searched the yard and found these wagons:\n"
                         + "1. [T][ ] borrow book\n3. [T][ ] read book",
                 new Ui().getMatchingTasksMessage(list, "book"));
     }
@@ -142,7 +142,7 @@ public class UiTest {
                 deadlineOn("pay fine", DEC_02));
 
         // Only the third task falls on the day, and it keeps the number 3.
-        assertEquals("Here are the tasks on Dec 02 2019:\n"
+        assertEquals("Here is my timetable for Dec 02 2019:\n"
                         + "3. [D][ ] pay fine (by: Dec 02 2019, 6:00 PM)",
                 new Ui().getTasksOnDayMessage(list, DEC_02));
     }

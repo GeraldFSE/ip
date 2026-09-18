@@ -46,8 +46,8 @@ public class Ui {
      * them: the console prints them under the banner, the window shows them in
      * the first dialog box, and they must not drift apart.
      */
-    private static final String GREETING_NAME = "Choo Choo! I'm Thomas!";
-    private static final String GREETING_OFFER = "How can I serve you today?";
+    private static final String GREETING_NAME = "Peep peep! Thomas the Tank Engine, reporting for duty!";
+    private static final String GREETING_OFFER = "What shall we haul today?";
 
     /** Reads the user's command lines from standard input. */
     private final Scanner userInput = new Scanner(System.in);
@@ -97,6 +97,20 @@ public class Ui {
      */
     private static String joinLines(String... lines) {
         return String.join("\n", lines);
+    }
+
+    /**
+     * Words how many wagons the train is pulling.
+     * <p>
+     * Every message that changes the length of the train ends with this line,
+     * so it is worded once: the count is the same fact whichever command
+     * changed it, and three copies of the sentence would drift apart.
+     *
+     * @param taskCount How many tasks are stored.
+     * @return The line reporting the count.
+     */
+    private static String getWagonCountLine(int taskCount) {
+        return "That's " + taskCount + " wagon(s) behind me now.";
     }
 
     /**
@@ -155,7 +169,7 @@ public class Ui {
      * @return The farewell to show the user.
      */
     public String getGoodbyeMessage() {
-        return "Until next time! Choo Choo!";
+        return "Off to the sheds! Peep peep, see you down the line!";
     }
 
     /**
@@ -185,8 +199,8 @@ public class Ui {
      * @return The warning to show the user.
      */
     public String getLoadingErrorMessage(String message) {
-        return joinLines("Uh oh! I could not read your saved tasks: " + message,
-                "Starting with an empty list.");
+        return joinLines("Cinders and ashes! I couldn't read your saved tasks: " + message,
+                "Setting off with an empty train.");
     }
 
     /**
@@ -205,7 +219,7 @@ public class Ui {
      * @return The warning to show the user.
      */
     public String getSkippedLineMessage(String message) {
-        return "Skipping a line I could not read: " + message;
+        return "Cinders and ashes! I left a saved line in the yard, I couldn't read it: " + message;
     }
 
     /**
@@ -224,7 +238,7 @@ public class Ui {
      * @return The warning to show the user.
      */
     public String getSavingErrorMessage(String message) {
-        return "Uh oh! I could not save your tasks: " + message;
+        return "Cinders and ashes! I couldn't save your tasks: " + message;
     }
 
     /**
@@ -239,9 +253,9 @@ public class Ui {
      * @return The confirmation to show the user.
      */
     public String getAddedMessage(Task task, int taskCount) {
-        return joinLines("Got it. I've added this task:",
+        return joinLines("Coupled up! This wagon is on the train now:",
                 "   " + task,
-                "Now you have " + taskCount + " task(s) in the list.");
+                getWagonCountLine(taskCount));
     }
 
     /**
@@ -252,9 +266,9 @@ public class Ui {
      * @return The confirmation to show the user.
      */
     public String getRemovedMessage(Task task, int taskCount) {
-        return joinLines("Noted. I've removed this task:",
+        return joinLines("Uncoupled! I've left this wagon in the siding:",
                 "   " + task,
-                "Now you have " + taskCount + " task(s) in the list.");
+                getWagonCountLine(taskCount));
     }
 
     /**
@@ -264,7 +278,7 @@ public class Ui {
      * @return The confirmation to show the user.
      */
     public String getMarkedMessage(Task task) {
-        return joinLines("Nice! I've marked this task as done:", "   " + task);
+        return joinLines("Delivered, right on time! This wagon is done:", "   " + task);
     }
 
     /**
@@ -274,7 +288,7 @@ public class Ui {
      * @return The confirmation to show the user.
      */
     public String getUnmarkedMessage(Task task) {
-        return joinLines("OK, I've marked this task as not done yet:", "   " + task);
+        return joinLines("Back on the train it goes! This wagon is not done yet:", "   " + task);
     }
 
     /**
@@ -295,8 +309,8 @@ public class Ui {
      * @return The confirmation to show the user.
      */
     public String getUndoneMessage(String typedLine, int taskCount) {
-        return joinLines("Choo Choo! I've undone '" + typedLine + "'.",
-                "Now you have " + taskCount + " task(s) in the list.");
+        return joinLines("Reversing! I've backed out of '" + typedLine + "'.",
+                getWagonCountLine(taskCount));
     }
 
     /**
@@ -341,7 +355,7 @@ public class Ui {
         for (int i = 0; i < tasks.size(); i++) {
             positions.add(i);
         }
-        return getNumberedTasksMessage(tasks, "Here are the tasks in your list:", positions);
+        return getNumberedTasksMessage(tasks, "Here is every wagon on my train:", positions);
     }
 
     /**
@@ -356,7 +370,7 @@ public class Ui {
      * @return The matches to show the user.
      */
     public String getMatchingTasksMessage(TaskList tasks, String keyword) {
-        return getNumberedTasksMessage(tasks, "Here are the matching tasks in your list:",
+        return getNumberedTasksMessage(tasks, "I searched the yard and found these wagons:",
                 tasks.positionsMatching(keyword));
     }
 
@@ -374,7 +388,7 @@ public class Ui {
      */
     public String getTasksOnDayMessage(TaskList tasks, LocalDate day) {
         return getNumberedTasksMessage(tasks,
-                "Here are the tasks on " + day.format(Task.DATE_DISPLAY_DAY) + ":",
+                "Here is my timetable for " + day.format(Task.DATE_DISPLAY_DAY) + ":",
                 tasks.positionsOn(day));
     }
 }
