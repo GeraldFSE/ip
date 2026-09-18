@@ -270,6 +270,19 @@ public class StorageTest {
     }
 
     @Test
+    public void load_blankDescription_lineSkipped() throws IOException {
+        // Refused here rather than reaching Task's constructor, whose assertion on a blank description would end
+        // start-up for the one damaged line.
+        writeSaveFile("T | 0 |   ", "T | 0 | read book");
+        Storage storage = storage();
+
+        ArrayList<Task> tasks = storage.load();
+
+        assertEquals(1, tasks.size());
+        assertEquals(List.of("empty description: T | 0 |   "), storage.getSkipComplaints());
+    }
+
+    @Test
     public void load_dayNotOnTheCalendar_lineSkipped() throws IOException {
         // The loader reads dates through the same strict helper as the parser, so an edited-in 30th of February is
         // reported rather than quietly loaded as the 28th.
@@ -282,6 +295,29 @@ public class StorageTest {
         assertEquals(List.of("There's no such moment as '2019-02-30 1800' for a deadline date! "
                 + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359."),
                 storage.getSkipComplaints());
+    }
+
+    @Test
+    public void load_lineRepeatingAnEarlierOne_secondCopySkipped() throws IOException {
+        // The first copy is kept and the repeat reported: loading both would put on the list what typing the
+        // second is refused. The done flag makes no difference to being a repeat.
+        writeSaveFile("T | 0 | read book", "T | 1 | read book", "T | 0 | return book");
+        Storage storage = storage();
+
+        ArrayList<Task> tasks = storage.load();
+
+        assertEquals(List.of("[T][ ] read book", "[T][ ] return book"),
+                tasks.stream().map(Task::toString).toList());
+        assertEquals(List.of("repeats an earlier line: T | 1 | read book"), storage.getSkipComplaints());
+    }
+
+    @Test
+    public void load_sameDescriptionDifferentTypes_bothLoad() throws IOException {
+        writeSaveFile("T | 0 | read book", "D | 0 | read book | 2019-12-02 1800");
+        Storage storage = storage();
+
+        assertEquals(2, storage.load().size());
+        assertTrue(storage.getSkipComplaints().isEmpty());
     }
 
     @Test
@@ -400,6 +436,41 @@ public class StorageTest {
 
         assertTrue(new File(nested.toString()).exists());
         assertEquals(List.of("T | 0 | read book"), Files.readAllLines(nested));
+    }
+
+    @Test
+    public void save_fileWhereTheFolderShouldBe_exceptionNamesTheFolder() throws IOException {
+        // A plain file sitting where ./data should go means the folder cannot be made. Said in words, rather than
+        // FileWriter's "No such file or directory" for the save file -- which points away from the fault.
+        Path inTheWay = folder.resolve("data");
+        Files.writeString(inTheWay, "not a folder");
+        Storage storage = new Storage(inTheWay.resolve("tasklist.txt").toString());
+
+        IOException e = assertThrows(IOException.class, () -> storage.save(new TaskList()));
+
+        assertEquals("I couldn't make the folder '" + inTheWay + "'. Is there a file with that name in the way?",
+                e.getMessage());
+    }
+
+    @Test
+    public void save_folderWhereTheFileShouldBe_exceptionNamesTheFile() throws IOException {
+        Files.createDirectory(saveFile());
+
+        IOException e = assertThrows(IOException.class, () -> storage().save(new TaskList()));
+
+        assertEquals("'" + saveFile() + "' is a folder, and I need it to be a file. Move the folder out of the way.",
+                e.getMessage());
+    }
+
+    @Test
+    public void load_folderWhereTheFileShouldBe_exceptionNamesTheFile() throws IOException {
+        // The same wrong thing on the reading side, so the first run against it is told in words too.
+        Files.createDirectory(saveFile());
+
+        IOException e = assertThrows(IOException.class, () -> storage().load());
+
+        assertEquals("'" + saveFile() + "' is a folder, and I need it to be a file. Move the folder out of the way.",
+                e.getMessage());
     }
 
     // ---- the two sides together ----

@@ -125,11 +125,18 @@ public class Storage {
      * @param fields The line already split on the field separator.
      * @param savedLine The line those fields came from, quoted back in any message.
      * @return The task those fields describe, not yet marked done.
-     * @throws ThomasException If the type is unknown, the field count is wrong
-     *                         or a date cannot be read.
+     * @throws ThomasException If the type is unknown, the field count is wrong,
+     *                         the description is blank or a date cannot be read.
      */
     private static Task buildTask(String[] fields, String savedLine) throws ThomasException {
         String description = fields[INDEX_DESCRIPTION];
+        // Every task the chatbot writes has a description, so a blank one can
+        // only come from the file being edited. Task's constructor treats a
+        // blank description as a broken contract and asserts, which would end
+        // start-up for one damaged line; refusing it here costs that line alone.
+        if (description.isBlank()) {
+            throw new ThomasException("empty description: " + savedLine);
+        }
         return switch (fields[INDEX_TYPE]) {
             case "T" -> {
                 requireFieldCount(fields, FIELDS_TODO, savedLine);
@@ -209,6 +216,13 @@ public class Storage {
      * Anything else that cannot be read costs that line alone, because the
      * complaint is collected rather than thrown on -- one damaged line should
      * not cost the user every other task in the file.
+     * <p>
+     * A line repeating a task already read is skipped too, and reported. The
+     * chatbot never writes one, because {@link TaskList#add} refuses the
+     * duplicate as it is typed; so one can only arrive by the file being
+     * edited, and loading it would put onto the list exactly what typing it
+     * is refused. The first copy is kept, since it is the one that was there
+     * before, and the same rule as the list's decides what counts as a copy.
      *
      * @param savedLine One line of the save file, without its line separator.
      * @param tasks The tasks read so far, appended to when the line decodes.
@@ -218,7 +232,11 @@ public class Storage {
             return;
         }
         try {
-            tasks.add(parseSavedTask(savedLine));
+            Task task = parseSavedTask(savedLine);
+            if (tasks.contains(task)) {
+                throw new ThomasException("repeats an earlier line: " + savedLine);
+            }
+            tasks.add(task);
         } catch (ThomasException e) {
             skipComplaints.add(e.getMessage());
         }
@@ -233,7 +251,7 @@ public class Storage {
      * it a line at a time, and closing it afterward.
      *
      * @return The tasks the file holds, in the order they were written.
-     * @throws IOException If the file exists but cannot be read.
+     * @throws IOException If the file exists but cannot be read, or is a folder.
      */
     public ArrayList<Task> load() throws IOException {
         // Cleared rather than appended to, so a second load reports only what
@@ -244,6 +262,13 @@ public class Storage {
         File file = new File(filePath);
         if (!file.exists()) {
             return tasks;
+        }
+        // Said in words here rather than left to Scanner, whose complaint is
+        // an OS message with the path and "(Is a directory)" -- true, but not
+        // telling the user what to do about it.
+        if (file.isDirectory()) {
+            throw new IOException("'" + filePath + "' is a folder, and I need it to be a file. "
+                    + "Move the folder out of the way.");
         }
 
         // try-with-resources: the Scanner holds a real file handle, so it is
@@ -266,7 +291,10 @@ public class Storage {
      * saving.
      *
      * @param tasks The tasks to write, left unchanged.
-     * @throws IOException If the folder or file cannot be written.
+     * @throws IOException If the folder cannot be made, or the file cannot be
+     *                     written, including because either is the wrong kind
+     *                     of thing: a file where the folder should be, or a
+     *                     folder where the file should be.
      */
     public void save(TaskList tasks) throws IOException {
         File file = new File(filePath);
@@ -274,9 +302,19 @@ public class Storage {
         // FileWriter cannot create missing folders, so ./data must be made
         // first. mkdirs() creates every missing level and is a no-op when they
         // already exist. getParentFile() is null for a bare filename.
+        // mkdirs() reports failure by its return value rather than by
+        // throwing, so it is checked: the usual cause is a plain file already
+        // sitting where the folder should go, which FileWriter would then
+        // report as the file being missing -- a message pointing away from
+        // the fault.
         File folder = file.getParentFile();
-        if (folder != null) {
-            folder.mkdirs();
+        if (folder != null && !folder.isDirectory() && !folder.mkdirs()) {
+            throw new IOException("I couldn't make the folder '" + folder + "'. "
+                    + "Is there a file with that name in the way?");
+        }
+        if (file.isDirectory()) {
+            throw new IOException("'" + filePath + "' is a folder, and I need it to be a file. "
+                    + "Move the folder out of the way.");
         }
 
         // try-with-resources: closing is what flushes buffered text to disk, so

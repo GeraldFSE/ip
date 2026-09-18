@@ -3282,6 +3282,10 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   twin, because putting a task back is not checked -- it only ever replays a
   delete that really happened, and refusing it would leave the undo half done.
   Rare enough to note rather than to fix.
+* **A duplicate line in the save file.** The chatbot never writes one, since
+  the duplicate is refused as it is typed; one can only be edited in, and it is
+  then reported and skipped with the first copy kept, which `StorageTest`
+  covers as it does every other kind of damaged line.
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.
@@ -3336,4 +3340,8 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **An unreadable or unwritable save file.** The messages for a save file that
   exists but cannot be read, or a `./data` folder that cannot be created, are
   reachable only by changing file permissions, which the test script does not
-  set up.
+  set up. The two shapes of the same trouble that need no permissions -- a
+  plain file sitting where `./data` should be, and a folder sitting where the
+  save file should be -- are named in words by `Storage` and covered by
+  `StorageTest`; the script works in an empty directory and does not set those
+  up either.
