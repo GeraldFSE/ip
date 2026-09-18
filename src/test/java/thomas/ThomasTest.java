@@ -138,6 +138,30 @@ public class ThomasTest {
     }
 
     @Test
+    public void hasErrored_beforeAnyCommand_isFalse() {
+        // The greeting is not a rejection, so it must not get the error bubble.
+        assertFalse(chatbot().hasErrored());
+    }
+
+    @Test
+    public void hasErrored_unknownCommand_isTrue() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("blah");
+
+        assertTrue(thomas.hasErrored());
+    }
+
+    @Test
+    public void hasErrored_validCommandAfterError_isCleared() {
+        Thomas thomas = chatbot();
+        thomas.getResponse("blah");
+        thomas.getResponse("todo read book");
+
+        // One rejection must not leave every later reply in the error bubble.
+        assertFalse(thomas.hasErrored());
+    }
+
+    @Test
     public void getCommandType_beforeAnyCommand_isEmpty() {
         // Not null: DialogBox switches on this value, and a null would close
         // the window with an exception before the first bubble is drawn.
