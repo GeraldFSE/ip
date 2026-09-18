@@ -45,10 +45,65 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_listWithTrailingText_returnsListCommand() throws ThomasException {
-        // A keyword taking no argument ignores whatever follows it, because the argument is only read by the commands
-        // that need one.
-        assertInstanceOf(ListCommand.class, Parser.parse("list everything"));
+    public void parse_listWithTrailingText_exceptionThrown() {
+        // A keyword taking no argument refuses one rather than ignoring it: "list 2019-12-02" was asked with a date
+        // in mind, and listing everything would answer a question the user did not ask.
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("list everything"));
+        assertEquals("Bust my buffers! 'list' is a signal on its own -- I don't know what to do with 'everything'.",
+                e.getMessage());
+    }
+
+    @Test
+    public void parse_byeWithTrailingText_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("bye now"));
+        assertEquals("Bust my buffers! 'bye' is a signal on its own -- I don't know what to do with 'now'.",
+                e.getMessage());
+    }
+
+    @Test
+    public void parse_undoWithTrailingText_exceptionThrown() {
+        // "undo 3" reads as a request to undo three changes, which is not a thing, so it is refused rather than
+        // undoing one.
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("undo 3"));
+        assertEquals("Bust my buffers! 'undo' is a signal on its own -- I don't know what to do with '3'.",
+                e.getMessage());
+    }
+
+    @Test
+    public void parse_keywordWithTrailingSpaces_returnsCommand() throws ThomasException {
+        // Trailing spaces are not an argument.
+        assertInstanceOf(ListCommand.class, Parser.parse("list   "));
+    }
+
+    // ---- stray whitespace ----
+
+    @Test
+    public void parse_leadingSpaces_keywordStillFound() throws ThomasException {
+        assertInstanceOf(ListCommand.class, Parser.parse("   list"));
+    }
+
+    @Test
+    public void parse_leadingTab_keywordStillFound() throws ThomasException {
+        // Any whitespace is tidied, not only the space character.
+        assertInstanceOf(AddCommand.class, Parser.parse("\ttodo read book"));
+    }
+
+    @Test
+    public void parse_tabBetweenKeywordAndArgument_argumentStillRead() throws ThomasException {
+        assertInstanceOf(AddCommand.class, Parser.parse("todo\tread book"));
+    }
+
+    @Test
+    public void parse_doubleSpacesInsideDate_dateStillRead() throws ThomasException {
+        // Runs of spaces inside the argument are squeezed to one, so a doubled space between the day and the time
+        // does not turn a good date into an unreadable one.
+        assertInstanceOf(AddCommand.class, Parser.parse("deadline return book  /by  2019-12-02   1800"));
+    }
+
+    @Test
+    public void parse_doubleSpacesAroundMarkers_markersStillFound() throws ThomasException {
+        assertInstanceOf(AddCommand.class,
+                Parser.parse("event meeting   /from   2019-12-02 1400   /to   2019-12-02 1600"));
     }
 
     // ---- unrecognized input ----
@@ -61,8 +116,15 @@ public class ParserTest {
 
     @Test
     public void parse_emptyInput_exceptionThrown() {
+        // An empty line is told it is empty, rather than being reported as an unknown command it did not name.
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse(""));
-        assertEquals("Cinders and ashes! I don't know that signal. What does it mean?", e.getMessage());
+        assertEquals("Peep? I didn't catch a signal. Give me a command, such as list or todo.", e.getMessage());
+    }
+
+    @Test
+    public void parse_onlySpaces_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("   "));
+        assertEquals("Peep? I didn't catch a signal. Give me a command, such as list or todo.", e.getMessage());
     }
 
     @Test
@@ -154,6 +216,17 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_deadlineDayNotOnCalendar_exceptionThrown() {
+        // The right shape, naming a day that does not exist. The message says so rather than repeating the format
+        // back, which the user has already matched.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline return book /by 2019-02-30 1800"));
+        assertEquals("There's no such moment as '2019-02-30 1800' for a deadline date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.",
+                e.getMessage());
+    }
+
+    @Test
     public void parse_deadlineDateWithoutTime_exceptionThrown() {
         // A date is not enough on its own: the time is required too.
         ThomasException e = assertThrows(ThomasException.class, () ->
@@ -193,10 +266,81 @@ public class ParserTest {
     @Test
     public void parse_eventMarkersInWrongOrder_exceptionThrown() {
         // The markers are split off one at a time, so writing them the wrong way round is rejected rather than being
-        // silently swapped.
+        // silently swapped -- and the message names the order, not a missing /to the user can see they typed.
         ThomasException e = assertThrows(ThomasException.class, () ->
                 Parser.parse("event project meeting /to 2019-12-02 1600 /from 2019-12-02 1400"));
-        assertEquals("When does it arrive? An event needs a /to after its /from.", e.getMessage());
+        assertEquals("Bust my buffers! Your event's /to came before its /from. Set off first, then arrive.",
+                e.getMessage());
+    }
+
+    // ---- markers given twice, or to the wrong command ----
+
+    @Test
+    public void parse_deadlineByTwice_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline return book /by 2019-12-02 1800 /by 2019-12-03 1800"));
+        assertEquals("Bust my buffers! You've given /by more than once. Once is all I need.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deadlineByTwiceInARow_exceptionThrown() {
+        // "/by /by 2019..." puts the second marker at the very start of the date text, which the whole-word match
+        // must still see.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline return book /by /by 2019-12-02 1800"));
+        assertEquals("Bust my buffers! You've given /by more than once. Once is all I need.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deadlineWithFromMarker_exceptionThrown() {
+        // Named as the wrong marker, not as a missing /by: the two commands have been mixed up.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline return book /from 2019-12-02 1800"));
+        assertEquals("Bust my buffers! A deadline takes just a /by -- there's no /from or /to on it.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deadlineWithByAndToMarkers_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("deadline return book /by 2019-12-02 1800 /to 2019-12-03 1800"));
+        assertEquals("Bust my buffers! A deadline takes just a /by -- there's no /from or /to on it.", e.getMessage());
+    }
+
+    @Test
+    public void parse_eventWithByMarker_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("event project meeting /by 2019-12-02 1800"));
+        assertEquals("Bust my buffers! An event takes a /from and a /to -- there's no /by on it.", e.getMessage());
+    }
+
+    @Test
+    public void parse_eventFromTwiceBeforeTo_exceptionThrown() {
+        // The second /from lands in the start date.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("event meeting /from 2019-12-02 1400 /from 2019-12-02 1500 /to 2019-12-02 1600"));
+        assertEquals("Bust my buffers! You've given /from more than once. Once is all I need.", e.getMessage());
+    }
+
+    @Test
+    public void parse_eventFromTwiceAfterTo_exceptionThrown() {
+        // The second /from lands in the end date.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("event meeting /from 2019-12-02 1400 /to 2019-12-02 1600 /from 2019-12-02 1500"));
+        assertEquals("Bust my buffers! You've given /from more than once. Once is all I need.", e.getMessage());
+    }
+
+    @Test
+    public void parse_eventToTwice_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Parser.parse("event meeting /from 2019-12-02 1400 /to 2019-12-02 1600 /to 2019-12-02 1700"));
+        assertEquals("Bust my buffers! You've given /to more than once. Once is all I need.", e.getMessage());
+    }
+
+    @Test
+    public void parse_markerInsideAWord_notTakenForAMarker() throws ThomasException {
+        // "/byte" and "standby" contain a marker's letters without being one, so neither is a repeat or a stray.
+        assertInstanceOf(AddCommand.class,
+                Parser.parse("deadline read /byte standby /by 2019-12-02 1800"));
     }
 
     @Test
@@ -337,6 +481,21 @@ public class ParserTest {
     public void parse_markNonInteger_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark two"));
         assertEquals("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...", e.getMessage());
+    }
+
+    @Test
+    public void parse_markTwoNumbers_exceptionThrown() {
+        // Two numbers is a request for two tasks at once, and the answer is that there is no such thing.
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark 1 2"));
+        assertEquals("One wagon at a time! Give me a single number to mark.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deleteNumberTooBigForAnInt_exceptionThrown() {
+        // All digits, so it is a number -- just one no list will ever reach. It gets the range answer, not "not a
+        // number".
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("delete 99999999999"));
+        assertEquals("There's no wagon 99999999999 on my train! No train is that long.", e.getMessage());
     }
 
     @Test

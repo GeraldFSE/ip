@@ -2893,6 +2893,162 @@ bye
 {{FAREWELL}}
 ```
 
+### TC68: Stray spaces before the keyword and inside the arguments are tidied
+
+**Aim:** A command is found under a leading space, and a doubled space between
+the day and the time of a date does not make the date unreadable. Guards the
+tidying done once in the parser's constructor, on which every later marker
+match with a space either side depends.
+
+**Input:**
+
+```text
+   todo read book
+deadline return book  /by  2019-12-02   1800
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [T][ ] read book
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC69: A keyword that takes no argument refuses one
+
+**Aim:** `list all` and `bye now` are refused with the text that was not
+understood quoted back, rather than being carried out with it ignored. The
+chatbot is still running after `bye now`, which is what the real `bye` at the
+end shows.
+
+**Input:**
+
+```text
+list all
+undo 3
+bye now
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! 'list' is a signal on its own -- I don't know what to do with 'all'.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! 'undo' is a signal on its own -- I don't know what to do with '3'.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! 'bye' is a signal on its own -- I don't know what to do with 'now'.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC70: A marker given twice is refused by name
+
+**Aim:** A second `/by`, `/from` or `/to` is reported as the repeat it is,
+not as an unreadable date with a marker inside it. Guards the whole-word
+marker check made on the text after each split.
+
+**Input:**
+
+```text
+deadline return book /by 2019-12-02 1800 /by 2019-12-03 1800
+event meeting /from 2019-12-02 1400 /from 2019-12-02 1500 /to 2019-12-02 1600
+event meeting /from 2019-12-02 1400 /to 2019-12-02 1600 /to 2019-12-02 1700
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! You've given /by more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! You've given /from more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! You've given /to more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC71: The other command's marker is refused by name
+
+**Aim:** A `/from` on a deadline, or a `/by` on an event, means the two
+commands have been mixed up, and that is the mistake named -- not a missing
+`/by` or `/from`, which the user can see they did not mean to type. Guards the
+marker check made before the line is split.
+
+**Input:**
+
+```text
+deadline return book /from 2019-12-02 1800
+event meeting /by 2019-12-02 1800
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! A deadline takes just a /by -- there's no /from or /to on it.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! An event takes a /from and a /to -- there's no /by on it.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC72: An event's markers the wrong way round are named as such
+
+**Aim:** `/to` before `/from` is reported as the wrong order, not as a
+missing `/to` the user can see they typed. Guards the check on the text in
+front of the `/from`, made before the `/to` is looked for after it.
+
+**Input:**
+
+```text
+event meeting /to 2019-12-02 1600 /from 2019-12-02 1400
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! Your event's /to came before its /from. Set off first, then arrive.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ### TC73: A day that is not on the calendar is refused rather than repaired
 
 **Aim:** `2019-02-30` matches the date format exactly and names a day that
@@ -2938,6 +3094,44 @@ bye
 {{FAREWELL}}
 ```
 
+### TC76: `mark` with two numbers, or a number no list could reach, is refused
+
+**Aim:** `mark 1 2` is told one wagon at a time, rather than that `1 2` is not
+a number; a number too big for an `int` is all digits and so is a number, and
+gets the range answer. Guards the two checks around `Integer.parseInt`.
+
+**Input:**
+
+```text
+todo read book
+mark 1 2
+mark 99999999999
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     One wagon at a time! Give me a single number to mark.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no wagon 99999999999 on my train! No train is that long.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
@@ -2972,13 +3166,13 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   reported as unknown commands, because the match is made with `equals`. That is
   deliberate rather than accidental, and noted in `Keyword.of`, but no case pins
   it down, so nothing would notice if the matching were loosened.
-* **Arguments given to `bye` and `list`.** Matching on the keyword means
-  `bye now` and `list all` are accepted, with the extra text ignored. That is
-  consistent with the other commands, which also ignore what they do not read,
-  but it is tolerated rather than intended, so it is not fixed by a case.
-* **A blank input line.** Pressing enter on its own is reported as an unknown
-  command. A blank line inside a fenced input block is too easy to mistake for
-  formatting, so this one is left to inspection rather than a case.
+* **A blank input line.** Pressing enter on its own is answered with its own
+  message, asking for a command, rather than being reported as an unknown one;
+  `ParserTest` pins the wording. A blank line inside a fenced input block is
+  too easy to mistake for formatting, so there is no case for it here.
+* **A tab typed in place of a space.** Tidied exactly as a run of spaces is,
+  which `ParserTest` covers. A tab inside a fenced input block is invisible on
+  the page, so the case would not be readable and is left to JUnit.
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.
