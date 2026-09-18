@@ -7,7 +7,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import thomas.Thomas;
@@ -15,7 +14,7 @@ import thomas.Thomas;
 /**
  * Controller for the main GUI.
  */
-public class MainWindow extends AnchorPane {
+public class MainWindow extends VBox {
     @FXML
     private ScrollPane scrollPane;
     @FXML
