@@ -26,13 +26,18 @@ public class MainWindow extends VBox {
 
     private Thomas thomas;
 
-    private Image userImage = new Image(this.getClass().getResourceAsStream("/images/User.png"));
     private Image thomasImage = new Image(this.getClass().getResourceAsStream("/images/Thomas.png"));
 
-    /** Keeps the newest dialog box in view as the conversation grows. */
+    /**
+     * Keeps the newest dialog box in view as the conversation grows, and puts
+     * the cursor in the input field so the user can type straight away.
+     */
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        // The field is not yet in a scene here, so the focus request has to
+        // wait until the window is shown.
+        Platform.runLater(userInput::requestFocus);
     }
 
     /**
@@ -49,7 +54,7 @@ public class MainWindow extends VBox {
     public void setThomas(Thomas thomas) {
         this.thomas = thomas;
         dialogContainer.getChildren().add(
-                DialogBox.getThomasDialog(thomas.getStartupMessage(), thomasImage, ""));
+                DialogBox.getThomasDialog(thomas.getStartupMessage(), thomasImage, "", false));
     }
 
     /**
@@ -63,11 +68,16 @@ public class MainWindow extends VBox {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
+        if (input.isBlank()) {
+            // An empty line is a slip of the Enter key, not a command, so it
+            // is not worth a pair of bubbles.
+            return;
+        }
         String response = thomas.getResponse(input);
-        String commandType = thomas.getCommandType();
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getThomasDialog(response, thomasImage, commandType)
+                DialogBox.getUserDialog(input),
+                DialogBox.getThomasDialog(response, thomasImage, thomas.getCommandType(),
+                        thomas.hasErrored())
         );
         userInput.clear();
 

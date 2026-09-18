@@ -1,43 +1,52 @@
+/*
+ * One turn of the conversation. The user's bubble and Thomas's are styled
+ * apart on purpose: the user's is a short line they already know, so it is
+ * compact and tinted; Thomas's may be a whole list, so it is wide and plain.
+ */
 .label {
-    background:white;
-    -fx-background-color: background;
-    -fx-border-color: #d55e00 #009e73 #cc79a7 #0072b2;
-    -fx-border-width: 2px;
-    -fx-background-radius: 1em 1em 0 1em;
-    -fx-border-radius: 1em 1em 0 1em;
-    -fx-text-fill: ladder(background, white 49%, black 50%);
-    -fx-padding: 6px;
-    -fx-border-insets: 0px 7px 0px 7px;
-    -fx-background-insets: 0px 7px 0px 7px;
+    -fx-padding: 8px 12px 8px 12px;
+    -fx-line-spacing: 2px;
+    -fx-text-fill: #1f2933;
+    /* A soft shadow lifts the bubble off the picture behind it. */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 6, 0.2, 0, 2);
 }
 
+/* What the user typed: right side, blue, tail at the bottom right. */
+.user-label {
+    -fx-background-color: #2f6fed;
+    -fx-background-radius: 14px 14px 2px 14px;
+    -fx-text-fill: white;
+}
+
+/* Thomas's reply: left side, white on a soft border, tail at the top left. */
 .reply-label {
-    -fx-background-radius: 1em 1em 1em 0;
-    -fx-border-radius: 1em 1em 1em 0;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 2px 14px 14px 14px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 2px 14px 14px 14px;
 }
 
-/* Paste this below reply-label */
+/* Tints for the commands that change the list, subtle enough to keep the text readable. */
 .add-label {
-    -fx-background-color: yellow;
+    -fx-background-color: #eaf7ee;
+    -fx-border-color: #b7e2c4;
 }
 
 .marked-label {
-    -fx-background-color: palegreen;
+    -fx-background-color: #eaf2fd;
+    -fx-border-color: #b9d1f7;
 }
 
 .delete-label {
-    -fx-background-color: lightpink;
+    -fx-background-color: #fff5e6;
+    -fx-border-color: #f5d5a6;
 }
 
-#displayPicture {
-    /* Shadow effect on image. */
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 5, 5);
-
-    /* Change size of image. */
-    -fx-scale-x: 1;
-    -fx-scale-y: 1;
-
-    /* Rotate image clockwise by degrees. */
-    -fx-rotate: 0;
+/*
+ * A rejected line. The same bubble as every other reply, only red, so a
+ * typo is noticed at a glance without looking like a different kind of thing.
+ */
+.error-label {
+    -fx-background-color: #fbdada;
 }
-
