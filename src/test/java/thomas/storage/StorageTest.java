@@ -439,6 +439,18 @@ public class StorageTest {
     }
 
     @Test
+    public void save_severalMissingFolderLevels_createsThemAll() throws IOException, ThomasException {
+        // mkdirs rather than mkdir: every missing level is made, not only the last.
+        Path nested = folder.resolve("a").resolve("b").resolve("c").resolve("tasklist.txt");
+        TaskList tasks = new TaskList();
+        tasks.add(new TodoTask("read book"));
+
+        new Storage(nested.toString()).save(tasks);
+
+        assertEquals(List.of("T | 0 | read book"), Files.readAllLines(nested));
+    }
+
+    @Test
     public void save_fileWhereTheFolderShouldBe_exceptionNamesTheFolder() throws IOException {
         // A plain file sitting where ./data should go means the folder cannot be made. Said in words, rather than
         // FileWriter's "No such file or directory" for the save file -- which points away from the fault.
@@ -497,6 +509,24 @@ public class StorageTest {
         for (int i = 0; i < original.size(); i++) {
             assertEquals(original.get(i).toString(), loaded.get(i).toString());
         }
+    }
+
+    @Test
+    public void saveThenLoad_nonAsciiDescription_survives() throws IOException, ThomasException {
+        // Chinese characters and an umlaut: two bytes and up each in UTF-8. The
+        // JVM's default charset has been UTF-8 on every platform since Java
+        // 18, which is what FileWriter and Scanner(File) both follow; this
+        // would fail first if either were given a narrower charset.
+        TaskList tasks = new TaskList();
+        tasks.add(new TodoTask("读书"));
+        tasks.add(new TodoTask("Bücher lesen"));
+
+        storage().save(tasks);
+        ArrayList<Task> loaded = storage().load();
+
+        assertEquals(2, loaded.size());
+        assertEquals("[T][ ] 读书", loaded.get(0).toString());
+        assertEquals("[T][ ] Bücher lesen", loaded.get(1).toString());
     }
 
     @Test

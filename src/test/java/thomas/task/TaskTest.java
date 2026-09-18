@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -223,6 +224,70 @@ public class TaskTest {
     public void displayDayFormat_wholeDay_showsNoTime() {
         // A whole day has no hour to show, so it has a format of its own.
         assertEquals("Dec 02 2019", LocalDate.of(2019, 12, 2).format(Task.DATE_DISPLAY_DAY));
+    }
+
+    // ---- the formats do not follow the machine's language ----
+
+    /**
+     * Runs an action with the JVM's default locale set to another language, and
+     * puts the original back afterwards whatever happens.
+     * This is the automated form of running the chatbot on a machine set to
+     * Chinese: DateTimeFormatter.ofPattern follows the default locale unless one
+     * is pinned, and the formats pin English so the month names and am/pm
+     * markers read the same everywhere.
+     *
+     * @param locale Language to run under.
+     * @param action What to check while that language is the default.
+     */
+    private static void underDefaultLocale(Locale locale, Runnable action) {
+        Locale original = Locale.getDefault();
+        Locale.setDefault(locale);
+        try {
+            action.run();
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
+    public void displayFormat_chineseDefaultLocale_stillShowsEnglishMonthAndMarker() {
+        underDefaultLocale(Locale.CHINA, () -> assertEquals("Dec 02 2019, 6:00 PM",
+                LocalDateTime.of(2019, 12, 2, 18, 0).format(Task.DATE_DISPLAY_FORMAT)));
+    }
+
+    @Test
+    public void displayDayFormat_chineseDefaultLocale_stillShowsEnglishMonth() {
+        underDefaultLocale(Locale.CHINA, () -> assertEquals("Dec 02 2019",
+                LocalDate.of(2019, 12, 2).format(Task.DATE_DISPLAY_DAY)));
+    }
+
+    @Test
+    public void displayFormat_germanDefaultLocale_stillShowsEnglishMonthAndMarker() {
+        // German has its own month abbreviations ("Dez") and no AM/PM, so a
+        // format following the default would show both differently.
+        underDefaultLocale(Locale.GERMANY, () -> assertEquals("Dec 02 2019, 6:00 PM",
+                LocalDateTime.of(2019, 12, 2, 18, 0).format(Task.DATE_DISPLAY_FORMAT)));
+    }
+
+    @Test
+    public void parseDate_chineseDefaultLocale_stillReadsTheDate() {
+        // The input format is digits only, but its locale is pinned too: some
+        // locales use their own digits, and the parser must not start expecting them.
+        underDefaultLocale(Locale.CHINA, () -> {
+            try {
+                assertEquals(LocalDateTime.of(2019, 12, 2, 18, 0),
+                        Task.parseDate("2019-12-02 1800", "a deadline date"));
+            } catch (ThomasException e) {
+                throw new AssertionError("Date refused under a Chinese default locale", e);
+            }
+        });
+    }
+
+    @Test
+    public void toSaveFormat_chineseDefaultLocale_writesTheSameLine() {
+        // What is written must be readable on any machine the file is copied to.
+        underDefaultLocale(Locale.CHINA, () -> assertEquals("D | 0 | return book | 2019-12-02 1800",
+                new DeadlineTask("return book", DEC_02_6PM).toSaveFormat()));
     }
 
     // ---- completion state ----

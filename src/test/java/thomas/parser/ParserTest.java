@@ -273,6 +273,16 @@ public class ParserTest {
                 e.getMessage());
     }
 
+    @Test
+    public void parse_eventDayNotOnCalendar_exceptionThrown() {
+        // The strict resolver refuses an event's dates exactly as a deadline's.
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse(
+                "event meeting /from 2019-02-30 1400 /to 2019-03-01 1600"));
+        assertEquals("There's no such moment as '2019-02-30 1400' for a start date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.",
+                e.getMessage());
+    }
+
     // ---- markers given twice, or to the wrong command ----
 
     @Test
@@ -502,6 +512,40 @@ public class ParserTest {
     public void parse_markDecimalNumber_exceptionThrown() {
         ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("mark 1.5"));
         assertEquals("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...", e.getMessage());
+    }
+
+    @Test
+    public void parse_unmarkWithoutNumber_exceptionThrown() {
+        // Each of the three names itself in the message.
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("unmark"));
+        assertEquals("Which wagon do you want me to unmark? Give me its number.", e.getMessage());
+    }
+
+    @Test
+    public void parse_deleteNonInteger_exceptionThrown() {
+        ThomasException e = assertThrows(ThomasException.class, () -> Parser.parse("delete two"));
+        assertEquals("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...", e.getMessage());
+    }
+
+    @Test
+    public void parse_markZero_returnsMarkCommand() throws ThomasException {
+        // Zero is a whole number, so the parser lets it through; whether any task
+        // carries it is the list's to answer, and TaskListTest pins that refusal.
+        assertInstanceOf(MarkCommand.class, Parser.parse("mark 0"));
+    }
+
+    @Test
+    public void parse_markNegativeNumber_returnsMarkCommand() throws ThomasException {
+        // "-1" is a whole number to parseInt and not all digits, so it is
+        // neither refused as text nor as too long: it reaches the list, which
+        // refuses it by range.
+        assertInstanceOf(MarkCommand.class, Parser.parse("mark -1"));
+    }
+
+    @Test
+    public void parse_markPlusSignedNumber_returnsMarkCommand() throws ThomasException {
+        // parseInt accepts a leading plus, so "+1" is task 1.
+        assertInstanceOf(MarkCommand.class, Parser.parse("mark +1"));
     }
 
     // ---- find ----
