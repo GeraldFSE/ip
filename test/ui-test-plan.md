@@ -3257,7 +3257,10 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **Undoing a save that failed.** A failed save leaves the change standing in
   memory with a warning above the confirmation, and an undo of it behaves the
   same way. Reaching it needs an unwritable `./data`, which the test script does
-  not set up -- the same reason the save failure itself has no case.
+  not set up -- the same reason the save failure itself has no case. Both are
+  covered by JUnit instead: each `*CommandTest` in `thomas.command` puts a
+  folder where the save file should be and checks the warning sits above the
+  confirmation, and `ThomasTest` runs a whole console session that way.
 * **The GUI window.** The plan drives `thomas.Thomas`, the console entry point,
   and says nothing about what the window looks like or does. The window types a
   line into `Thomas.getResponse` and paints whatever comes back, so the wording
@@ -3265,7 +3268,9 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   `ThomasTest` covers that method, including the reply an error earns and the
   command type each bubble is colored by. What is left uncovered is the JavaFX
   layer itself -- the layout, the styling, and closing the window after `bye` --
-  which needs a running window rather than typed input.
+  which needs a running window rather than typed input. Those checks, along
+  with running the app on other operating systems, display scalings and OS
+  language settings, are listed in `manual-test-plan.md` beside this file.
 * **A keyword typed in the wrong case.** `Bye`, `TODO x` and `List` are all
   reported as unknown commands, because the match is made with `equals`. That is
   deliberate rather than accidental, and noted in `Keyword.of`, but no case pins

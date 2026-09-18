@@ -54,7 +54,7 @@ Rank a method by what a bug in it would cost:
 * **Highest** — anything that loses data the user cannot get back (`Storage`: a save file written or read wrongly loses tasks silently between runs, while every other error is on screen and survives to the next command).
 * **High** — logic shared by several callers (`Task.parseDate` is reached from both the parser and the loader, so one bug is felt at the keyboard and in the save file at once), and conversions with off-by-one risk (`TaskList`, where the user's 1-based numbers meet the list's 0-based positions).
 * **Worth testing** — anything with a real decision in it: the parser's rules about input shape, an inclusive range test, a constructor that refuses invalid state.
-* **Below the line** — one-line delegations, and code whose only job is display. `Ui` and the `Command.execute` methods are deliberately left to the text-UI plan, which already tests exactly that end to end; duplicating it in JUnit costs more than it catches.
+* **Below the line** — one-line delegations, and the JavaFX layer (`Main`, `MainWindow`, `DialogBox`), which needs a running window and is covered by `test/manual-test-plan.md` instead. `Ui` and the `Command.execute` methods do have JUnit tests: the text-UI plan pins what the user sees end to end, while the JUnit cases pin what the plan cannot reach — a save that fails, the console furniture around a message — and the four separate effects of a command (list, file, undo step, reply).
 
 Follow Gradle and JUnit conventions: `seedu.duke.Todo` is tested by `seedu.duke.TodoTest` in `src/test/java/seedu/duke/TodoTest.java`. Name test methods `featureUnderTest_testScenario_expectedBehavior()`.
 
