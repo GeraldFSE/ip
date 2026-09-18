@@ -387,7 +387,9 @@ bye
 round, or naming a month that does not exist, is refused rather than guessed at.
 `2/12/2019 1800` is the shape the user is most likely to reach for, and
 `2019-13-01 1800` matches the pattern exactly while naming a thirteenth month,
-which a check on shape alone would let through.
+which a check on shape alone would let through. The two earn different
+answers: the first is shown the format, the second has already matched it and
+is told the moment does not exist instead.
 
 **Input:**
 
@@ -406,7 +408,7 @@ bye
      I can't read '2/12/2019 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-13-01 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-13-01 1800' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
     ____________________________________________________________
      Here is every wagon on my train:
@@ -434,10 +436,10 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read '2019-12-02 2500' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-12-02 2500' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-12-02 1860' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-12-02 1860' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2887,6 +2889,51 @@ bye
     ____________________________________________________________
      Here is every wagon on my train:
      1. [T][X] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC73: A day that is not on the calendar is refused rather than repaired
+
+**Aim:** `2019-02-30` matches the date format exactly and names a day that
+does not exist. It is refused, and told so; the date formatter would otherwise
+resolve it to the 28th and store a moment the user never chose. `2400` is the
+same mistake on the clock side, which would roll to the next day's midnight.
+The leap day is accepted in a leap year and refused in a common one, so the
+rule being applied is the calendar's and not a fixed table of month lengths.
+
+**Input:**
+
+```text
+deadline return book /by 2019-02-30 1800
+event meeting /from 2019-12-02 1400 /to 2019-12-02 2400
+deadline leap /by 2020-02-29 1200
+deadline leap /by 2019-02-29 1200
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     There's no such moment as '2019-02-30 1800' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no such moment as '2019-12-02 2400' for an end date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] leap (by: Feb 29 2020, 12:00 PM)
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no such moment as '2019-02-29 1200' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [D][ ] leap (by: Feb 29 2020, 12:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
 ```

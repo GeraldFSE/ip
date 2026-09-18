@@ -270,6 +270,21 @@ public class StorageTest {
     }
 
     @Test
+    public void load_dayNotOnTheCalendar_lineSkipped() throws IOException {
+        // The loader reads dates through the same strict helper as the parser, so an edited-in 30th of February is
+        // reported rather than quietly loaded as the 28th.
+        writeSaveFile("D | 0 | return book | 2019-02-30 1800");
+        Storage storage = storage();
+
+        ArrayList<Task> tasks = storage.load();
+
+        assertTrue(tasks.isEmpty());
+        assertEquals(List.of("There's no such moment as '2019-02-30 1800' for a deadline date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359."),
+                storage.getSkipComplaints());
+    }
+
+    @Test
     public void load_someLinesDamaged_othersStillLoad() throws IOException {
         // One damaged line must not cost the user every other task in the file.
         writeSaveFile("T | 0 | read book",
