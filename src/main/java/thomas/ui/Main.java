@@ -5,7 +5,7 @@ import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import thomas.Thomas;
 
@@ -30,12 +30,15 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/view/MainWindow.fxml"));
-            AnchorPane ap = fxmlLoader.load();
-            Scene scene = new Scene(ap);
+            VBox root = fxmlLoader.load();
+            Scene scene = new Scene(root);
             stage.setScene(scene);
 
-            stage.setMinHeight(220);
-            stage.setMinWidth(417);
+            stage.setTitle("Thomas");
+            // Small enough for a corner of the screen, but never so narrow
+            // that a task line has to wrap every few words.
+            stage.setMinHeight(300);
+            stage.setMinWidth(360);
 
             // The controller is built by the FXML loader, so the chatbot can only
             // be handed to it here, once the layout has been loaded.

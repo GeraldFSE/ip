@@ -96,6 +96,16 @@ public class Thomas {
     private boolean hasExited = false;
 
     /**
+     * Whether the last line given to {@link #getResponse} was rejected.
+     * <p>
+     * Kept apart from {@link #commandType}, which is empty both for a rejected
+     * line and before any line at all: the window shows a rejection in a
+     * different bubble from a plain reply, so it has to be able to tell the
+     * two apart.
+     */
+    private boolean hasErrored = false;
+
+    /**
      * Starts a chatbot over the usual save file.
      * <p>
      * For the GUI, which has no say in where the tasks are kept: choosing that
@@ -277,12 +287,24 @@ public class Thomas {
             // "thomas.command.AddCommand".
             commandType = command.getClass().getSimpleName();
             hasExited = command.isExit();
+            hasErrored = false;
             return response;
         } catch (ThomasException e) {
             // No command ran, so there is no kind of command to color by.
             commandType = "";
+            hasErrored = true;
             return e.getMessage();
         }
+    }
+
+    /**
+     * Returns whether the last line given to {@link #getResponse} was rejected.
+     *
+     * @return True if the reply to it was an error message rather than a
+     *         command's answer.
+     */
+    public boolean hasErrored() {
+        return hasErrored;
     }
 
     /**
