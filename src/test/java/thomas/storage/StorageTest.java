@@ -347,7 +347,7 @@ public class StorageTest {
     }
 
     @Test
-    public void save_doneTask_writesTheDoneFlag() throws IOException {
+    public void save_doneTask_writesTheDoneFlag() throws IOException, ThomasException {
         TaskList tasks = new TaskList();
         Task task = new TodoTask("read book");
         task.markAsDone();
@@ -366,7 +366,7 @@ public class StorageTest {
     }
 
     @Test
-    public void save_overExistingFile_replacesItsContents() throws IOException {
+    public void save_overExistingFile_replacesItsContents() throws IOException, ThomasException {
         // Saving replaces the file, so tasks deleted in this run do not come back.
         writeSaveFile("T | 0 | read book", "T | 0 | return book");
         TaskList tasks = new TaskList();
@@ -378,7 +378,7 @@ public class StorageTest {
     }
 
     @Test
-    public void save_anyList_leavesTheListUnchanged() throws IOException {
+    public void save_anyList_leavesTheListUnchanged() throws IOException, ThomasException {
         // Saving runs after every change to the task list, so it must only read the list: emptying it here would
         // delete the tasks it is meant to be saving.
         TaskList tasks = new TaskList();
@@ -390,7 +390,7 @@ public class StorageTest {
     }
 
     @Test
-    public void save_missingFolder_createsIt() throws IOException {
+    public void save_missingFolder_createsIt() throws IOException, ThomasException {
         // The folder a save file sits in is created if it is not there yet.
         Path nested = folder.resolve("data").resolve("tasklist.txt");
         TaskList tasks = new TaskList();
@@ -429,7 +429,7 @@ public class StorageTest {
     }
 
     @Test
-    public void saveThenLoad_descriptionWithSpacesAndPunctuation_survives() throws IOException {
+    public void saveThenLoad_descriptionWithSpacesAndPunctuation_survives() throws IOException, ThomasException {
         // A description with awkward characters still comes back whole.
         TaskList original = new TaskList();
         original.add(new TodoTask("read  book (chapter 3) -- twice!"));
@@ -442,7 +442,7 @@ public class StorageTest {
     }
 
     @Test
-    public void saveThenLoad_descriptionContainingSeparator_isSkipped() throws IOException {
+    public void saveThenLoad_descriptionContainingSeparator_isSkipped() throws IOException, ThomasException {
         // A description containing the field separator cannot survive, and is lost on the way back in rather than
         // coming back truncated. This is the known cost of the format, recorded here so that changing it is a
         // deliberate act rather than an accident.
@@ -467,7 +467,7 @@ public class StorageTest {
      * show the corruption, which is what makes it worth pinning here.
      */
     @Test
-    public void save_descriptionContainingNewline_assertionThrown() {
+    public void save_descriptionContainingNewline_assertionThrown() throws ThomasException {
         TaskList original = new TaskList();
         original.add(new TodoTask("read book\nand return it"));
         Storage storage = storage();

@@ -3094,6 +3094,110 @@ bye
 {{FAREWELL}}
 ```
 
+### TC74: Adding a task that is already on the list is refused
+
+**Aim:** The same task typed a second time is refused, with the number of the
+one already there, and the count does not move. Marking the first does not make
+the second a different task. A deadline with the same text is a different task
+and is accepted, and once the first is deleted the same text is accepted again.
+
+**Input:**
+
+```text
+todo read book
+todo read book
+mark 1
+todo read book
+deadline read book /by 2019-12-02 1800
+delete 1
+todo read book
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Delivered, right on time! This wagon is done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] read book (by: Dec 02 2019, 6:00 PM)
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Uncoupled! I've left this wagon in the siding:
+        [T][X] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [D][ ] read book (by: Dec 02 2019, 6:00 PM)
+     2. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC75: A refused duplicate leaves nothing to undo
+
+**Aim:** The duplicate is refused by the list before the history is told
+anything, so `undo` reaches the change before it -- exactly as TC62 shows for
+a line the parser refused.
+
+**Input:**
+
+```text
+todo read book
+todo read book
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Reversing! I've backed out of 'todo read book'.
+     That's 0 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ### TC76: `mark` with two numbers, or a number no list could reach, is refused
 
 **Aim:** `mark 1 2` is told one wagon at a time, rather than that `1 2` is not
@@ -3173,6 +3277,11 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **A tab typed in place of a space.** Tidied exactly as a run of spaces is,
   which `ParserTest` covers. A tab inside a fenced input block is invisible on
   the page, so the case would not be readable and is left to JUnit.
+* **A duplicate returning through `undo`.** Deleting a task, adding the same
+  one again and then undoing the delete puts the original back beside its
+  twin, because putting a task back is not checked -- it only ever replays a
+  delete that really happened, and refusing it would leave the undo half done.
+  Rare enough to note rather than to fix.
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.

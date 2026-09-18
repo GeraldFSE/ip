@@ -2,6 +2,7 @@ package thomas.task;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import thomas.ThomasException;
 
@@ -85,6 +86,29 @@ public class EventTask extends Task {
         // an event that never matches is far harder to notice than a crash.
         assert !end.isBefore(start) : "Event ends on " + end + ", before it starts on " + start;
         return !day.isBefore(start) && !day.isAfter(end);
+    }
+
+    /**
+     * Returns whether another object is this event written a second time: the
+     * same description, as {@link Task#equals(Object)} checks, running between
+     * the same two moments.
+     *
+     * @param other The object to compare with.
+     * @return True if {@code other} is an event with the same description,
+     *         start and end.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (!super.equals(other)) {
+            return false;
+        }
+        EventTask otherEvent = (EventTask) other;
+        return from.equals(otherEvent.from) && to.equals(otherEvent.to);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), from, to);
     }
 
     /**

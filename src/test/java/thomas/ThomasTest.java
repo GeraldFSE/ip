@@ -115,6 +115,18 @@ public class ThomasTest {
     }
 
     @Test
+    public void getResponse_todoTypedTwice_secondIsRefusedAndListUnchanged() {
+        // A duplicate is refused on the way in, so the reply is the error and the count stays at one.
+        Thomas thomas = chatbot();
+        thomas.getResponse("todo read book");
+
+        assertEquals("Bust my buffers! That wagon is already on my train, at number 1:\n   [T][ ] read book",
+                thomas.getResponse("todo read book"));
+        assertTrue(thomas.hasErrored());
+        assertEquals("Here is every wagon on my train:\n1. [T][ ] read book", thomas.getResponse("list"));
+    }
+
+    @Test
     public void getResponse_unknownCommand_clearsCommandType() {
         Thomas thomas = chatbot();
         thomas.getResponse("todo read book");

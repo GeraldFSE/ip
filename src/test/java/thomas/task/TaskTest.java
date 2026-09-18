@@ -2,6 +2,7 @@ package thomas.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +31,9 @@ import thomas.ThomasException;
  * still produces something date-shaped.
  */
 public class TaskTest {
+
+    /** Moment the equality tests build their dated tasks around */
+    private static final LocalDateTime DEC_02_6PM = LocalDateTime.of(2019, 12, 2, 18, 0);
 
     // ---- parseDate: dates it accepts ----
 
@@ -435,6 +439,65 @@ public class TaskTest {
         todo.markAsDone();
 
         assertTrue(todo.toSaveFormat().startsWith("T | 1 | "));
+    }
+
+    // ---- equality: what counts as the same task twice ----
+
+    @Test
+    public void equals_sameDescriptionSameType_isTrue() {
+        assertEquals(new TodoTask("read book"), new TodoTask("read book"));
+    }
+
+    @Test
+    public void equals_differentDescription_isFalse() {
+        assertNotEquals(new TodoTask("read book"), new TodoTask("return book"));
+    }
+
+    @Test
+    public void equals_oneDoneOneNot_isTrue() {
+        // Ticking a task changes its state, not which task it is: adding "read book" again after finishing it is
+        // still adding a duplicate.
+        Task done = new TodoTask("read book");
+        done.markAsDone();
+
+        assertEquals(done, new TodoTask("read book"));
+    }
+
+    @Test
+    public void equals_sameDescriptionDifferentType_isFalse() {
+        // A todo and a deadline with the same text are different tasks, one dated and one not.
+        assertNotEquals(new TodoTask("read book"), new DeadlineTask("read book", DEC_02_6PM));
+    }
+
+    @Test
+    public void equals_deadlinesDueAtTheSameMoment_isTrue() {
+        assertEquals(new DeadlineTask("read book", DEC_02_6PM), new DeadlineTask("read book", DEC_02_6PM));
+    }
+
+    @Test
+    public void equals_deadlinesDueAtDifferentMoments_isFalse() {
+        assertNotEquals(new DeadlineTask("read book", DEC_02_6PM),
+                new DeadlineTask("read book", DEC_02_6PM.plusMinutes(1)));
+    }
+
+    @Test
+    public void equals_eventsOverTheSameSpan_isTrue() throws ThomasException {
+        assertEquals(new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)),
+                new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)));
+    }
+
+    @Test
+    public void equals_eventsDifferingOnlyInTheEnd_isFalse() throws ThomasException {
+        // The end is compared as well as the start, so it is checked on its own.
+        assertNotEquals(new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)),
+                new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(3)));
+    }
+
+    @Test
+    public void hashCode_equalTasks_isTheSame() {
+        // The contract equals() carries with it, and what a hash-based lookup would depend on.
+        assertEquals(new DeadlineTask("read book", DEC_02_6PM).hashCode(),
+                new DeadlineTask("read book", DEC_02_6PM).hashCode());
     }
 
     /**

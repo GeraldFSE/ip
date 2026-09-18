@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import thomas.ThomasException;
@@ -243,6 +244,46 @@ public class Task {
      */
     public boolean matches(String keyword) {
         return description.contains(keyword);
+    }
+
+    /**
+     * Returns whether another object is the same task written a second time.
+     * <p>
+     * Two tasks are the same when they are of the same type and describe the
+     * same thing; the subclasses that carry dates extend this to compare those
+     * too. Whether either is done is deliberately left out: ticking a task
+     * changes its state, not which task it is, so adding "read book" again
+     * after finishing it is still adding a duplicate.
+     * <p>
+     * Comparing {@code getClass()} rather than using {@code instanceof} is
+     * what keeps a todo and a deadline with the same text apart, without each
+     * subclass having to say so.
+     *
+     * @param other The object to compare with.
+     * @return True if {@code other} is a task of the same type with the same
+     *         description.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        Task otherTask = (Task) other;
+        return description.equals(otherTask.description);
+    }
+
+    /**
+     * Returns a hash consistent with {@link #equals(Object)}, so a task can sit
+     * in a hash-based collection.
+     *
+     * @return A hash of the description, which is what equality is decided on here.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), description);
     }
 
     /**

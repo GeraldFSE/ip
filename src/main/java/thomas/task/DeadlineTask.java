@@ -2,6 +2,7 @@ package thomas.task;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * A task that must be done before a given date and time.
@@ -48,6 +49,25 @@ public class DeadlineTask extends Task {
     @Override
     public boolean occursOn(LocalDate day) {
         return by.toLocalDate().equals(day);
+    }
+
+    /**
+     * Returns whether another object is this deadline written a second time:
+     * the same description, as {@link Task#equals(Object)} checks, due at the
+     * same moment.
+     *
+     * @param other The object to compare with.
+     * @return True if {@code other} is a deadline with the same description and
+     *         due date.
+     */
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other) && by.equals(((DeadlineTask) other).by);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), by);
     }
 
     /**
