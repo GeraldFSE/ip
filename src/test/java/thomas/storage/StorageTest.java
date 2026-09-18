@@ -253,7 +253,7 @@ public class StorageTest {
 
         assertTrue(storage.load().isEmpty());
         assertEquals(List.of("I can't read 'tomorrow' as a deadline date! "
-                + "Write it as a date and a 24-hour time, like 2019-12-02 1800."),
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800."),
                 storage.getSkipComplaints());
     }
 
@@ -265,7 +265,7 @@ public class StorageTest {
         Storage storage = storage();
 
         assertTrue(storage.load().isEmpty());
-        assertEquals(List.of("HUH?! Your event ends before it starts! Check your /from and /to."),
+        assertEquals(List.of("Bust my buffers! Your event arrives before it sets off! Check its /from and /to."),
                 storage.getSkipComplaints());
     }
 

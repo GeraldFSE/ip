@@ -59,6 +59,7 @@ public enum Keyword {
         return Arrays.stream(values())
                 .filter(type -> type.keyword.equals(keyword))
                 .findFirst()
-                .orElseThrow(() -> new ThomasException("Erm sorry, what does that mean again?"));
+                .orElseThrow(() -> new ThomasException(
+                        "Cinders and ashes! I don't know that signal. What does it mean?"));
     }
 }

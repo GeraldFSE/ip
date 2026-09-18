@@ -33,7 +33,7 @@ import thomas.task.TaskList;
  */
 public class History {
     /** Told to an {@code undo} with nothing left to undo. */
-    private static final String MESSAGE_NOTHING_TO_UNDO = "Erm, there's nothing to undo!";
+    private static final String MESSAGE_NOTHING_TO_UNDO = "I can't reverse any further! There's nothing to undo.";
 
     /** Which of the three reversals a step is. */
     private enum Kind {

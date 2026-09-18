@@ -42,27 +42,27 @@ import thomas.task.TodoTask;
 public class Parser {
     /** Told to a {@code todo} given no description. */
     private static final String MESSAGE_EMPTY_TODO =
-            "HEYY!! The description of a todo cannot be empty!";
+            "Bust my buffers! A todo needs a description before I can couple it up.";
 
     /** Told to a {@code deadline} given no description. */
     private static final String MESSAGE_EMPTY_DEADLINE =
-            "HEYY!! The description of a deadline cannot be empty!";
+            "Bust my buffers! A deadline needs a description before I can couple it up.";
 
     /** Told to an {@code event} given no description. */
     private static final String MESSAGE_EMPTY_EVENT =
-            "HEYY!! The description of an event cannot be empty!";
+            "Bust my buffers! An event needs a description before I can couple it up.";
 
     /** Told to a {@code deadline} whose {@code /by} is missing or has no date. */
     private static final String MESSAGE_MISSING_BY =
-            "Are you forgetting something!! When is the deadline!";
+            "When is it due? A deadline needs a /by before I can pull it.";
 
     /** Told to an {@code event} whose {@code /from} is missing or has no date. */
     private static final String MESSAGE_MISSING_FROM =
-            "Erm when does it start? You need a /from!";
+            "When does it set off? An event needs a /from.";
 
     /** Told to an {@code event} whose {@code /to} is missing or has no date. */
     private static final String MESSAGE_MISSING_TO =
-            "Erm when does it end? You need a /to after your /from!";
+            "When does it arrive? An event needs a /to after its /from.";
 
     /** The kind of command the line names. */
     private final Keyword keyword;
@@ -191,8 +191,8 @@ public class Parser {
      */
     private static String requireSeparatorFree(String description) throws ThomasException {
         if (description.contains(Task.FIELD_SEPARATOR)) {
-            throw new ThomasException("HEYY!! A description can't contain '" + Task.FIELD_SEPARATOR
-                    + "' -- that's how I keep your tasks in the save file.");
+            throw new ThomasException("Bust my buffers! A description can't contain '"
+                    + Task.FIELD_SEPARATOR + "' -- that's how I keep my wagons apart in the save file.");
         }
         return description;
     }
@@ -212,12 +212,12 @@ public class Parser {
      * @throws ThomasException If the number is missing or is not a whole number.
      */
     private int parseTaskNumber(String action) throws ThomasException {
-        String argument = requireArgument("HEYY!! You need a valid number to " + action);
+        String argument = requireArgument("Which wagon do you want me to " + action + "? Give me its number.");
 
         try {
             return Integer.parseInt(argument);
         } catch (NumberFormatException e) {
-            throw new ThomasException("WHAT? Why are you passing a non integer?! Give me an INTEGER!!");
+            throw new ThomasException("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...");
         }
     }
 
@@ -235,12 +235,12 @@ public class Parser {
      *                         {@code yyyy-mm-dd}.
      */
     private LocalDate parseDay() throws ThomasException {
-        String text = requireArgument("HEYY!! Which day do you want to see?");
+        String text = requireArgument("Which day's timetable do you want to see?");
         try {
             return LocalDate.parse(text);
         } catch (DateTimeParseException e) {
-            throw new ThomasException("I can't read '" + text + "' as a day! "
-                    + "Write it as 2019-12-02.");
+            throw new ThomasException("I can't find '" + text + "' on my timetable! "
+                    + "Write the day as 2019-12-02.");
         }
     }
 
@@ -259,7 +259,7 @@ public class Parser {
      * @throws ThomasException if no keyword was given
      */
     private String parseKeyword() throws ThomasException {
-        return requireArgument("HEYY!! What am I looking for? Give me a keyword!");
+        return requireArgument("What am I looking for? Give me a word to search the yard for.");
     }
 
     /**

@@ -109,8 +109,8 @@ public class TaskList {
      */
     private int requirePosition(int taskNumber) throws ThomasException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new ThomasException("There is no task " + taskNumber + "! You only have "
-                    + tasks.size() + " task(s).");
+            throw new ThomasException("There's no wagon " + taskNumber + " on my train! "
+                    + "I'm only pulling " + tasks.size() + " wagon(s).");
         }
         int position = taskNumber - 1;
         // The guard above already forces this, so it cannot fail as the two

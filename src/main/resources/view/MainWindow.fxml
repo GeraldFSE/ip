@@ -22,8 +22,8 @@
         </ScrollPane>
         <HBox fx:id="inputBar" spacing="8.0" styleClass="input-bar">
             <children>
-                <TextField fx:id="userInput" onAction="#handleUserInput" promptText="Type a command, e.g. todo read book" HBox.hgrow="ALWAYS" />
-                <Button fx:id="sendButton" defaultButton="true" mnemonicParsing="false" onAction="#handleUserInput" text="➤" />
+                <TextField fx:id="userInput" onAction="#handleUserInput" promptText="Tell Thomas what to haul, e.g. todo read book" HBox.hgrow="ALWAYS" />
+                <Button fx:id="sendButton" defaultButton="true" mnemonicParsing="false" onAction="#handleUserInput" text="Peep!" />
             </children>
             <padding>
                 <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

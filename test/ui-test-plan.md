@@ -48,8 +48,8 @@ greeting and farewell.
        / / / __ \/ __ \/ __ `__ \/ __ `/ ___/
       / / / / / / /_/ / / / / / / /_/ (__  )
      /_/ /_/ /_/\____/_/ /_/ /_/\__,_/____/
-     Choo Choo! I'm Thomas!
-     How can I serve you today?
+     Peep peep! Thomas the Tank Engine, reporting for duty!
+     What shall we haul today?
     ____________________________________________________________
 ```
 
@@ -57,7 +57,7 @@ greeting and farewell.
 
 ```text
     ____________________________________________________________
-     Until next time! Choo Choo!
+     Off to the sheds! Peep peep, see you down the line!
     ____________________________________________________________
 ```
 
@@ -100,17 +100,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][ ] return book
     ____________________________________________________________
@@ -135,7 +135,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -160,21 +160,21 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] return book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][X] return book
     ____________________________________________________________
@@ -201,20 +201,20 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     OK, I've marked this task as not done yet:
+     Back on the train it goes! This wagon is not done yet:
         [T][ ] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -240,20 +240,20 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -275,9 +275,9 @@ todo read book
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -305,22 +305,22 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] borrow book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] borrow book
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      3. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
@@ -351,7 +351,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read 'no idea :-p' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read 'no idea :-p' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -376,7 +376,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read '2019-12-02' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '2019-12-02' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -403,13 +403,13 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read '2/12/2019 1800' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '2/12/2019 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-13-01 1800' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '2019-13-01 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -434,10 +434,10 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read '2019-12-02 2500' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '2019-12-02 2500' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-12-02 1860' as a deadline date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '2019-12-02 1860' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -462,10 +462,10 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read 'Mon 2pm' as a start date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read 'Mon 2pm' as a start date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '4pm' as an end date! Write it as a date and a 24-hour time, like 2019-12-02 1800.
+     I can't read '4pm' as an end date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -491,17 +491,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] sleep (by: Dec 02 2019, 12:00 AM)
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] lunch (by: Dec 02 2019, 12:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [D][ ] sleep (by: Dec 02 2019, 12:00 AM)
      2. [D][ ] lunch (by: Dec 02 2019, 12:00 PM)
     ____________________________________________________________
@@ -527,16 +527,16 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] join sports club
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] join sports club
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] join sports club
     ____________________________________________________________
 {{FAREWELL}}
@@ -559,7 +559,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Erm sorry, what does that mean again?
+     Cinders and ashes! I don't know that signal. What does it mean?
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -581,7 +581,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HEYY!! The description of a todo cannot be empty!
+     Bust my buffers! A todo needs a description before I can couple it up.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -604,7 +604,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HEYY!! The description of a todo cannot be empty!
+     Bust my buffers! A todo needs a description before I can couple it up.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -626,7 +626,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Are you forgetting something!! When is the deadline!
+     When is it due? A deadline needs a /by before I can pull it.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -649,7 +649,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Erm when does it start? You need a /from!
+     When does it set off? An event needs a /from.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -676,7 +676,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Erm when does it end? You need a /to after your /from!
+     When does it arrive? An event needs a /to after its /from.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -699,7 +699,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     WHAT? Why are you passing a non integer?! Give me an INTEGER!!
+     Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -724,12 +724,12 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 9! You only have 1 task(s).
+     There's no wagon 9 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -753,12 +753,12 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 0! You only have 1 task(s).
+     There's no wagon 0 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -783,15 +783,15 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Erm sorry, what does that mean again?
+     Cinders and ashes! I don't know that signal. What does it mean?
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -819,21 +819,21 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Are you forgetting something!! When is the deadline!
+     When is it due? A deadline needs a /by before I can pull it.
     ____________________________________________________________
     ____________________________________________________________
-     Erm when does it start? You need a /from!
+     When does it set off? An event needs a /from.
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! The description of a todo cannot be empty!
+     Bust my buffers! A todo needs a description before I can couple it up.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -860,20 +860,20 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Are you forgetting something!! When is the deadline!
+     When is it due? A deadline needs a /by before I can pull it.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] join sports club
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][ ] join sports club
     ____________________________________________________________
@@ -903,27 +903,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 5! You only have 2 task(s).
+     There's no wagon 5 on my train! I'm only pulling 2 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     WHAT? Why are you passing a non integer?! Give me an INTEGER!!
+     Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
      2. [T][ ] return book
     ____________________________________________________________
@@ -951,22 +951,22 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 9! You only have 1 task(s).
+     There's no wagon 9 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! You need a valid number to unmark
+     Which wagon do you want me to unmark? Give me its number.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -994,24 +994,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 2! You only have 1 task(s).
+     There's no wagon 2 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] return book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][X] return book
     ____________________________________________________________
@@ -1038,17 +1038,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book /by tomorrow
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] standby report (by: Dec 06 2019, 9:00 AM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book /by tomorrow
      2. [D][ ] standby report (by: Dec 06 2019, 9:00 AM)
     ____________________________________________________________
@@ -1076,16 +1076,16 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1118,37 +1118,37 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Erm when does it end? You need a /to after your /from!
+     When does it arrive? An event needs a /to after its /from.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Erm sorry, what does that mean again?
+     Cinders and ashes! I don't know that signal. What does it mean?
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [D][X] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! The description of a todo cannot be empty!
+     Bust my buffers! A todo needs a description before I can couple it up.
     ____________________________________________________________
     ____________________________________________________________
-     OK, I've marked this task as not done yet:
+     Back on the train it goes! This wagon is not done yet:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 9! You only have 2 task(s).
+     There's no wagon 9 on my train! I'm only pulling 2 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
@@ -1194,12 +1194,12 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1228,32 +1228,32 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] join sports club
-     Now you have 4 task(s) in the list.
+     That's 4 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      3. [T][ ] join sports club
@@ -1284,31 +1284,31 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] join sports club
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] read book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] join sports club
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] return book
      2. [T][X] join sports club
     ____________________________________________________________
@@ -1334,17 +1334,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] read book
-     Now you have 0 task(s) in the list.
+     That's 0 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1372,24 +1372,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! You need a valid number to delete
+     Which wagon do you want me to delete? Give me its number.
     ____________________________________________________________
     ____________________________________________________________
-     WHAT? Why are you passing a non integer?! Give me an INTEGER!!
+     Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 9! You only have 1 task(s).
+     There's no wagon 9 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 0! You only have 1 task(s).
+     There's no wagon 0 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1413,7 +1413,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     There is no task 1! You only have 0 task(s).
+     There's no wagon 1 on my train! I'm only pulling 0 wagon(s).
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1440,27 +1440,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] join sports club
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] return book
      2. [T][ ] join sports club
     ____________________________________________________________
@@ -1489,26 +1489,26 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] return book
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] return book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1540,19 +1540,19 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
@@ -1586,23 +1586,23 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] return book
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][X] return book
     ____________________________________________________________
@@ -1636,24 +1636,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] return book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1685,14 +1685,14 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
 {{FAREWELL}}
@@ -1722,14 +1722,14 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1777,23 +1777,23 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
+     Bust my buffers! A description can't contain ' | ' -- that's how I keep my wagons apart in the save file.
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
+     Bust my buffers! A description can't contain ' | ' -- that's how I keep my wagons apart in the save file.
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! A description can't contain ' | ' -- that's how I keep your tasks in the save file.
+     Bust my buffers! A description can't contain ' | ' -- that's how I keep my wagons apart in the save file.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -1828,24 +1828,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] a|b
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] c |d
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] e| f
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] a|b
      2. [T][ ] c |d
      3. [T][ ] e| f
@@ -1876,27 +1876,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] borrow book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 4 task(s) in the list.
+     That's 4 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      4. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
@@ -1930,27 +1930,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 01 2019:
+     Here is my timetable for Dec 01 2019:
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
      1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 03 2019:
+     Here is my timetable for Dec 03 2019:
      1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 04 2019:
+     Here is my timetable for Dec 04 2019:
      1. [E][ ] project meeting (from: Dec 02 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 05 2019:
+     Here is my timetable for Dec 05 2019:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -1979,17 +1979,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] 2019-12-02
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 03 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2017,25 +2017,25 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] borrow book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
      2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [D][X] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] borrow book
      2. [D][X] return book (by: Dec 02 2019, 6:00 PM)
     ____________________________________________________________
@@ -2063,13 +2063,13 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HEYY!! Which day do you want to see?
+     Which day's timetable do you want to see?
     ____________________________________________________________
     ____________________________________________________________
-     I can't read 'tomorrow' as a day! Write it as 2019-12-02.
+     I can't find 'tomorrow' on my timetable! Write the day as 2019-12-02.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-12-02 1800' as a day! Write it as 2019-12-02.
+     I can't find '2019-12-02 1800' on my timetable! Write the day as 2019-12-02.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2092,7 +2092,7 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2122,10 +2122,10 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HEYY!! The description of a deadline cannot be empty!
+     Bust my buffers! A deadline needs a description before I can couple it up.
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! The description of an event cannot be empty!
+     Bust my buffers! An event needs a description before I can couple it up.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2151,13 +2151,13 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Are you forgetting something!! When is the deadline!
+     When is it due? A deadline needs a /by before I can pull it.
     ____________________________________________________________
     ____________________________________________________________
-     Erm when does it start? You need a /from!
+     When does it set off? An event needs a /from.
     ____________________________________________________________
     ____________________________________________________________
-     Erm when does it end? You need a /to after your /from!
+     When does it arrive? An event needs a /to after its /from.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2186,13 +2186,13 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     HUH?! Your event ends before it starts! Check your /from and /to.
+     Bust my buffers! Your event arrives before it sets off! Check its /from and /to.
     ____________________________________________________________
     ____________________________________________________________
-     HUH?! Your event ends before it starts! Check your /from and /to.
+     Bust my buffers! Your event arrives before it sets off! Check its /from and /to.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2217,12 +2217,12 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] standup (from: Dec 02 2019, 9:00 AM to: Dec 02 2019, 9:00 AM)
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [E][ ] standup (from: Dec 02 2019, 9:00 AM to: Dec 02 2019, 9:00 AM)
     ____________________________________________________________
 {{FAREWELL}}
@@ -2253,27 +2253,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy milk
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [E][ ] book club (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
-     Now you have 4 task(s) in the list.
+     That's 4 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
      1. [T][ ] read book
      3. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
      4. [E][ ] book club (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
@@ -2301,15 +2301,15 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
     ____________________________________________________________
     ____________________________________________________________
-     HEYY!! What am I looking for? Give me a keyword!
+     What am I looking for? Give me a word to search the yard for.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2341,36 +2341,36 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy milk
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] call mum
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] return book
-     Now you have 4 task(s) in the list.
+     That's 4 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
      2. [T][ ] read book
      4. [T][ ] return book
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] buy milk
      2. [T][X] read book
      3. [T][ ] call mum
@@ -2402,23 +2402,23 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [D][ ] pay fine (by: Dec 02 2019, 6:00 PM)
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2444,17 +2444,17 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy book
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -2484,27 +2484,27 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the matching tasks in your list:
+     I searched the yard and found these wagons:
      1. [T][ ] read book
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks on Dec 02 2019:
+     Here is my timetable for Dec 02 2019:
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo read book'.
-     Now you have 0 task(s) in the list.
+     Reversing! I've backed out of 'todo read book'.
+     That's 0 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2533,31 +2533,31 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy milk
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] pay fine
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Noted. I've removed this task:
+     Uncoupled! I've left this wagon in the siding:
         [T][ ] buy milk
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'delete 2'.
-     Now you have 3 task(s) in the list.
+     Reversing! I've backed out of 'delete 2'.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
      2. [T][ ] buy milk
      3. [T][ ] pay fine
@@ -2587,24 +2587,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'mark 1'.
-     Now you have 1 task(s) in the list.
+     Reversing! I've backed out of 'mark 1'.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -2632,19 +2632,19 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     There is no task 99! You only have 1 task(s).
+     There's no wagon 99 on my train! I'm only pulling 1 wagon(s).
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo read book'.
-     Now you have 0 task(s) in the list.
+     Reversing! I've backed out of 'todo read book'.
+     That's 0 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2670,19 +2670,19 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Erm, there's nothing to undo!
+     I can't reverse any further! There's nothing to undo.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo read book'.
-     Now you have 0 task(s) in the list.
+     Reversing! I've backed out of 'todo read book'.
+     That's 0 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Erm, there's nothing to undo!
+     I can't reverse any further! There's nothing to undo.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2718,34 +2718,34 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy milk
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo buy milk'.
-     Now you have 1 task(s) in the list.
+     Reversing! I've backed out of 'todo buy milk'.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
 {{GREETING}}
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
     ____________________________________________________________
-     Erm, there's nothing to undo!
+     I can't reverse any further! There's nothing to undo.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -2775,30 +2775,30 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] buy milk
-     Now you have 2 task(s) in the list.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] pay fine
-     Now you have 3 task(s) in the list.
+     That's 3 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo pay fine'.
-     Now you have 2 task(s) in the list.
+     Reversing! I've backed out of 'todo pay fine'.
+     That's 2 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'todo buy milk'.
-     Now you have 1 task(s) in the list.
+     Reversing! I've backed out of 'todo buy milk'.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -2826,20 +2826,20 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'mark 1'.
-     Now you have 1 task(s) in the list.
+     Reversing! I've backed out of 'mark 1'.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][ ] read book
     ____________________________________________________________
 {{FAREWELL}}
@@ -2868,24 +2868,24 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     Got it. I've added this task:
+     Coupled up! This wagon is on the train now:
         [T][ ] read book
-     Now you have 1 task(s) in the list.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Nice! I've marked this task as done:
+     Delivered, right on time! This wagon is done:
         [T][X] read book
     ____________________________________________________________
     ____________________________________________________________
-     OK, I've marked this task as not done yet:
+     Back on the train it goes! This wagon is not done yet:
         [T][ ] read book
     ____________________________________________________________
     ____________________________________________________________
-     Choo Choo! I've undone 'unmark 1'.
-     Now you have 1 task(s) in the list.
+     Reversing! I've backed out of 'unmark 1'.
+     That's 1 wagon(s) behind me now.
     ____________________________________________________________
     ____________________________________________________________
-     Here are the tasks in your list:
+     Here is every wagon on my train:
      1. [T][X] read book
     ____________________________________________________________
 {{FAREWELL}}

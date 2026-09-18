@@ -125,7 +125,7 @@ public class Task {
             return LocalDateTime.parse(text, DATE_INPUT_FORMAT);
         } catch (DateTimeParseException e) {
             throw new ThomasException("I can't read '" + text + "' as " + field
-                    + "! Write it as a date and a 24-hour time, like 2019-12-02 1800.");
+                    + "! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.");
         }
     }
 

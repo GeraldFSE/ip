@@ -59,8 +59,8 @@ public class ThomasTest {
     public void getStartupMessage_readableSaveFile_isGreetingAlone() {
         // The banner the console prints above this is deliberately not here: it
         // is ASCII art, and the window draws text in a proportional font.
-        assertEquals("Choo Choo! I'm Thomas!\n"
-                + "How can I serve you today?",
+        assertEquals("Peep peep! Thomas the Tank Engine, reporting for duty!\n"
+                + "What shall we haul today?",
                 chatbot().getStartupMessage());
     }
 
@@ -71,11 +71,12 @@ public class ThomasTest {
         // The damaged line costs only itself: the greeting still arrives, the
         // warning follows it, and the readable task above it still loaded.
         Thomas thomas = chatbot();
-        assertEquals("Choo Choo! I'm Thomas!\n"
-                + "How can I serve you today?\n"
-                + "Skipping a line I could not read: unknown task type 'X': X | 0 | mystery",
+        assertEquals("Peep peep! Thomas the Tank Engine, reporting for duty!\n"
+                + "What shall we haul today?\n"
+                + "Cinders and ashes! I left a saved line in the yard, I couldn't read it: "
+                + "unknown task type 'X': X | 0 | mystery",
                 thomas.getStartupMessage());
-        assertEquals("Here are the tasks in your list:\n"
+        assertEquals("Here is every wagon on my train:\n"
                 + "1. [T][ ] read book",
                 thomas.getResponse("list"));
     }
@@ -86,9 +87,9 @@ public class ThomasTest {
 
         // The wording is Ui's, and the message carries its own lines only: the
         // dividers and indentation the console shows are added when printing.
-        assertEquals("Got it. I've added this task:\n"
+        assertEquals("Coupled up! This wagon is on the train now:\n"
                 + "   [T][ ] read book\n"
-                + "Now you have 1 task(s) in the list.",
+                + "That's 1 wagon(s) behind me now.",
                 thomas.getResponse("todo read book"));
     }
 
@@ -109,7 +110,7 @@ public class ThomasTest {
 
         // A mistake is a reply like any other here. The console prints it
         // through Ui.showError instead, but the words are the same.
-        assertEquals("Erm sorry, what does that mean again?",
+        assertEquals("Cinders and ashes! I don't know that signal. What does it mean?",
                 thomas.getResponse("blah"));
     }
 
@@ -128,7 +129,7 @@ public class ThomasTest {
     public void getResponse_bye_reportsSessionDone() {
         Thomas thomas = chatbot();
 
-        assertEquals("Until next time! Choo Choo!", thomas.getResponse("bye"));
+        assertEquals("Off to the sheds! Peep peep, see you down the line!", thomas.getResponse("bye"));
         assertTrue(thomas.hasExited());
     }
 
@@ -176,7 +177,7 @@ public class ThomasTest {
         // A command that parses but cannot be carried out fails the same way an
         // unparseable one does, which is what keeps the window free of error
         // handling.
-        assertEquals("There is no task 5! You only have 1 task(s).",
+        assertEquals("There's no wagon 5 on my train! I'm only pulling 1 wagon(s).",
                 thomas.getResponse("delete 5"));
         assertEquals("", thomas.getCommandType());
     }
@@ -185,7 +186,7 @@ public class ThomasTest {
     public void getResponse_undoBeforeAnyChange_returnsErrorMessage() {
         // A fresh chatbot has nothing to undo whatever the save file held: the
         // history is built with the session, not loaded with the tasks.
-        assertEquals("Erm, there's nothing to undo!", chatbot().getResponse("undo"));
+        assertEquals("I can't reverse any further! There's nothing to undo.", chatbot().getResponse("undo"));
     }
 
     @Test
@@ -193,7 +194,7 @@ public class ThomasTest {
         writeSaveFile("T | 0 | read book");
 
         // Loading is not a change the user made, so it is not one to take back.
-        assertEquals("Erm, there's nothing to undo!", chatbot().getResponse("undo"));
+        assertEquals("I can't reverse any further! There's nothing to undo.", chatbot().getResponse("undo"));
     }
 
     @Test
@@ -201,8 +202,8 @@ public class ThomasTest {
         Thomas thomas = chatbot();
         thomas.getResponse("todo read book");
 
-        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
-                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+        assertEquals("Reversing! I've backed out of 'todo read book'.\n"
+                + "That's 0 wagon(s) behind me now.", thomas.getResponse("undo"));
     }
 
     @Test
@@ -212,7 +213,7 @@ public class ThomasTest {
 
         thomas.getResponse("undo");
 
-        assertEquals("Here are the tasks in your list:", thomas.getResponse("list"));
+        assertEquals("Here is every wagon on my train:", thomas.getResponse("list"));
     }
 
     @Test
@@ -246,10 +247,10 @@ public class ThomasTest {
         thomas.getResponse("todo read book");
         thomas.getResponse("todo buy milk");
 
-        assertEquals("Choo Choo! I've undone 'todo buy milk'.\n"
-                + "Now you have 1 task(s) in the list.", thomas.getResponse("undo"));
-        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
-                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+        assertEquals("Reversing! I've backed out of 'todo buy milk'.\n"
+                + "That's 1 wagon(s) behind me now.", thomas.getResponse("undo"));
+        assertEquals("Reversing! I've backed out of 'todo read book'.\n"
+                + "That's 0 wagon(s) behind me now.", thomas.getResponse("undo"));
     }
 
     @Test
@@ -260,8 +261,8 @@ public class ThomasTest {
 
         // The rejected command changed nothing, so it recorded nothing and did
         // not become the change that the next undo takes back.
-        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
-                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+        assertEquals("Reversing! I've backed out of 'todo read book'.\n"
+                + "That's 0 wagon(s) behind me now.", thomas.getResponse("undo"));
     }
 
     @Test
@@ -271,8 +272,8 @@ public class ThomasTest {
         thomas.getResponse("list");
         thomas.getResponse("find read");
 
-        assertEquals("Choo Choo! I've undone 'todo read book'.\n"
-                + "Now you have 0 task(s) in the list.", thomas.getResponse("undo"));
+        assertEquals("Reversing! I've backed out of 'todo read book'.\n"
+                + "That's 0 wagon(s) behind me now.", thomas.getResponse("undo"));
     }
 
     @Test
@@ -286,7 +287,7 @@ public class ThomasTest {
 
         // The second mark changed nothing, so undoing it must not clear the tick
         // the first one set.
-        assertEquals("Here are the tasks in your list:\n1. [T][X] read book",
+        assertEquals("Here is every wagon on my train:\n1. [T][X] read book",
                 thomas.getResponse("list"));
     }
 

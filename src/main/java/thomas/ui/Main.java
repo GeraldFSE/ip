@@ -34,7 +34,7 @@ public class Main extends Application {
             Scene scene = new Scene(root);
             stage.setScene(scene);
 
-            stage.setTitle("Thomas");
+            stage.setTitle("Thomas the Tank Engine");
             // Small enough for a corner of the screen, but never so narrow
             // that a task line has to wrap every few words.
             stage.setMinHeight(300);

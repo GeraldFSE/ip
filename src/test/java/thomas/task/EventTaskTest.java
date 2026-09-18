@@ -47,7 +47,7 @@ public class EventTaskTest {
         ThomasException e = assertThrows(ThomasException.class, () ->
                 new EventTask("project meeting", DEC_02.atTime(16, 0), DEC_02.atTime(14, 0)));
 
-        assertEquals("HUH?! Your event ends before it starts! Check your /from and /to.",
+        assertEquals("Bust my buffers! Your event arrives before it sets off! Check its /from and /to.",
                 e.getMessage());
     }
 
