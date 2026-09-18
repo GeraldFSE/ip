@@ -3,6 +3,8 @@ package thomas.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,11 +43,9 @@ public class UiTest {
      * @return List holding those tasks.
      */
     private static TaskList listOf(Task... tasks) {
-        TaskList list = new TaskList();
-        for (Task task : tasks) {
-            list.add(task);
-        }
-        return list;
+        // Built through the constructor rather than add(), which refuses a duplicate and so would make every test
+        // declare the exception; what a duplicate does is tested by the add tests themselves.
+        return new TaskList(new ArrayList<>(List.of(tasks)));
     }
 
     /**

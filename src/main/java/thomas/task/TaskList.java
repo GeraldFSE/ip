@@ -81,16 +81,35 @@ public class TaskList {
     }
 
     /**
-     * Adds a task to the end of the list.
+     * Adds a task to the end of the list, refusing one that is already there.
+     * <p>
+     * A task typed twice is far more often a slip -- the user forgot it was
+     * already on the list, or pressed enter twice -- than a wish for two
+     * copies, and two copies cost more than they give: marking one leaves the
+     * other undone, and deleting one leaves the other looking like the same
+     * chore still to do. So the second is refused, and the message says where
+     * the first one sits so the user can go to it. What counts as the same
+     * task is {@link Task#equals(Object)}'s to decide.
+     * <p>
+     * Checked here rather than in the command that adds, so there is no way to
+     * build a list holding two of the same task through this method. Putting
+     * a task back with {@link #insertByNumber(int, Task)} is not checked,
+     * because that only ever replays a delete that really happened.
      *
      * @param task The task to store.
+     * @throws ThomasException If the same task is already on the list.
      */
-    public void add(Task task) {
+    public void add(Task task) throws ThomasException {
         // Only Parser builds tasks, and it either returns one or throws, so a
         // null arriving here means that contract has been broken. Caught now
         // rather than as a NullPointerException the next time the list is
         // printed, by which point what added it is no longer on the stack.
         assert task != null : "Cannot add a null task to the list";
+        int existingPosition = tasks.indexOf(task);
+        if (existingPosition >= 0) {
+            throw new ThomasException("Bust my buffers! That wagon is already on my train, at number "
+                    + (existingPosition + 1) + ":\n   " + tasks.get(existingPosition));
+        }
         tasks.add(task);
     }
 

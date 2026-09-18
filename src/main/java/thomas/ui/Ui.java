@@ -185,11 +185,17 @@ public class Ui {
 
     /**
      * Reports a problem with what the user asked for.
+     * <p>
+     * Split into lines exactly as {@link #showMessage} does, because an
+     * explanation can run to more than one: the refusal of a duplicate task
+     * quotes the existing task on a line of its own. Handed to
+     * {@link #showBlock} whole, that second line would be printed without
+     * the indent every other line has.
      *
      * @param message The explanation to show, already worded for the user.
      */
     public void showError(String message) {
-        showBlock(message);
+        showBlock(message.split("\n", -1));
     }
 
     /**

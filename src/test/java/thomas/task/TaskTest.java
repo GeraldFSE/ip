@@ -2,6 +2,7 @@ package thomas.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +31,9 @@ import thomas.ThomasException;
  * still produces something date-shaped.
  */
 public class TaskTest {
+
+    /** Moment the equality tests build their dated tasks around */
+    private static final LocalDateTime DEC_02_6PM = LocalDateTime.of(2019, 12, 2, 18, 0);
 
     // ---- parseDate: dates it accepts ----
 
@@ -110,21 +114,61 @@ public class TaskTest {
     }
 
     @Test
-    public void parseDate_dayOutsideItsMonth_clampedToLastDayOfMonth() throws ThomasException {
-        // A day that does not exist in its month is NOT refused, but quietly moved to the last day of that month,
-        // since the date formatter resolves smartly unless told otherwise. This is recorded rather than asserted away,
-        // since it is the behavior the user meets today: "deadline submit /by 2019-02-30 1800" is accepted and stored
-        // as the 28th, with nothing said. Resolving strictly instead would make this throw, and this case would then
-        // confirm the change worked.
-        assertEquals(LocalDateTime.of(2019, 2, 28, 18, 0),
+    public void parseDate_dayOutsideItsMonth_exceptionThrown() {
+        // A day that does not exist in its month is refused. The formatter resolves strictly for exactly this:
+        // resolved smartly, the default, "2019-02-30 1800" would be accepted and stored as the 28th with nothing said.
+        ThomasException e = assertThrows(ThomasException.class, () ->
                 Task.parseDate("2019-02-30 1800", "a deadline date"));
+        assertEquals("There's no such moment as '2019-02-30 1800' for a deadline date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.",
+                e.getMessage());
     }
 
     @Test
-    public void parseDate_hourTwentyFour_rollsToNextMidnight() throws ThomasException {
-        // Smart resolution likewise rolls hour 24 forward to midnight the next day.
-        assertEquals(LocalDateTime.of(2019, 12, 3, 0, 0),
+    public void parseDate_thirtyFirstOfAThirtyDayMonth_exceptionThrown() {
+        assertThrows(ThomasException.class, () -> Task.parseDate("2019-04-31 0900", "a deadline date"));
+    }
+
+    @Test
+    public void parseDate_leapDayInALeapYear_returnsThatMoment() throws ThomasException {
+        // Both sides of the leap-year boundary: the 29th exists in 2020 and not in 2019.
+        assertEquals(LocalDateTime.of(2020, 2, 29, 18, 0), Task.parseDate("2020-02-29 1800", "a deadline date"));
+    }
+
+    @Test
+    public void parseDate_leapDayInACommonYear_exceptionThrown() {
+        assertThrows(ThomasException.class, () -> Task.parseDate("2019-02-29 1800", "a deadline date"));
+    }
+
+    @Test
+    public void parseDate_hourTwentyFour_exceptionThrown() {
+        // Strict resolution likewise refuses hour 24, which smart resolution would roll forward to midnight the next
+        // day. Midnight is written 0000, which parseDate_midnight_returnsStartOfDay covers.
+        ThomasException e = assertThrows(ThomasException.class, () ->
                 Task.parseDate("2019-12-02 2400", "a deadline date"));
+        assertEquals("There's no such moment as '2019-12-02 2400' for a deadline date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.",
+                e.getMessage());
+    }
+
+    @Test
+    public void parseDate_impossibleMonth_messageSaysTheMomentDoesNotExist() {
+        // The right shape naming a thirteenth month is told the moment does not exist, not what the shape should be.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Task.parseDate("2019-13-02 1800", "a deadline date"));
+        assertEquals("There's no such moment as '2019-13-02 1800' for a deadline date! "
+                + "Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.",
+                e.getMessage());
+    }
+
+    @Test
+    public void parseDate_wrongShape_messageGivesTheFormat() {
+        // Text that is not in the format at all is shown the format. The two messages are told apart by shape, so a
+        // near miss of the right width but wrong punctuation gets this one.
+        ThomasException e = assertThrows(ThomasException.class, () ->
+                Task.parseDate("2019/12/02 1800", "a deadline date"));
+        assertEquals("I can't read '2019/12/02 1800' as a deadline date! "
+                + "My timetable wants a date and a 24-hour time, like 2019-12-02 1800.", e.getMessage());
     }
 
     @Test
@@ -395,6 +439,65 @@ public class TaskTest {
         todo.markAsDone();
 
         assertTrue(todo.toSaveFormat().startsWith("T | 1 | "));
+    }
+
+    // ---- equality: what counts as the same task twice ----
+
+    @Test
+    public void equals_sameDescriptionSameType_isTrue() {
+        assertEquals(new TodoTask("read book"), new TodoTask("read book"));
+    }
+
+    @Test
+    public void equals_differentDescription_isFalse() {
+        assertNotEquals(new TodoTask("read book"), new TodoTask("return book"));
+    }
+
+    @Test
+    public void equals_oneDoneOneNot_isTrue() {
+        // Ticking a task changes its state, not which task it is: adding "read book" again after finishing it is
+        // still adding a duplicate.
+        Task done = new TodoTask("read book");
+        done.markAsDone();
+
+        assertEquals(done, new TodoTask("read book"));
+    }
+
+    @Test
+    public void equals_sameDescriptionDifferentType_isFalse() {
+        // A todo and a deadline with the same text are different tasks, one dated and one not.
+        assertNotEquals(new TodoTask("read book"), new DeadlineTask("read book", DEC_02_6PM));
+    }
+
+    @Test
+    public void equals_deadlinesDueAtTheSameMoment_isTrue() {
+        assertEquals(new DeadlineTask("read book", DEC_02_6PM), new DeadlineTask("read book", DEC_02_6PM));
+    }
+
+    @Test
+    public void equals_deadlinesDueAtDifferentMoments_isFalse() {
+        assertNotEquals(new DeadlineTask("read book", DEC_02_6PM),
+                new DeadlineTask("read book", DEC_02_6PM.plusMinutes(1)));
+    }
+
+    @Test
+    public void equals_eventsOverTheSameSpan_isTrue() throws ThomasException {
+        assertEquals(new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)),
+                new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)));
+    }
+
+    @Test
+    public void equals_eventsDifferingOnlyInTheEnd_isFalse() throws ThomasException {
+        // The end is compared as well as the start, so it is checked on its own.
+        assertNotEquals(new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(2)),
+                new EventTask("meeting", DEC_02_6PM, DEC_02_6PM.plusHours(3)));
+    }
+
+    @Test
+    public void hashCode_equalTasks_isTheSame() {
+        // The contract equals() carries with it, and what a hash-based lookup would depend on.
+        assertEquals(new DeadlineTask("read book", DEC_02_6PM).hashCode(),
+                new DeadlineTask("read book", DEC_02_6PM).hashCode());
     }
 
     /**

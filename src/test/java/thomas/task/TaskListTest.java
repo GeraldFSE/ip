@@ -44,11 +44,9 @@ public class TaskListTest {
      * @return List holding those tasks.
      */
     private static TaskList listOf(Task... tasks) {
-        TaskList list = new TaskList();
-        for (Task task : tasks) {
-            list.add(task);
-        }
-        return list;
+        // Built through the constructor rather than add(), which refuses a duplicate and so would make every test
+        // declare the exception; what a duplicate does is tested by the add tests themselves.
+        return new TaskList(new ArrayList<>(List.of(tasks)));
     }
 
     /**
@@ -112,7 +110,7 @@ public class TaskListTest {
     }
 
     @Test
-    public void add_toEmptyList_appendsTask() {
+    public void add_toEmptyList_appendsTask() throws ThomasException {
         TaskList list = new TaskList();
         Task task = new TodoTask("read book");
 
@@ -123,7 +121,7 @@ public class TaskListTest {
     }
 
     @Test
-    public void add_toNonEmptyList_appendsToTheEnd() {
+    public void add_toNonEmptyList_appendsToTheEnd() throws ThomasException {
         // Tasks are kept in the order they were added, which is the order shown.
         TaskList list = listOf(new TodoTask("read book"));
         Task second = new TodoTask("return book");
@@ -131,6 +129,69 @@ public class TaskListTest {
         list.add(second);
 
         assertSame(second, list.get(1));
+    }
+
+    @Test
+    public void add_taskAlreadyOnTheList_exceptionThrown() {
+        // The same task a second time is refused, and the message says where the first one sits, counting from 1.
+        TaskList list = listOf(new TodoTask("read book"), new TodoTask("return book"));
+
+        ThomasException e = assertThrows(ThomasException.class, () -> list.add(new TodoTask("return book")));
+
+        assertEquals("Bust my buffers! That wagon is already on my train, at number 2:\n   [T][ ] return book",
+                e.getMessage());
+    }
+
+    @Test
+    public void add_taskAlreadyOnTheList_listUnchanged() {
+        TaskList list = listOf(new TodoTask("read book"));
+
+        assertThrows(ThomasException.class, () -> list.add(new TodoTask("read book")));
+
+        assertEquals(List.of("[T][ ] read book"), contentsOf(list));
+    }
+
+    @Test
+    public void add_duplicateOfADoneTask_exceptionThrown() {
+        // Done or not makes no difference to whether it is the same task; the message shows the ticked one.
+        Task done = new TodoTask("read book");
+        done.markAsDone();
+        TaskList list = listOf(done);
+
+        ThomasException e = assertThrows(ThomasException.class, () -> list.add(new TodoTask("read book")));
+
+        assertEquals("Bust my buffers! That wagon is already on my train, at number 1:\n   [T][X] read book",
+                e.getMessage());
+    }
+
+    @Test
+    public void add_sameDescriptionDifferentType_appendsTask() throws ThomasException {
+        // A todo and a deadline with the same text are different tasks.
+        TaskList list = listOf(new TodoTask("read book"));
+
+        list.add(deadlineOn("read book", DEC_02));
+
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    public void add_sameDescriptionDifferentDate_appendsTask() throws ThomasException {
+        TaskList list = listOf(deadlineOn("read book", DEC_02));
+
+        list.add(deadlineOn("read book", DEC_03));
+
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    public void add_sameTaskAfterDeletingIt_appendsTask() throws ThomasException {
+        // Once the first is gone it is no longer a duplicate.
+        TaskList list = listOf(new TodoTask("read book"));
+        list.deleteByNumber(1);
+
+        list.add(new TodoTask("read book"));
+
+        assertEquals(1, list.size());
     }
 
     // ---- getByNumber ----

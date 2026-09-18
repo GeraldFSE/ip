@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import thomas.ThomasException;
 
@@ -35,9 +38,18 @@ public class Task {
      * The locale is pinned because {@code ofPattern} otherwise follows whatever
      * the machine is set to, which would change the month names and am/pm
      * markers depending on where the chatbot is run.
+     * <p>
+     * The resolver is {@code STRICT} because the default, {@code SMART}, quietly
+     * repairs a date that does not exist: {@code 2019-02-30} becomes the 28th and
+     * hour {@code 24} rolls over to midnight the next day, so a slip of the
+     * finger is stored as a different moment with nothing said. Strict mode
+     * refuses both. It also insists on {@code uuuu} for the year, since
+     * {@code yyyy} is the year of an era and strict mode will not guess which
+     * era; for the years anyone will type the two print the same.
      */
     public static final DateTimeFormatter DATE_INPUT_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm", Locale.ENGLISH);
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm", Locale.ENGLISH)
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     /**
      * How a date is shown back to the user, for example
@@ -73,6 +85,17 @@ public class Task {
      * spelling of it rather than using this one.
      */
     public static final String FIELD_SEPARATOR = " | ";
+
+    /**
+     * The shape of a date written in {@link #DATE_INPUT_FORMAT}, digits only.
+     * <p>
+     * Used to tell two failures apart when a date will not parse: text of the
+     * wrong shape altogether, and text of exactly the right shape naming a day
+     * or time that does not exist. The second deserves a different answer,
+     * because repeating the format back to someone who has already matched it
+     * tells them nothing.
+     */
+    private static final Pattern DATE_SHAPE = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{4}");
 
     /** The task text exactly as the user typed it. */
     protected String description;
@@ -111,19 +134,27 @@ public class Task {
      * <p>
      * The parser's own exception is rethrown as a {@link ThomasException} so
      * that callers have one kind of user error to report and no Java class name
-     * reaches the user.
+     * reaches the user. Two messages are possible: one for text that is not
+     * in the format at all, and one for text that is but names a moment that
+     * does not exist, such as the 30th of February or the hour 25.
      *
      * @param text The date as written, expected as {@code yyyy-mm-dd HHmm}.
      * @param field Which date this is, named as it should read in the message
      *              and so carrying its own article, for example
      *              {@code "a deadline date"} against {@code "an end date"}.
      * @return The date and time the text names.
-     * @throws ThomasException If the text is not a date and time in that form.
+     * @throws ThomasException If the text is not a date and time in that form,
+     *                         or names a day or time that does not exist.
      */
     public static LocalDateTime parseDate(String text, String field) throws ThomasException {
         try {
             return LocalDateTime.parse(text, DATE_INPUT_FORMAT);
         } catch (DateTimeParseException e) {
+            if (DATE_SHAPE.matcher(text).matches()) {
+                throw new ThomasException("There's no such moment as '" + text + "' for " + field
+                        + "! Check the day is on the calendar and the time is on the 24-hour clock, "
+                        + "0000 to 2359.");
+            }
             throw new ThomasException("I can't read '" + text + "' as " + field
                     + "! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.");
         }
@@ -213,6 +244,46 @@ public class Task {
      */
     public boolean matches(String keyword) {
         return description.contains(keyword);
+    }
+
+    /**
+     * Returns whether another object is the same task written a second time.
+     * <p>
+     * Two tasks are the same when they are of the same type and describe the
+     * same thing; the subclasses that carry dates extend this to compare those
+     * too. Whether either is done is deliberately left out: ticking a task
+     * changes its state, not which task it is, so adding "read book" again
+     * after finishing it is still adding a duplicate.
+     * <p>
+     * Comparing {@code getClass()} rather than using {@code instanceof} is
+     * what keeps a todo and a deadline with the same text apart, without each
+     * subclass having to say so.
+     *
+     * @param other The object to compare with.
+     * @return True if {@code other} is a task of the same type with the same
+     *         description.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        Task otherTask = (Task) other;
+        return description.equals(otherTask.description);
+    }
+
+    /**
+     * Returns a hash consistent with {@link #equals(Object)}, so a task can sit
+     * in a hash-based collection.
+     *
+     * @return A hash of the description, which is what equality is decided on here.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass(), description);
     }
 
     /**

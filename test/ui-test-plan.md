@@ -387,7 +387,9 @@ bye
 round, or naming a month that does not exist, is refused rather than guessed at.
 `2/12/2019 1800` is the shape the user is most likely to reach for, and
 `2019-13-01 1800` matches the pattern exactly while naming a thirteenth month,
-which a check on shape alone would let through.
+which a check on shape alone would let through. The two earn different
+answers: the first is shown the format, the second has already matched it and
+is told the moment does not exist instead.
 
 **Input:**
 
@@ -406,7 +408,7 @@ bye
      I can't read '2/12/2019 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-13-01 1800' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-13-01 1800' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
     ____________________________________________________________
      Here is every wagon on my train:
@@ -434,10 +436,10 @@ bye
 ```text
 {{GREETING}}
     ____________________________________________________________
-     I can't read '2019-12-02 2500' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-12-02 2500' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
     ____________________________________________________________
-     I can't read '2019-12-02 1860' as a deadline date! My timetable wants a date and a 24-hour time, like 2019-12-02 1800.
+     There's no such moment as '2019-12-02 1860' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
     ____________________________________________________________
 {{FAREWELL}}
 ```
@@ -2891,6 +2893,349 @@ bye
 {{FAREWELL}}
 ```
 
+### TC68: Stray spaces before the keyword and inside the arguments are tidied
+
+**Aim:** A command is found under a leading space, and a doubled space between
+the day and the time of a date does not make the date unreadable. Guards the
+tidying done once in the parser's constructor, on which every later marker
+match with a space either side depends.
+
+**Input:**
+
+```text
+   todo read book
+deadline return book  /by  2019-12-02   1800
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [T][ ] read book
+     2. [D][ ] return book (by: Dec 02 2019, 6:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC69: A keyword that takes no argument refuses one
+
+**Aim:** `list all` and `bye now` are refused with the text that was not
+understood quoted back, rather than being carried out with it ignored. The
+chatbot is still running after `bye now`, which is what the real `bye` at the
+end shows.
+
+**Input:**
+
+```text
+list all
+undo 3
+bye now
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! 'list' is a signal on its own -- I don't know what to do with 'all'.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! 'undo' is a signal on its own -- I don't know what to do with '3'.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! 'bye' is a signal on its own -- I don't know what to do with 'now'.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC70: A marker given twice is refused by name
+
+**Aim:** A second `/by`, `/from` or `/to` is reported as the repeat it is,
+not as an unreadable date with a marker inside it. Guards the whole-word
+marker check made on the text after each split.
+
+**Input:**
+
+```text
+deadline return book /by 2019-12-02 1800 /by 2019-12-03 1800
+event meeting /from 2019-12-02 1400 /from 2019-12-02 1500 /to 2019-12-02 1600
+event meeting /from 2019-12-02 1400 /to 2019-12-02 1600 /to 2019-12-02 1700
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! You've given /by more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! You've given /from more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! You've given /to more than once. Once is all I need.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC71: The other command's marker is refused by name
+
+**Aim:** A `/from` on a deadline, or a `/by` on an event, means the two
+commands have been mixed up, and that is the mistake named -- not a missing
+`/by` or `/from`, which the user can see they did not mean to type. Guards the
+marker check made before the line is split.
+
+**Input:**
+
+```text
+deadline return book /from 2019-12-02 1800
+event meeting /by 2019-12-02 1800
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! A deadline takes just a /by -- there's no /from or /to on it.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! An event takes a /from and a /to -- there's no /by on it.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC72: An event's markers the wrong way round are named as such
+
+**Aim:** `/to` before `/from` is reported as the wrong order, not as a
+missing `/to` the user can see they typed. Guards the check on the text in
+front of the `/from`, made before the `/to` is looked for after it.
+
+**Input:**
+
+```text
+event meeting /to 2019-12-02 1600 /from 2019-12-02 1400
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Bust my buffers! Your event's /to came before its /from. Set off first, then arrive.
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC73: A day that is not on the calendar is refused rather than repaired
+
+**Aim:** `2019-02-30` matches the date format exactly and names a day that
+does not exist. It is refused, and told so; the date formatter would otherwise
+resolve it to the 28th and store a moment the user never chose. `2400` is the
+same mistake on the clock side, which would roll to the next day's midnight.
+The leap day is accepted in a leap year and refused in a common one, so the
+rule being applied is the calendar's and not a fixed table of month lengths.
+
+**Input:**
+
+```text
+deadline return book /by 2019-02-30 1800
+event meeting /from 2019-12-02 1400 /to 2019-12-02 2400
+deadline leap /by 2020-02-29 1200
+deadline leap /by 2019-02-29 1200
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     There's no such moment as '2019-02-30 1800' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no such moment as '2019-12-02 2400' for an end date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] leap (by: Feb 29 2020, 12:00 PM)
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no such moment as '2019-02-29 1200' for a deadline date! Check the day is on the calendar and the time is on the 24-hour clock, 0000 to 2359.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [D][ ] leap (by: Feb 29 2020, 12:00 PM)
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC74: Adding a task that is already on the list is refused
+
+**Aim:** The same task typed a second time is refused, with the number of the
+one already there, and the count does not move. Marking the first does not make
+the second a different task. A deadline with the same text is a different task
+and is accepted, and once the first is deleted the same text is accepted again.
+
+**Input:**
+
+```text
+todo read book
+todo read book
+mark 1
+todo read book
+deadline read book /by 2019-12-02 1800
+delete 1
+todo read book
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Delivered, right on time! This wagon is done:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][X] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [D][ ] read book (by: Dec 02 2019, 6:00 PM)
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Uncoupled! I've left this wagon in the siding:
+        [T][X] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 2 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [D][ ] read book (by: Dec 02 2019, 6:00 PM)
+     2. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC75: A refused duplicate leaves nothing to undo
+
+**Aim:** The duplicate is refused by the list before the history is told
+anything, so `undo` reaches the change before it -- exactly as TC62 shows for
+a line the parser refused.
+
+**Input:**
+
+```text
+todo read book
+todo read book
+undo
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Bust my buffers! That wagon is already on my train, at number 1:
+        [T][ ] read book
+    ____________________________________________________________
+    ____________________________________________________________
+     Reversing! I've backed out of 'todo read book'.
+     That's 0 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
+### TC76: `mark` with two numbers, or a number no list could reach, is refused
+
+**Aim:** `mark 1 2` is told one wagon at a time, rather than that `1 2` is not
+a number; a number too big for an `int` is all digits and so is a number, and
+gets the range answer. Guards the two checks around `Integer.parseInt`.
+
+**Input:**
+
+```text
+todo read book
+mark 1 2
+mark 99999999999
+list
+bye
+```
+
+**Expected output:**
+
+```text
+{{GREETING}}
+    ____________________________________________________________
+     Coupled up! This wagon is on the train now:
+        [T][ ] read book
+     That's 1 wagon(s) behind me now.
+    ____________________________________________________________
+    ____________________________________________________________
+     One wagon at a time! Give me a single number to mark.
+    ____________________________________________________________
+    ____________________________________________________________
+     There's no wagon 99999999999 on my train! No train is that long.
+    ____________________________________________________________
+    ____________________________________________________________
+     Here is every wagon on my train:
+     1. [T][ ] read book
+    ____________________________________________________________
+{{FAREWELL}}
+```
+
 ## Not yet covered
 
 Behaviour that is out of scope for the current increment, listed so it is not
@@ -2925,13 +3270,22 @@ mistaken for an oversight. Add cases here as the chatbot grows:
   reported as unknown commands, because the match is made with `equals`. That is
   deliberate rather than accidental, and noted in `Keyword.of`, but no case pins
   it down, so nothing would notice if the matching were loosened.
-* **Arguments given to `bye` and `list`.** Matching on the keyword means
-  `bye now` and `list all` are accepted, with the extra text ignored. That is
-  consistent with the other commands, which also ignore what they do not read,
-  but it is tolerated rather than intended, so it is not fixed by a case.
-* **A blank input line.** Pressing enter on its own is reported as an unknown
-  command. A blank line inside a fenced input block is too easy to mistake for
-  formatting, so this one is left to inspection rather than a case.
+* **A blank input line.** Pressing enter on its own is answered with its own
+  message, asking for a command, rather than being reported as an unknown one;
+  `ParserTest` pins the wording. A blank line inside a fenced input block is
+  too easy to mistake for formatting, so there is no case for it here.
+* **A tab typed in place of a space.** Tidied exactly as a run of spaces is,
+  which `ParserTest` covers. A tab inside a fenced input block is invisible on
+  the page, so the case would not be readable and is left to JUnit.
+* **A duplicate returning through `undo`.** Deleting a task, adding the same
+  one again and then undoing the delete puts the original back beside its
+  twin, because putting a task back is not checked -- it only ever replays a
+  delete that really happened, and refusing it would leave the undo half done.
+  Rare enough to note rather than to fix.
+* **A duplicate line in the save file.** The chatbot never writes one, since
+  the duplicate is refused as it is typed; one can only be edited in, and it is
+  then reported and skipped with the first copy kept, which `StorageTest`
+  covers as it does every other kind of damaged line.
 * **A ceiling on the number of tasks.** There is no longer one to test: the
   tasks are held in an `ArrayList`, which grows as tasks are added, so the
   refusal message that `MAX_TASKS` used to produce is gone.
@@ -2986,4 +3340,8 @@ mistaken for an oversight. Add cases here as the chatbot grows:
 * **An unreadable or unwritable save file.** The messages for a save file that
   exists but cannot be read, or a `./data` folder that cannot be created, are
   reachable only by changing file permissions, which the test script does not
-  set up.
+  set up. The two shapes of the same trouble that need no permissions -- a
+  plain file sitting where `./data` should be, and a folder sitting where the
+  save file should be -- are named in words by `Storage` and covered by
+  `StorageTest`; the script works in an empty directory and does not set those
+  up either.

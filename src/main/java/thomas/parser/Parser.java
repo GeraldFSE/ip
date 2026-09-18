@@ -64,29 +64,71 @@ public class Parser {
     private static final String MESSAGE_MISSING_TO =
             "When does it arrive? An event needs a /to after its /from.";
 
+    /** Told to a line that is empty or only spaces. */
+    private static final String MESSAGE_BLANK_LINE =
+            "Peep? I didn't catch a signal. Give me a command, such as list or todo.";
+
+    /** Told to a {@code deadline} given an event's marker. */
+    private static final String MESSAGE_DEADLINE_WRONG_MARKER =
+            "Bust my buffers! A deadline takes just a /by -- there's no /from or /to on it.";
+
+    /** Told to an {@code event} given a deadline's marker. */
+    private static final String MESSAGE_EVENT_WRONG_MARKER =
+            "Bust my buffers! An event takes a /from and a /to -- there's no /by on it.";
+
+    /** Told to an {@code event} whose {@code /to} comes before its {@code /from}. */
+    private static final String MESSAGE_MARKERS_SWAPPED =
+            "Bust my buffers! Your event's /to came before its /from. Set off first, then arrive.";
+
+    /** The marker a deadline's date follows. */
+    private static final String MARKER_BY = "/by";
+
+    /** The marker an event's start follows. */
+    private static final String MARKER_FROM = "/from";
+
+    /** The marker an event's end follows. */
+    private static final String MARKER_TO = "/to";
+
     /** The kind of command the line names. */
     private final Keyword keyword;
 
     /**
      * The line split into keyword and argument.
      * <p>
-     * Split on the first space only, so {@code parts[0]} is the command keyword
-     * and {@code parts[1]}, when present, is everything after it -- descriptions
-     * contain spaces, so the rest of the line must stay in one piece.
+     * Split at the first run of spaces only, so {@code parts[0]} is the command
+     * keyword and {@code parts[1]}, when present, is everything after it --
+     * descriptions contain spaces, so the rest of the line must stay in one
+     * piece. The argument has been tidied: no spaces at either end, and every
+     * run of spaces or tabs inside it squeezed to one space.
      */
     private final String[] parts;
 
     /**
      * Reads a line far enough to know which command it is.
      * <p>
+     * Spacing is tidied before anything is read from the line, so that a
+     * stray space at the front, a double space after the keyword or a tab
+     * where a space was meant are none of them mistakes: the user typed the
+     * command they meant, and the tidying finds it. It is done once here, so
+     * every method below can assume single spaces and a clean argument, which
+     * is what lets the markers be matched with a space on either side.
+     * <p>
      * An unrecognized keyword is rejected here, so the arguments are only ever
-     * read for a command that really exists.
+     * read for a command that really exists. A line with no words on it at all
+     * is told so, rather than being reported as an unknown command.
      *
      * @param line The line exactly as the user typed it.
-     * @throws ThomasException If the first word is not a command.
+     * @throws ThomasException If the line is blank, or its first word is not a
+     *                         command.
      */
     private Parser(String line) throws ThomasException {
-        this.parts = line.split(" ", 2);
+        // Whitespace, not just the space character: a tab pasted in from
+        // elsewhere would otherwise ride along as part of the keyword.
+        String tidied = line.trim().replaceAll("\\s+", " ");
+        if (tidied.isEmpty()) {
+            throw new ThomasException(MESSAGE_BLANK_LINE);
+        }
+        this.parts = tidied.split(" ", 2);
         // split never returns an empty array, so parts[0] is always there to
         // be read as the keyword. Stated because every method below indexes
         // into parts on that basis rather than checking it again.
@@ -110,20 +152,21 @@ public class Parser {
      *
      * @param fullCommand The line exactly as the user typed it.
      * @return The command that line asks for.
-     * @throws ThomasException If the line is not a command Thomas understands, or
-     *                         its arguments are missing or unreadable.
+     * @throws ThomasException If the line is blank or not a command Thomas
+     *                         understands, or its arguments are missing,
+     *                         unreadable, or given to a command that takes none.
      */
     public static Command parse(String fullCommand) throws ThomasException {
         Parser parser = new Parser(fullCommand);
         Command command = switch (parser.keyword) {
-            case BYE -> new ExitCommand();
-            case LIST -> new ListCommand();
+            case BYE -> parser.requireNoArgument(new ExitCommand());
+            case LIST -> parser.requireNoArgument(new ListCommand());
             case ON -> new OnCommand(parser.parseDay());
             case FIND -> new FindCommand(parser.parseKeyword());
             case MARK -> new MarkCommand(parser.parseTaskNumber("mark"));
             case UNMARK -> new UnmarkCommand(parser.parseTaskNumber("unmark"));
             case DELETE -> new DeleteCommand(parser.parseTaskNumber("delete"));
-            case UNDO -> new UndoCommand();
+            case UNDO -> parser.requireNoArgument(new UndoCommand());
             // The three add commands differ only in the task they build, which
             // parseNewTask settles, so one AddCommand serves all three.
             case TODO, DEADLINE, EVENT -> new AddCommand(parser.parseNewTask());
@@ -137,31 +180,55 @@ public class Parser {
     }
 
     /**
+     * Returns a command that takes no argument, rejecting it if one was given.
+     * <p>
+     * {@code list all} and {@code bye now} used to be carried out with the
+     * extra text ignored. Ignoring it is the wrong side to err on: the user
+     * who typed {@code list 2019-12-02} meant something by the date, and
+     * silently listing everything answers a question they did not ask. Saying
+     * what was not understood lets them find the command they wanted.
+     * <p>
+     * Takes and returns the command rather than being a bare check, so that
+     * the {@code switch} in {@link #parse} reads the same way for every
+     * keyword: each arm builds its command in one expression.
+     *
+     * @param command The command the keyword names.
+     * @return That same command.
+     * @throws ThomasException If anything follows the keyword.
+     */
+    private Command requireNoArgument(Command command) throws ThomasException {
+        if (parts.length > 1) {
+            throw new ThomasException("Bust my buffers! '" + parts[0] + "' is a signal on its own -- "
+                    + "I don't know what to do with '" + parts[1] + "'.");
+        }
+        return command;
+    }
+
+    /**
      * Returns this command's argument, rejecting a command given without one.
      * <p>
      * {@code parts} holds a single element when the user typed a bare keyword
-     * such as {@code todo}. Checking {@code isBlank()} as well covers the other
-     * case the length misses: {@code "todo    "} splits into two parts, the
-     * second all spaces.
+     * such as {@code todo}. The constructor has already trimmed the line, so
+     * {@code "todo    "} is the same case: it splits into the one part too.
      * <p>
      * Returning the argument rather than only checking it keeps the indexing
      * into {@code parts} in one place, instead of every caller reaching back for
      * {@code parts[1]} after asking whether it exists.
      *
      * @param message What to tell the user when the argument is missing.
-     * @return The argument, with surrounding spaces removed.
-     * @throws ThomasException If there is no argument, or it is only spaces.
+     * @return The argument, already tidied of stray spaces.
+     * @throws ThomasException If there is no argument.
      */
     private String requireArgument(String message) throws ThomasException {
-        if (parts.length < 2 || parts[1].isBlank()) {
+        if (parts.length < 2) {
             throw new ThomasException(message);
         }
-        String argument = parts[1].trim();
+        String argument = parts[1];
         // Every caller treats what comes back as real content -- a task
         // description, a date, a keyword -- and none tests it for emptiness
-        // again. That holds only because the blank case threw above, so the
-        // trim below cannot leave nothing behind.
-        assert !argument.isEmpty() : "A non-blank argument trimmed to nothing";
+        // again. That holds only because the constructor trimmed the line
+        // before splitting it, so a second part is never empty or all spaces.
+        assert !argument.isBlank() : "A split line produced a blank argument";
         return argument;
     }
 
@@ -214,9 +281,22 @@ public class Parser {
     private int parseTaskNumber(String action) throws ThomasException {
         String argument = requireArgument("Which wagon do you want me to " + action + "? Give me its number.");
 
+        // "mark 1 2" is a real request, for two tasks at once, and the answer
+        // is that there is no such thing -- not that "1 2" is not a number.
+        if (argument.contains(" ")) {
+            throw new ThomasException("One wagon at a time! Give me a single number to " + action + ".");
+        }
         try {
             return Integer.parseInt(argument);
         } catch (NumberFormatException e) {
+            // parseInt fails the same way for "abc" and for a number too big
+            // for an int. The second is all digits and is a number, just one
+            // no list will ever reach, so it gets the range answer rather
+            // than being told it is not a number.
+            if (argument.matches("\\d+")) {
+                throw new ThomasException("There's no wagon " + argument + " on my train! "
+                        + "No train is that long.");
+            }
             throw new ThomasException("Bust my buffers! That's not a number. My wagons are numbered 1, 2, 3...");
         }
     }
@@ -329,6 +409,56 @@ public class Parser {
     }
 
     /**
+     * Returns whether a marker appears in some text as a word of its own.
+     * <p>
+     * Padding both with spaces is what makes the match whole-word: {@code /by}
+     * is found in {@code "x /by y"} and at either end, but not inside
+     * {@code "standby"} or {@code "/byte"}. The constructor has squeezed every
+     * run of spaces to one, so a marker cannot hide behind a double space.
+     *
+     * @param text The text to look in, already tidied.
+     * @param marker The marker to look for, for example {@code "/by"}.
+     * @return True if the marker is there as a separate word.
+     */
+    private static boolean containsMarker(String text, String marker) {
+        return (" " + text + " ").contains(" " + marker + " ");
+    }
+
+    /**
+     * Rejects text that holds a marker it should not.
+     * <p>
+     * Three mistakes are caught this way, each with its own message from the
+     * caller: a marker belonging to the other kind of task, a marker given
+     * twice, and an event's markers in the wrong order. All three would
+     * otherwise reach {@link Task#parseDate} as a "date" with a marker in
+     * it, and be reported as an unreadable date -- true, but pointing the
+     * user at the wrong part of the line.
+     *
+     * @param text The text to check, already tidied.
+     * @param marker The marker that must not be in it.
+     * @param message What to tell the user if it is.
+     * @throws ThomasException If the marker is there.
+     */
+    private static void requireMarkerAbsent(String text, String marker, String message)
+            throws ThomasException {
+        if (containsMarker(text, marker)) {
+            throw new ThomasException(message);
+        }
+    }
+
+    /**
+     * Rejects text in which a marker appears a second time.
+     *
+     * @param text The text after the marker's first appearance, already tidied.
+     * @param marker The marker that has already been read once.
+     * @throws ThomasException If the marker is there again.
+     */
+    private static void requireNotRepeated(String text, String marker) throws ThomasException {
+        requireMarkerAbsent(text, marker, "Bust my buffers! You've given " + marker
+                + " more than once. Once is all I need.");
+    }
+
+    /**
      * Returns a field of a command, rejecting one the user left blank.
      * <p>
      * A marker can be there with nothing after it, as in {@code "... /by  "},
@@ -353,20 +483,30 @@ public class Parser {
      *
      * @return The new deadline.
      * @throws ThomasException If the description, the marker or the date is missing,
-     *                         the date cannot be read, or the description contains
+     *                         the marker is given twice or is an event's, the
+     *                         date cannot be read, or the description contains
      *                         the save file's field separator.
      */
     private Task parseDeadline() throws ThomasException {
         String arguments = requireArgument(MESSAGE_EMPTY_DEADLINE);
 
+        // Checked before splitting, so "deadline x /from ..." is told it has
+        // the wrong marker rather than that its /by is missing: the user has
+        // mixed up the two commands, and that is the mistake worth naming.
+        requireMarkerAbsent(arguments, MARKER_FROM, MESSAGE_DEADLINE_WRONG_MARKER);
+        requireMarkerAbsent(arguments, MARKER_TO, MESSAGE_DEADLINE_WRONG_MARKER);
+
         // "return book /by 2019-12-02 1800"
         //     -> ["return book", "2019-12-02 1800"]
-        String[] details = splitAtMarker(arguments, "/by",
+        String[] details = splitAtMarker(arguments, MARKER_BY,
                 MESSAGE_EMPTY_DEADLINE, MESSAGE_MISSING_BY);
 
         String description = requireNonEmpty(details[0].trim(), MESSAGE_EMPTY_DEADLINE);
-        // The marker can be present with nothing after it: "... /by  ".
+        // The marker can be present with nothing after it: "... /by".
         String by = requireNonEmpty(details[1].trim(), MESSAGE_MISSING_BY);
+        // The split stopped at the first /by, so a second one is still in
+        // the text after it.
+        requireNotRepeated(by, MARKER_BY);
 
         LocalDateTime byDate = Task.parseDate(by, "a deadline date");
         return new DeadlineTask(requireSeparatorFree(description), byDate);
@@ -378,25 +518,40 @@ public class Parser {
      *
      * @return The new event.
      * @throws ThomasException If the description, either marker or either date is
-     *                         missing, a date cannot be read, the description
-     *                         contains the save file's field separator, or the
-     *                         event ends before it starts.
+     *                         missing, a marker is given twice, out of order or
+     *                         is a deadline's, a date cannot be read, the
+     *                         description contains the save file's field
+     *                         separator, or the event ends before it starts.
      */
     private Task parseEvent() throws ThomasException {
         String arguments = requireArgument(MESSAGE_EMPTY_EVENT);
+
+        // As for a deadline: a /by means the two commands have been mixed up,
+        // and that is the mistake to name.
+        requireMarkerAbsent(arguments, MARKER_BY, MESSAGE_EVENT_WRONG_MARKER);
 
         // Split the markers off one at a time rather than together. Splitting on
         // " /from | /to " at once matches them in any order, so
         // "/to 4pm /from 2pm" would silently swap the two.
         // "meeting /from Mon 2pm /to 4pm" -> ["meeting", "Mon 2pm /to 4pm"]
-        String[] afterFrom = splitAtMarker(arguments, "/from",
+        String[] afterFrom = splitAtMarker(arguments, MARKER_FROM,
                 MESSAGE_EMPTY_EVENT, MESSAGE_MISSING_FROM);
+
+        // A /to in front of the /from is the two markers the wrong way round.
+        // Caught here, before the /to is looked for after the /from, where
+        // its absence would be reported as a missing /to -- which the user,
+        // looking at the /to they typed, could make nothing of.
+        requireMarkerAbsent(afterFrom[0], MARKER_TO, MESSAGE_MARKERS_SWAPPED);
 
         // "Mon 2pm /to 4pm" -> ["Mon 2pm", "4pm"]
         // Not splitAtMarker: what sits in front of a missing /to is the start
         // date rather than the description, so the description complaint that
         // helper can raise would name the wrong part of the line.
-        String[] afterTo = afterFrom[1].split(" /to ", 2);
+        // A space is put in front first so that "/to 4pm", where the start
+        // was left out, still splits: the marker is matched with a space on
+        // each side, and the tidying in the constructor left none in front of
+        // one that directly follows the /from.
+        String[] afterTo = (" " + afterFrom[1]).split(" " + MARKER_TO + " ", 2);
         if (afterTo.length < 2) {
             throw new ThomasException(MESSAGE_MISSING_TO);
         }
@@ -404,6 +559,13 @@ public class Parser {
         String description = requireNonEmpty(afterFrom[0].trim(), MESSAGE_EMPTY_EVENT);
         String from = requireNonEmpty(afterTo[0].trim(), MESSAGE_MISSING_FROM);
         String to = requireNonEmpty(afterTo[1].trim(), MESSAGE_MISSING_TO);
+
+        // Each split stopped at the first of its marker, so a repeat is still
+        // in whichever piece came after it: a second /from lands in the start
+        // or the end, a second /to only in the end.
+        requireNotRepeated(from, MARKER_FROM);
+        requireNotRepeated(to, MARKER_FROM);
+        requireNotRepeated(to, MARKER_TO);
 
         LocalDateTime fromDate = Task.parseDate(from, "a start date");
         LocalDateTime toDate = Task.parseDate(to, "an end date");

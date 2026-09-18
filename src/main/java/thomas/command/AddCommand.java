@@ -1,5 +1,6 @@
 package thomas.command;
 
+import thomas.ThomasException;
 import thomas.parser.Parser;
 import thomas.storage.Storage;
 import thomas.task.Task;
@@ -42,9 +43,14 @@ public class AddCommand extends Command {
      * @param storage Where the longer list is written.
      * @param history Told how to take the new task back out again.
      * @return The confirmation, behind a warning if the save failed.
+     * @throws ThomasException If the same task is already on the list.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage, History history) {
+    public String execute(TaskList tasks, Ui ui, Storage storage, History history)
+            throws ThomasException {
+        // A duplicate is refused by the list before anything is recorded or
+        // saved, so a rejected add leaves no undo entry behind, exactly as a
+        // line the parser refused leaves none.
         tasks.add(task);
         // The new task is on the end, so its number is the new size of the list.
         history.pushRemove(tasks.size());

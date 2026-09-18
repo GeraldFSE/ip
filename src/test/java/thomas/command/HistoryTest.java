@@ -40,11 +40,13 @@ public class HistoryTest {
      * @return List holding those tasks.
      */
     private static TaskList listOf(String... descriptions) {
-        TaskList list = new TaskList();
+        // Built through the constructor rather than add(), which refuses a duplicate and so would make every test
+        // declare the exception; no case here is about duplicates.
+        ArrayList<Task> tasks = new ArrayList<>();
         for (String description : descriptions) {
-            list.add(new TodoTask(description));
+            tasks.add(new TodoTask(description));
         }
-        return list;
+        return new TaskList(tasks);
     }
 
     /**
