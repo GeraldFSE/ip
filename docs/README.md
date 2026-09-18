@@ -26,9 +26,10 @@ handful of commands below.
 1. Make sure you have **JDK 25** installed.
 2. Download the latest `thomas.jar` from the releases page.
 3. Put it in the folder you want Thomas to keep your tasks in.
-4. Double-click the file, or run `java -jar thomas.jar` from that folder.
-   A window opens and Thomas greets you.
-5. Type a command in the box at the bottom and press Enter. Try these:
+4. Open a terminal and navigate to that folder, for example with
+   `cd path/to/folder`.
+5. Run `java -jar thomas.jar`. A window opens and Thomas greets you.
+6. Type a command in the box at the bottom and press Enter. Try these:
 
    - `todo borrow book` — adds a task to the list
    - `list` — shows every task
